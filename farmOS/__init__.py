@@ -84,10 +84,12 @@ class farmOS:
         if self.token:
             headers['X-CSRF-Token'] = self.token
 
-        # Add configuration to use strict RFC compliant redirects (so that POST data is forwarded to the new
-        # destination). This allows for HTTP to be redirected to HTTPS automatically.
+        # Automatically follow redirects, unless this is a POST request.
+        # The Python requests library converts POST to GET during a redirect.
         # Allow this to be overridden in options.
         allow_redirects = True
+        if method == 'POST':
+            allow_redirects = False
         if options and 'allow_redirects' in options:
             allow_redirects = options['allow_redirects']
 
@@ -96,5 +98,14 @@ class farmOS:
         if options and 'data' in options:
             data = options['data']
 
-        # Perform the request and return the response
-        return self.session.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data)
+        # Perform the request.
+        response = self.session.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data)
+
+        # If this is a POST request, and a redirect occurred, attempt to re-POST.
+        redirect_codes = [300, 301, 302, 303, 304, 305, 306, 307, 308]
+        if method == 'POST' and response.status_code in redirect_codes:
+            if response.headers['Location']:
+                response = self.session.request(method, response.headers['Location'], headers=headers, allow_redirects=True, data=data)
+
+        # Return the response.
+        return response
