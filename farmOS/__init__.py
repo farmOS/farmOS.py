@@ -8,8 +8,9 @@ class farmOS:
     username = ''
     password = ''
 
-    # Store cookie jar and authentication token internally.
-    jar = requests.cookies.RequestsCookieJar()
+    # Use a Requests Session to store cookies across requests.
+    #   http://docs.python-requests.org/en/master/user/advanced/#session-objects
+    session = requests.Session()
 
     # Store authentication token internally.
     token = ''
@@ -27,9 +28,6 @@ class farmOS:
         if not self.hostname or not self.username or not self.password:
             print('farmOS authentication failed: missing hostname, username, or password.')
             return
-
-        # Create a cookie jar to store the session cookie.
-        self.jar = requests.cookies.RequestsCookieJar()
 
         # Clear any previously populated token.
         self.token = ''
@@ -99,4 +97,4 @@ class farmOS:
             data = options['data']
 
         # Perform the request and return the response
-        return requests.request(method, url, cookies=self.jar, headers=headers, allow_redirects=allow_redirects, data=data)
+        return self.session.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data)
