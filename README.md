@@ -11,6 +11,20 @@ over API.
 
 For more information on farmOS, visit [farmOS.org](https://farmOS.org).
 
+## USAGE
+
+    import farmOS
+
+    hostname = 'myfarm.farmos.net'
+    username = 'My Name'
+    password = 'mYPa$$w0rd'
+
+    farm = farmOS.farmOS(hostname, username, password)
+    success = farm.authenticate()
+
+    r = farm.httpRequest('farm.json')
+    print(r.text)
+
 ## MAINTAINERS
 
  * Michael Stenta (m.stenta) - https://github.com/mstenta
