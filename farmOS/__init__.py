@@ -57,6 +57,14 @@ class farmOS:
         else:
             return False
 
+    # Retirieve all farm area get_records
+    def get_areas(self, filters = {}):
+        return self.get_terms('farm_areas')
+
+    # Generic method for retrieving terms from a given vocabulary.
+    def get_terms(self, vocabulary, filters = {}):
+        filters['bundle'] = vocabulary
+        return self.get_records('taxonomy_term', filters)
 
     # Generic method for retrieving a list of records from farmOS.
     def get_records(self, entity_type, filters = {}):
