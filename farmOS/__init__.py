@@ -1,5 +1,7 @@
 import requests
 
+from urllib.parse import urlparse, parse_qs
+
 
 class farmOS:
 
@@ -74,6 +76,23 @@ class farmOS:
             return data['list']
 
         return []
+
+    # Determines how many pages of records are available for a given entity type
+    # and filter(s).
+    def page_count(self, entity_type, filters = {}):
+        pages = 0
+
+        data = self.get_record_data(entity_type, filters)
+
+        # If the 'last' page is not set, return 0
+        if ('last' not in data):
+            return pages
+
+        # The number of pages is the last page + 1
+        parsed_url = urlparse(data['last'])
+        pages = parse_qs(parsed_url.query)['page'][0]
+        return int(pages) + 1
+
 
     # Retrieve raw record data from the farmOS API.
     def get_record_data(self, entity_type, filters = {}):
