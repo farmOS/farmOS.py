@@ -57,7 +57,31 @@ class farmOS:
         else:
             return False
 
-    def httpRequest(self, path, method='GET', options=None):
+
+    # Generic method for retrieving a list of records from farmOS.
+    def get_records(self, entity_type, filters = {}):
+        data = self.get_record_data(entity_type, filters)
+
+        if ('list' in data):
+            return data['list']
+
+        return []
+
+    # Retrieve raw record data from the farmOS API.
+    def get_record_data(self, entity_type, filters = {}):
+        path = entity_type + '.json'
+
+        if filters and 'id' in filters:
+            path = entity_type + '/' + filters['id'] + '.json'
+
+        response = self.httpRequest(path=path, params=filters)
+
+        if (response.status_code == 200):
+            return response.json()
+
+        return []
+
+    def httpRequest(self, path, method='GET', options=None, params=None):
         """Raw HTTP request helper function."""
 
         # Strip protocol, hostname, leading/trailing slashes, and whitespace from the path.
@@ -99,13 +123,13 @@ class farmOS:
             data = options['data']
 
         # Perform the request.
-        response = self.session.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data)
+        response = self.session.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data, params=params)
 
         # If this is a POST request, and a redirect occurred, attempt to re-POST.
         redirect_codes = [300, 301, 302, 303, 304, 305, 306, 307, 308]
         if method == 'POST' and response.status_code in redirect_codes:
             if response.headers['Location']:
-                response = self.session.request(method, response.headers['Location'], headers=headers, allow_redirects=True, data=data)
+                response = self.session.request(method, response.headers['Location'], headers=headers, allow_redirects=True, data=data, params=params)
 
         # Return the response.
         return response
