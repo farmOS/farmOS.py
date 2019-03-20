@@ -25,7 +25,6 @@ class farmOS:
 
     def authenticate(self):
         """Authenticate with the farmOS site."""
-
         # If any of the authentication credentials are empty, bail.
         if not self.hostname or not self.username or not self.password:
             print('farmOS authentication failed: missing hostname, username, or password.')
@@ -59,17 +58,17 @@ class farmOS:
         else:
             return False
 
-    # Retirieve all farm area get_records
-    def get_areas(self, filters = {}):
+    def get_areas(self, filters={}):
+        """Retirieve all farm area get_records"""
         return self.get_terms('farm_areas')
 
-    # Generic method for retrieving terms from a given vocabulary.
-    def get_terms(self, vocabulary, filters = {}):
+    def get_terms(self, vocabulary, filters={}):
+        """Generic method for retrieving terms from a given vocabulary."""
         filters['bundle'] = vocabulary
         return self.get_records('taxonomy_term', filters)
 
-    # Generic method for retrieving a list of records from farmOS.
-    def get_records(self, entity_type, filters = {}):
+    def get_records(self, entity_type, filters={}):
+        """"Generic method for retrieving a list of records from farmOS."""
         data = self.get_record_data(entity_type, filters)
 
         if ('list' in data):
@@ -77,9 +76,11 @@ class farmOS:
 
         return []
 
-    # Determines how many pages of records are available for a given entity type
-    # and filter(s).
-    def page_count(self, entity_type, filters = {}):
+    def page_count(self, entity_type, filters={}):
+        """
+        Determines how many pages of records are available for
+        a given entity type and filter(s).
+        """
         pages = 0
 
         data = self.get_record_data(entity_type, filters)
@@ -93,22 +94,21 @@ class farmOS:
         pages = parse_qs(parsed_url.query)['page'][0]
         return int(pages) + 1
 
-
-    # Retrieve raw record data from the farmOS API.
-    def get_record_data(self, entity_type, filters = {}):
+    def get_record_data(self, entity_type, filters={}):
+        """Retrieve raw record data from the farmOS API."""
         path = entity_type + '.json'
 
         if filters and 'id' in filters:
             path = entity_type + '/' + filters['id'] + '.json'
 
-        response = self.httpRequest(path=path, params=filters)
+        response = self.http_request(path=path, params=filters)
 
         if (response.status_code == 200):
             return response.json()
 
         return []
 
-    def httpRequest(self, path, method='GET', options=None, params=None):
+    def http_request(self, path, method='GET', options=None, params=None):
         """Raw HTTP request helper function."""
 
         # Strip protocol, hostname, leading/trailing slashes, and whitespace from the path.
