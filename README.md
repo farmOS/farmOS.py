@@ -22,8 +22,18 @@ For more information on farmOS, visit [farmOS.org](https://farmOS.org).
     farm = farmOS.farmOS(hostname, username, password)
     success = farm.authenticate()
 
-    r = farm.httpRequest('farm.json')
-    print(r.text)
+    logs = farm.get_records('log')
+    harvests = farm.get_records(log', filters={'type':'farm_harvest'}')
+    areas = farm.get_areas()
+
+## TESTING
+Configure credentials for the farmOS instance used to test in
+
+    tests/test_credentials.py
+
+Automated tests are run with pytest
+
+    python setup.py test
 
 ## MAINTAINERS
 
