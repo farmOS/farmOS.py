@@ -14,8 +14,8 @@ def test_valid_login():
 
     assert success is True
 
-def test_valid_record_request():
-    """ Verifies that get_records pulls logs from the server """
+def test_record_request_logs():
+    """ Test pulling logs from the server """
     farm = farmOS.farmOS(**valid_credentials)
     farm.authenticate()
     logs = farm.get_records('log')
