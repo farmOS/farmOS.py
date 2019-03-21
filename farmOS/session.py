@@ -3,6 +3,18 @@ import requests
 # Use a Requests Session to store cookies across requests.
 #   http://docs.python-requests.org/en/master/user/advanced/#session-objects
 class APISession(requests.Session):
+
+    """APISession handles all HTTP requests for the farmOS API
+
+    This class stores cookies and tokens generated from authentication
+    across all requests made to the farmOS host.
+
+    Keyword Arguments:
+    hostname - the farmOS hostname (without protocol)
+    username - the farmOS username
+    password - the farmOS user's password
+    """
+
     def __init__(self, hostname, username, password, *args, **kwargs):
         super(APISession, self).__init__(*args, **kwargs)
 
@@ -15,7 +27,11 @@ class APISession(requests.Session):
         self.token = ''
 
     def authenticate(self):
-        """Authenticate with the farmOS site."""
+        """Authenticates with the farmOS site.
+
+        Returns True or False indicating whether or not
+        the authentication was successful
+        """
 
         # Clear any previously populated token.
         self.token = ''
@@ -28,7 +44,7 @@ class APISession(requests.Session):
                 'form_id': 'user_login',
             }
         }
-        
+
         # Login with the username and password to get a cookie.
         response = self.http_request('user/login', 'POST', options)
         if response:
@@ -48,7 +64,14 @@ class APISession(requests.Session):
             return False
 
     def http_request(self, path, method='GET', options=None, params=None):
-        """Raw HTTP request helper function."""
+        """Raw HTTP request helper function.
+
+        Keyword arguments:
+        path - URL path (without hostname)
+        method - the HTTP method
+        options - a dictionary of data and parameters to pass on to the request
+
+        """
 
         # Strip protocol, hostname, leading/trailing slashes, and whitespace from the path.
         remove = [

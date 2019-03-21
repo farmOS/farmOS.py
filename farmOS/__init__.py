@@ -3,11 +3,28 @@ from urllib.parse import urlparse, parse_qs
 from .session import APISession
 
 class farmOS:
+
+    """Create a new farmOS instance.
+
+    Keyword Arguments:
+    hostname - the farmOS hostname (without protocol)
+    username - the farmOS username
+    password - the farmOS user's password
+
+    Attributes:
+    session - an APISession object that handles HTTP requests
+
+    """
+
     def __init__(self, hostname, username, password):
-        """Create a new farmOS instance."""
         self.session = APISession(hostname, username, password)
 
     def authenticate(self):
+        """Authenticates with the farmOS site.
+
+        Returns True or False indicating whether or not
+        the authentication was successful
+        """
         return self.session.authenticate()
 
     def get_areas(self, filters={}):
