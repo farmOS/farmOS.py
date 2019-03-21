@@ -30,3 +30,11 @@ def test_get_records_log_harvests():
 
     assert len(harvests) > 0
     assert harvests[0]['type'] == 'farm_harvest'
+
+def test_get_farm_areas():
+    """ Test pulling area taxonomies from the server """
+    farm = farmOS.farmOS(**valid_credentials)
+    farm.authenticate()
+    areas = farm.get_areas()
+
+    assert len(areas) > 0
