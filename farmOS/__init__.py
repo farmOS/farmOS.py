@@ -8,6 +8,7 @@ class farmOS:
         self.session = APISession(hostname, username, password)
 
     def authenticate(self):
+        return self.session.authenticate()
 
     def get_areas(self, filters={}):
         """Retirieve all farm area get_records"""
