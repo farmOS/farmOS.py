@@ -14,7 +14,7 @@ def test_valid_login():
 
     assert success is True
 
-def test_record_request_logs():
+def test_get_records_logs():
     """ Test pulling logs from the server """
     farm = farmOS.farmOS(**valid_credentials)
     farm.authenticate()
@@ -22,7 +22,7 @@ def test_record_request_logs():
 
     assert len(logs) > 0
 
-def test_record_request_log_harvests():
+def test_get_records_log_harvests():
     """ Test pulling logs with 'type=farm_harvest' filter """
     farm = farmOS.farmOS(**valid_credentials)
     farm.authenticate()
