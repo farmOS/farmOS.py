@@ -21,7 +21,7 @@ class farmOS:
 
     def get_records(self, entity_type, filters={}):
         """"Generic method for retrieving a list of records from farmOS."""
-        data = self.get_record_data(entity_type, filters)
+        data = self._get_record_data(entity_type, filters)
 
         if ('list' in data):
             return data['list']
@@ -46,7 +46,7 @@ class farmOS:
         pages = parse_qs(parsed_url.query)['page'][0]
         return int(pages) + 1
 
-    def get_record_data(self, entity_type, filters={}):
+    def _get_record_data(self, entity_type, filters={}):
         """Retrieve raw record data from the farmOS API."""
         path = entity_type + '.json'
 
