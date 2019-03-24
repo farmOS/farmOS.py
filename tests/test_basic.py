@@ -106,3 +106,31 @@ def test_get_farm_areas_by_id(test_farm):
     assert 'id' in area
     assert area['id'] == area_id
 
+#
+# Test farm taxonomy term methods
+#
+
+def test_get_all_taxonomy_terms(test_farm):
+    terms = test_farm.term.get()
+
+    assert len(terms) > 0
+
+def test_get_farm_terms_filtered_by_single_vocabulary(test_farm):
+    vocabulary_name = 'farm_crops'
+
+    terms = test_farm.term.get(vocabulary_name)
+
+    assert len(terms) > 0
+    assert terms[0]['vocabulary'] == vocabulary_name
+
+def test_get_farm_term_filtered_by_multiple_vocabulary(test_farm):
+    vocabulary_name = 'farm_crops'
+    term_name = 'Icicle Radish'
+
+    term = test_farm.term.get({
+        'vocabulary':vocabulary_name,
+        'name':term_name
+    })
+
+    assert 'name' in term
+    assert term['name'] == term_name
