@@ -80,9 +80,29 @@ def test_get_asset_by_id(test_farm):
     assert 'id' in asset
     assert asset['id'] == asset_id
 
+#
+# Test farm area methods
+#
 
-def test_get_farm_areas(test_farm):
-    """ Test pulling area taxonomies from the server """
-    areas = test_farm.areas.get()
+def test_get_all_farm_areas(test_farm):
+    areas = test_farm.area.get()
 
     assert len(areas) > 0
+
+def test_get_farm_areas_filtered_by_type(test_farm):
+    area_type = 'field'
+
+    areas = test_farm.area.get({
+        'type':area_type
+    })
+
+    assert len(areas) > 0
+    assert areas[0]['type'] == area_type
+
+def test_get_farm_areas_by_id(test_farm):
+    area_id = 5
+    area = test_farm.area.get(area_id)
+
+    assert 'id' in area
+    assert area['id'] == area_id
+
