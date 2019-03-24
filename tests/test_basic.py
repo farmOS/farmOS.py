@@ -93,11 +93,11 @@ def test_get_farm_areas_filtered_by_type(test_farm):
     area_type = 'field'
 
     areas = test_farm.area.get({
-        'type':area_type
+        'area_type':area_type
     })
 
     assert len(areas) > 0
-    assert areas[0]['type'] == area_type
+    assert areas[0]['area_type'] == area_type
 
 def test_get_farm_areas_by_id(test_farm):
     area_id = 5
