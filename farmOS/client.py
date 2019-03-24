@@ -8,12 +8,22 @@ class BaseAPI(object):
 
     def _get_record_data(self, filters={}):
         """Retrieve raw record data from the farmOS API."""
-        # Combine instance filters and filters from the method call
-        filters = {**self.filters, **filters}
 
-        path = self.entity_type + '.json'
+        # Determine if filters is an int (id) or dict (filters object)
+        if isinstance(filters, int):
+            # Set path to return record type by specific ID
+            path = self.entity_type + '/' + str(filters) + '.json'
 
-        response = self.session.http_request(path=path, params=filters)
+            response = self.session.http_request(path=path)
+        elif isinstance(filters, dict):
+            # Set path to return record type + filters
+            path = self.entity_type + '.json'
+            # Combine instance filters and filters from the method call
+            filters = {**self.filters, **filters}
+
+            response = self.session.http_request(path=path, params=filters)
+
+
         if (response.status_code == 200):
             return response.json()
 
@@ -22,10 +32,14 @@ class BaseAPI(object):
     def get(self, filters={}):
         data = self._get_record_data(filters=filters)
 
+        # Check if response contains a list of objects
         if ('list' in data):
             return data['list']
-
-        return []
+        # Check if response contains an object
+        elif len(data) > 0:
+            return data
+        else:
+            return []
 
 class TermAPI(BaseAPI):
     def __init__(self, session):
