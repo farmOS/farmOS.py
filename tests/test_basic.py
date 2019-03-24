@@ -54,10 +54,32 @@ def test_get_log_by_id(test_farm):
     assert 'id' in log
     assert log['id'] == log_id
 
+#
+# Test farm asset methods
+#
+
+def test_get_all_assets(test_farm):
+    assets = test_farm.asset.get()
+
+    assert len(assets) > 0
+
+def test_get_assets_filtered_by_type(test_farm):
+    asset_type = 'animal'
+
+    assets = test_farm.asset.get({
+        'type':asset_type
     })
 
-    assert len(harvests) > 0
-    assert harvests[0]['type'] == 'farm_harvest'
+    assert len(assets) > 0
+    assert asset[0]['type'] == asset_type
+
+def test_get_asset_by_id(test_farm):
+    asset_id = 5
+    asset = test_farm.asset.get(asset_id)
+
+    assert 'id' in asset
+    assert asset['id'] == asset_id
+
 
 def test_get_farm_areas(test_farm):
     """ Test pulling area taxonomies from the server """
