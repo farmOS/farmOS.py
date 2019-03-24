@@ -16,19 +16,21 @@ def test_valid_login():
 
 def test_get_records_logs(test_farm):
     """ Test pulling logs from the server """
-    logs = test_farm.get_records('log')
+    logs = test_farm.logs.get()
 
     assert len(logs) > 0
 
 def test_get_records_log_harvests(test_farm):
     """ Test pulling logs with 'type=farm_harvest' filter """
-    harvests = test_farm.get_records('log', filters={'type':'farm_harvest'})
+    harvests = test_farm.logs.get({
+        'type':'farm_harvest'
+    })
 
     assert len(harvests) > 0
     assert harvests[0]['type'] == 'farm_harvest'
 
 def test_get_farm_areas(test_farm):
     """ Test pulling area taxonomies from the server """
-    areas = test_farm.get_areas()
+    areas = test_farm.areas.get()
 
     assert len(areas) > 0
