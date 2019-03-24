@@ -1,6 +1,7 @@
 from urllib.parse import urlparse, parse_qs
 
 from .session import APISession
+from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
 
 class farmOS:
 
@@ -18,6 +19,11 @@ class farmOS:
 
     def __init__(self, hostname, username, password):
         self.session = APISession(hostname, username, password)
+        self.log = LogAPI(self.session)
+        self.asset = AssetAPI(self.session)
+        self.area = AreaAPI(self.session)
+        self.term = TermAPI(self.session)
+
 
     def authenticate(self):
         """Authenticates with the farmOS site.
@@ -26,24 +32,6 @@ class farmOS:
         the authentication was successful
         """
         return self.session.authenticate()
-
-    def get_areas(self, filters={}):
-        """Retirieve all farm area get_records"""
-        return self.get_terms('farm_areas')
-
-    def get_terms(self, vocabulary, filters={}):
-        """Generic method for retrieving terms from a given vocabulary."""
-        filters['bundle'] = vocabulary
-        return self.get_records('taxonomy_term', filters)
-
-    def get_records(self, entity_type, filters={}):
-        """"Generic method for retrieving a list of records from farmOS."""
-        data = self._get_record_data(entity_type, filters)
-
-        if ('list' in data):
-            return data['list']
-
-        return []
 
     def page_count(self, entity_type, filters={}):
         """
