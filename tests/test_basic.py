@@ -66,11 +66,11 @@ def test_get_all_assets(test_farm):
 def test_get_assets_filtered_by_type(test_farm):
     asset_type = 'animal'
 
-    assets = test_farm.asset.get({
+    asset = test_farm.asset.get({
         'type':asset_type
     })
 
-    assert len(assets) > 0
+    assert len(asset) > 0
     assert asset[0]['type'] == asset_type
 
 def test_get_asset_by_id(test_farm):
