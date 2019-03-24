@@ -48,11 +48,11 @@ def test_get_logs_filtered_by_type(test_farm):
     assert logs[0]['type'] == log_type
 
 def test_get_log_by_id(test_farm):
-    log_id = 5
+    log_id = 164
     log = test_farm.log.get(log_id)
 
     assert 'id' in log
-    assert log['id'] == log_id
+    assert int(log['id']) == log_id
 
 #
 # Test farm asset methods
@@ -74,11 +74,11 @@ def test_get_assets_filtered_by_type(test_farm):
     assert asset[0]['type'] == asset_type
 
 def test_get_asset_by_id(test_farm):
-    asset_id = 5
+    asset_id = 1
     asset = test_farm.asset.get(asset_id)
 
     assert 'id' in asset
-    assert asset['id'] == asset_id
+    assert int(asset['id']) == asset_id
 
 #
 # Test farm area methods
