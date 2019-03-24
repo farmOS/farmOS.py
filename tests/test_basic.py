@@ -2,6 +2,8 @@ import farmOS
 
 from .test_credentials import valid_credentials
 
+# Test authentication
+
 def test_invalid_login():
     farm = farmOS.farmOS('test.farmos.net', 'username', 'password')
     success = farm.authenticate()
