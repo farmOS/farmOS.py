@@ -38,7 +38,7 @@ def test_get_all_logs(test_farm):
     assert len(logs) > 0
 
 def test_get_logs_filtered_by_type(test_farm):
-    log_type = 'harvest'
+    log_type = 'farm_harvest'
 
     logs = test_farm.log.get({
         'type':log_type
