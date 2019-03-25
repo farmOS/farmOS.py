@@ -33,6 +33,14 @@ class farmOS:
         """
         return self.session.authenticate()
 
+    def info(self):
+        """Retrieve info about the farmOS instance"""
+        response = self.session.http_request(path='farm.json')
+        if (response.status_code == 200):
+            return response.json()
+
+        return []
+
     def page_count(self, entity_type, filters={}):
         """
         Determines how many pages of records are available for
