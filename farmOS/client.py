@@ -45,6 +45,24 @@ class TermAPI(BaseAPI):
     def __init__(self, session):
         super().__init__(session=session, entity_type='taxonomy_term')
 
+    def get(self, filters={}):
+        if isinstance(filters, str):
+            # Add filters to instance filter dict with keyword 'bundle'
+            self.filters['bundle'] = filters
+            # Reset filters to empty dict
+            filters = {}
+
+        data = self._get_record_data(filters=filters)
+
+        # Check if response contains a list of objects
+        if ('list' in data):
+            return data['list']
+        # Check if response contains an object
+        elif len(data) > 0:
+            return data
+        else:
+            return []
+
 class LogAPI(BaseAPI):
     def __init__(self, session):
         super().__init__(session=session, entity_type='log')
