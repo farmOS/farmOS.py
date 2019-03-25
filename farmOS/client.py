@@ -57,3 +57,31 @@ class AreaAPI(TermAPI):
     def __init__(self, session):
         super().__init__(session=session)
         self.filters['bundle'] = 'farm_areas'
+
+    def _get_record_data(self, filters={}):
+        """Retrieve raw record data from the farmOS API.
+
+        Override _get_record_data() from BaseAPI to support TID (Taxonomy ID)
+        rather than record ID
+        """
+
+        # Determine if filters is an int (tid) or dict (filters object)
+        if isinstance(filters, int):
+            tid = str(filters)
+            # Add tid to filters object
+            filters = {
+                'tid':tid
+            }
+        elif isinstance(filters, dict):
+            # Combine instance filters and filters from the method call
+            filters = {**self.filters, **filters}
+
+        # Set path to return record type + filters
+        path = self.entity_type + '.json'
+
+        response = self.session.http_request(path=path, params=filters)
+
+        if (response.status_code == 200):
+            return response.json()
+
+        return []

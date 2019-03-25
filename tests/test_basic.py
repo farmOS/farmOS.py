@@ -100,11 +100,12 @@ def test_get_farm_areas_filtered_by_type(test_farm):
     assert areas[0]['area_type'] == area_type
 
 def test_get_farm_areas_by_id(test_farm):
-    area_id = 5
-    area = test_farm.area.get(area_id)
+    area_tid = 5
+    areas = test_farm.area.get(area_tid)
+    area = areas[0]
 
-    assert 'id' in area
-    assert area['id'] == area_id
+    assert 'tid' in area
+    assert int(area['tid']) == area_tid
 
 #
 # Test farm taxonomy term methods
