@@ -7,7 +7,7 @@
 [![Chat](https://img.shields.io/matrix/farmOS:matrix.org.svg)](https://riot.im/app/#/room/#farmOS:matrix.org)
 
 farmOS.py is a Python library for interacting with [farmOS](https://farmOS.org)
-over API. 
+over API.
 
 For more information on farmOS, visit [farmOS.org](https://farmOS.org).
 
@@ -22,9 +22,36 @@ For more information on farmOS, visit [farmOS.org](https://farmOS.org).
     farm = farmOS.farmOS(hostname, username, password)
     success = farm.authenticate()
 
-    logs = farm.get_records('log')
-    harvests = farm.get_records(log', filters={'type':'farm_harvest'}')
-    areas = farm.get_areas()
+    # Get farm info
+    info = farm.info()
+
+    # Get all logs
+    logs = farm.log.get()
+    # Get harvest logs
+    harvests = farm.log.get({
+      'type':'farm_harvest'
+      })
+    # Get log number 37
+    log = farm.log.get(37)
+
+    # Get all assets
+    assets = farm.asset.get()
+    # Get all animal assets
+    animals = farm.log.get({
+      'type':'animal'
+      })
+
+    # Get all areas
+    areas = farm.area.get()
+    # Get field areas
+    fields = farm.area.get({
+      'area_type':'field'
+      })
+
+    # Get all terms
+    terms = farm.term.get()
+    # Get all terms from farm_crops vocabulary
+    crops = farm.term.get('farm_crops')
 
 ## TESTING
 Configure credentials for the farmOS instance used to test in
@@ -46,4 +73,3 @@ This project has been sponsored by:
  * [Our Sci](http://our-sci.net)
  * [Bionutrient Food Association](https://bionutrient.org)
  * [Foundation for Food and Agriculture Research](https://foundationfar.org/)
-
