@@ -1,6 +1,17 @@
 from .session import APISession
 
 class BaseAPI(object):
+    """Base class for API methods
+
+    This class includes basic implementations of the
+    get(), send() and delete() methods used in the API client.
+
+    Keyword Arguments:
+    session: APISession for the farmOS instance
+    entity_type: String, used to set the entity type in the path
+        of all requests used with the API
+    """
+
     def __init__(self, session, entity_type=None):
         self.session = session
         self.entity_type = entity_type
@@ -30,6 +41,7 @@ class BaseAPI(object):
         return []
 
     def get(self, filters={}):
+        """Simple get method"""
         data = self._get_record_data(filters=filters)
 
         # Check if response contains a list of objects
@@ -42,10 +54,16 @@ class BaseAPI(object):
             return []
 
 class TermAPI(BaseAPI):
+    """API for interacting with farm Terms"""
+
     def __init__(self, session):
+        # Define 'taxonomy_term' as the farmOS API entity endpoint
         super().__init__(session=session, entity_type='taxonomy_term')
 
     def get(self, filters={}):
+        """Get method that supports a bundle name as the 'filter' parameter"""
+
+        # Check if filters parameter is a str
         if isinstance(filters, str):
             # Add filters to instance filter dict with keyword 'bundle'
             self.filters['bundle'] = filters
@@ -64,14 +82,22 @@ class TermAPI(BaseAPI):
             return []
 
 class LogAPI(BaseAPI):
+    """API for interacting with farm logs"""
+
     def __init__(self, session):
+        # Define 'log' as the farmOS API entity endpoint
         super().__init__(session=session, entity_type='log')
 
 class AssetAPI(BaseAPI):
+    """API for interacting with farm assets"""
+
     def __init__(self, session):
+        # Define 'farm_asset' as the farmOS API entity endpoint
         super().__init__(session=session, entity_type='farm_asset')
 
 class AreaAPI(TermAPI):
+    """API for interacting with farm areas, a subset of farm terms"""
+
     def __init__(self, session):
         super().__init__(session=session)
         self.filters['bundle'] = 'farm_areas'
