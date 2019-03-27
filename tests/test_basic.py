@@ -136,12 +136,12 @@ def test_get_farm_terms_filtered_by_single_vocabulary_tid(test_farm):
 
 def test_get_farm_term_filtered_by_multiple_vocabulary(test_farm):
     vocabulary_name = 'farm_crops'
-    term_name = 'Icicle Radish'
+    term_name = 'Spinach'
 
     term = test_farm.term.get({
-        'vocabulary':vocabulary_name,
+        'bundle':vocabulary_name,
         'name':term_name
     })
 
-    assert 'name' in term
-    assert term['name'] == term_name
+    assert 'name' in term[0]
+    assert term[0]['name'] == term_name
