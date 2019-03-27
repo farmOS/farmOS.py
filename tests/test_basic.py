@@ -1,6 +1,9 @@
+import pytest
+
 import farmOS
 
 from .test_credentials import valid_credentials
+from farmOS.exceptions import NotAuthenticatedError
 
 # Test authentication
 
@@ -15,6 +18,11 @@ def test_valid_login():
     success = farm.authenticate()
 
     assert success is True
+
+def test_not_authenticated_exception_raised():
+    with pytest.raises(NotAuthenticatedError):
+        farm = farmOS.farmOS(**valid_credentials)
+        farm.info()
 
 #
 # Test farm info method
