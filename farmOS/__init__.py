@@ -1,111 +1,73 @@
-import requests
+from urllib.parse import urlparse, parse_qs
 
+from .session import APISession
+from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
 
 class farmOS:
 
-    # Store authentication credentials.
-    hostname = ''
-    username = ''
-    password = ''
+    """Create a new farmOS instance.
 
-    # Use a Requests Session to store cookies across requests.
-    #   http://docs.python-requests.org/en/master/user/advanced/#session-objects
-    session = requests.Session()
+    Keyword Arguments:
+    hostname - the farmOS hostname (without protocol)
+    username - the farmOS username
+    password - the farmOS user's password
 
-    # Store authentication token internally.
-    token = ''
+    Attributes:
+    session - an APISession object that handles HTTP requests
+
+    """
 
     def __init__(self, hostname, username, password):
-        """Create a new farmOS instance."""
-        self.hostname = hostname
-        self.username = username
-        self.password = password
+        self.session = APISession(hostname, username, password)
+        self.log = LogAPI(self.session)
+        self.asset = AssetAPI(self.session)
+        self.area = AreaAPI(self.session)
+        self.term = TermAPI(self.session)
+
 
     def authenticate(self):
-        """Authenticate with the farmOS site."""
+        """Authenticates with the farmOS site.
 
-        # If any of the authentication credentials are empty, bail.
-        if not self.hostname or not self.username or not self.password:
-            print('farmOS authentication failed: missing hostname, username, or password.')
-            return
+        Returns True or False indicating whether or not
+        the authentication was successful
+        """
+        return self.session.authenticate()
 
-        # Clear any previously populated token.
-        self.token = ''
+    def info(self):
+        """Retrieve info about the farmOS instance"""
+        response = self.session.http_request(path='farm.json')
+        if (response.status_code == 200):
+            return response.json()
 
-        # Login with the username and password to get a cookie.
-        options = {
-            'data': {
-                'name': self.username,
-                'pass': self.password,
-                'form_id': 'user_login',
-            }
-        }
-        response = self.httpRequest('user/login', 'POST', options)
-        if response:
-            if response.status_code != 200:
-                return False
+        return []
 
-        # Request a session token from the RESTful Web Services module
-        response = self.httpRequest('restws/session/token')
-        if response:
-            if response.status_code == 200:
-                self.token = response.text
+    def page_count(self, entity_type, filters={}):
+        """
+        Determines how many pages of records are available for
+        a given entity type and filter(s).
+        """
+        pages = 0
 
-        # Return True if the token was populated.
-        if self.token:
-            return True
-        else:
-            return False
+        data = self.get_record_data(entity_type, filters)
 
-    def httpRequest(self, path, method='GET', options=None):
-        """Raw HTTP request helper function."""
+        # If the 'last' page is not set, return 0
+        if ('last' not in data):
+            return pages
 
-        # Strip protocol, hostname, leading/trailing slashes, and whitespace from the path.
-        remove = [
-            'http://',
-            'https://',
-            self.hostname,
-        ]
-        for string in remove:
-            path = path.replace(string, '')
-        path = path.strip('/')
-        path = path.strip()
+        # The number of pages is the last page + 1
+        parsed_url = urlparse(data['last'])
+        pages = parse_qs(parsed_url.query)['page'][0]
+        return int(pages) + 1
 
-        # Assemble the URL.
-        url = 'http://{}/{}'.format(self.hostname, path)
+    def _get_record_data(self, entity_type, filters={}):
+        """Retrieve raw record data from the farmOS API."""
+        path = entity_type + '.json'
 
-        # Start a headers dictionary.
-        headers = {}
+        if filters and 'id' in filters:
+            path = entity_type + '/' + filters['id'] + '.json'
 
-        # Automatically add the token to the request, if it exists.
-        # Give precedence to a token passed in with options['headers']['X-CSRF-Token'].
-        if options and 'headers' in options and 'X-CSRF-Token' in options['headers']:
-            headers['X-CSRF-Token'] = options['headers']['X-CSRF-Token']
-        if self.token:
-            headers['X-CSRF-Token'] = self.token
+        response = self.session.http_request(path=path, params=filters)
+        if (response.status_code == 200):
+            return response.json()
 
-        # Automatically follow redirects, unless this is a POST request.
-        # The Python requests library converts POST to GET during a redirect.
-        # Allow this to be overridden in options.
-        allow_redirects = True
-        if method == 'POST':
-            allow_redirects = False
-        if options and 'allow_redirects' in options:
-            allow_redirects = options['allow_redirects']
-
-        # If there is data to be sent, include it.
-        data = None
-        if options and 'data' in options:
-            data = options['data']
-
-        # Perform the request.
-        response = self.session.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data)
-
-        # If this is a POST request, and a redirect occurred, attempt to re-POST.
-        redirect_codes = [300, 301, 302, 303, 304, 305, 306, 307, 308]
-        if method == 'POST' and response.status_code in redirect_codes:
-            if response.headers['Location']:
-                response = self.session.request(method, response.headers['Location'], headers=headers, allow_redirects=True, data=data)
-
-        # Return the response.
-        return response
+        return []

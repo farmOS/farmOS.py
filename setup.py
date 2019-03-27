@@ -1,5 +1,17 @@
 import setuptools
 
+setup_requires=[
+    'pytest-runner',
+]
+
+install_requires=[
+    'requests',
+    ]
+
+tests_require=[
+    'pytest',
+],
+
 with open('README.md', 'r') as fh:
     readme = fh.read()
 
@@ -18,8 +30,8 @@ setuptools.setup(
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: OS Independent',
     ],
-    install_requires=[
-        'requests',
-    ],
+    setup_requires=setup_requires,
+    install_requires=install_requires,
+    tests_require=tests_require,
+    test_suite='pytest',
 )
-
