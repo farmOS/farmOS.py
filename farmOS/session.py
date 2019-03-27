@@ -1,5 +1,7 @@
 import requests
 
+from .exceptions import NotAuthenticatedError
+
 # Use a Requests Session to store cookies across requests.
 #   http://docs.python-requests.org/en/master/user/advanced/#session-objects
 class APISession(requests.Session):
@@ -26,6 +28,8 @@ class APISession(requests.Session):
         # Store the authentication token
         self.token = ''
 
+        self.authenticated = False
+
     def authenticate(self):
         """Authenticates with the farmOS site.
 
@@ -46,24 +50,25 @@ class APISession(requests.Session):
         }
 
         # Login with the username and password to get a cookie.
-        response = self.http_request('user/login', 'POST', options)
+        response = self.http_request('user/login', 'POST', options, force=True)
         if response:
             if response.status_code != 200:
                 return False
 
         # Request a session token from the RESTful Web Services module
-        response = self.http_request('restws/session/token')
+        response = self.http_request('restws/session/token', force=True)
         if response:
             if response.status_code == 200:
                 self.token = response.text
 
         # Return True if the token was populated.
         if self.token:
+            self.authenticated = True
             return True
         else:
             return False
 
-    def http_request(self, path, method='GET', options=None, params=None):
+    def http_request(self, path, method='GET', options=None, params=None, force=False):
         """Raw HTTP request helper function.
 
         Keyword arguments:
@@ -72,6 +77,12 @@ class APISession(requests.Session):
         options - a dictionary of data and parameters to pass on to the request
 
         """
+        
+        # If the session has not been authenticated
+        # and the request does not have force=True,
+        # raise NotAuthenticatedError
+        if not self.authenticated and not force:
+            raise NotAuthenticatedError()
 
         # Strip protocol, hostname, leading/trailing slashes, and whitespace from the path.
         remove = [
