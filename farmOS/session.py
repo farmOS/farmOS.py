@@ -77,7 +77,7 @@ class APISession(requests.Session):
         options - a dictionary of data and parameters to pass on to the request
 
         """
-        
+
         # If the session has not been authenticated
         # and the request does not have force=True,
         # raise NotAuthenticatedError
@@ -122,14 +122,19 @@ class APISession(requests.Session):
         if options and 'data' in options:
             data = options['data']
 
+        # If there is a json data to be sent, include it.
+        json = None
+        if options and 'json' in options:
+            json = options['json']
+
         # Perform the request.
-        response = self.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data, params=params)
+        response = self.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data, json=json, params=params)
 
         # If this is a POST request, and a redirect occurred, attempt to re-POST.
         redirect_codes = [300, 301, 302, 303, 304, 305, 306, 307, 308]
         if method == 'POST' and response.status_code in redirect_codes:
             if response.headers['Location']:
-                response = self.request(method, response.headers['Location'], headers=headers, allow_redirects=True, data=data, params=params)
+                response = self.request(method, response.headers['Location'], headers=headers, allow_redirects=True, data=data, json=json, params=params)
 
         # Return the response.
         return response

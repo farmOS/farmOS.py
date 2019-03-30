@@ -1,3 +1,16 @@
+from datetime import datetime
+
+curr_time = datetime.now()
+timestamp = datetime.timestamp(curr_time)
+timestamp = str(timestamp)[0:-7]
+
+# Create a test log
+test_log = {
+    'name':'Testing from farmOS.py',
+    'type':'farm_observation',
+    'timestamp':timestamp
+}
+
 #
 # Test farm log methods
 #
@@ -23,3 +36,17 @@ def test_get_log_by_id(test_farm):
 
     assert 'id' in log
     assert int(log['id']) == log_id
+
+def test_create_log(test_farm):
+    response = test_farm.log.send(test_log)
+    assert 'id' in response
+
+    # Once created, add 'id' to test_log
+    test_log['id'] = response['id']
+
+    created_log = test_farm.log.get(response['id'])
+    assert created_log['timestamp'] == test_log['timestamp']
+
+def test_delete_log(test_farm):
+    deleted_response = test_farm.log.delete(test_log['id'])
+    assert deleted_response.status_code == 200

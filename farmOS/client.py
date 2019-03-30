@@ -53,6 +53,23 @@ class BaseAPI(object):
         else:
             return []
 
+    def send(self, payload):
+        options = {}
+        options['json'] = payload
+        path = self.entity_type
+        response = self.session.http_request(method='POST', path=path, options=options)
+
+        if (response.status_code == 201):
+            return response.json()
+
+        return []
+
+    def delete(self, id):
+        path = self.entity_type + '/' + id
+        response = self.session.http_request(method='DELETE', path=path)
+
+        return response
+
 class TermAPI(BaseAPI):
     """API for interacting with farm Terms"""
 
