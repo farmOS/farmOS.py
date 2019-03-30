@@ -47,6 +47,16 @@ def test_create_log(test_farm):
     created_log = test_farm.log.get(response['id'])
     assert created_log['timestamp'] == test_log['timestamp']
 
+def test_update_log(test_farm):
+    test_log_changes = {
+        'id':test_log['id'],
+        'name':"Updated Log Name",
+    }
+    response = test_farm.log.send(test_log_changes)
+
+    updated_log = test_farm.log.get(test_log['id'])
+    assert updated_log['name'] == test_log_changes['name']
+
 def test_delete_log(test_farm):
     deleted_response = test_farm.log.delete(test_log['id'])
     assert deleted_response.status_code == 200
