@@ -21,7 +21,7 @@ class BaseAPI(object):
         """Retrieve raw record data from the farmOS API."""
 
         # Determine if filters is an int (id) or dict (filters object)
-        if isinstance(filters, int):
+        if isinstance(filters, int) or isinstance(filters, str):
             # Set path to return record type by specific ID
             path = self.entity_type + '/' + str(filters) + '.json'
 
@@ -127,7 +127,7 @@ class AreaAPI(TermAPI):
         """
 
         # Determine if filters is an int (tid) or dict (filters object)
-        if isinstance(filters, int):
+        if isinstance(filters, int) or isinstance(filters, str):
             tid = str(filters)
             # Add tid to filters object
             filters = {
