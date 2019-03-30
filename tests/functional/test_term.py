@@ -64,3 +64,7 @@ def test_create_taxonomy_term(test_farm):
 
     # Once created, add 'id' to test_asset
     test_term['id'] = response['id']
+
+def test_delete_taxonomy_term(test_farm):
+    response = test_farm.term.delete(int(test_term['id']))
+    assert response.status_code == 200

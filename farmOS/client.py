@@ -59,7 +59,7 @@ class BaseAPI(object):
 
         # If an ID is included, update the record
         if 'id' in payload:
-            path = self.entity_type + '/' + payload['id']
+            path = self.entity_type + '/' + str(payload['id'])
             response = self.session.http_request(method='PUT', path=path, options=options)
         # If no ID is included, create a new record
         else:
@@ -72,7 +72,7 @@ class BaseAPI(object):
         return []
 
     def delete(self, id):
-        path = self.entity_type + '/' + id
+        path = self.entity_type + '/' + str(id)
         response = self.session.http_request(method='DELETE', path=path)
 
         return response
