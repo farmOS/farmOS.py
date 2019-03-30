@@ -84,6 +84,16 @@ class TermAPI(BaseAPI):
         # Define 'taxonomy_term' as the farmOS API entity endpoint
         super().__init__(session=session, entity_type='taxonomy_term')
 
+    def vocabularies(self):
+        response = self.session.http_request(path='taxonomy_vocabulary.json')
+
+        if (response.status_code == 200):
+            data = response.json()
+            if 'list' in data:
+                return data['list']
+
+        return []
+
     def get(self, filters={}):
         """Get method that supports a bundle name as the 'filter' parameter"""
 

@@ -36,3 +36,8 @@ def test_get_farm_term_filtered_by_multiple_vocabulary(test_farm):
 
     assert 'name' in term[0]
     assert term[0]['name'] == term_name
+
+def test_get_all_taxonomy_vocabularies(test_farm):
+    vocabs = test_farm.term.vocabularies()
+
+    assert len(vocabs) > 0
