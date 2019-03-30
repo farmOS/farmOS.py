@@ -56,8 +56,15 @@ class BaseAPI(object):
     def send(self, payload):
         options = {}
         options['json'] = payload
-        path = self.entity_type
-        response = self.session.http_request(method='POST', path=path, options=options)
+
+        # If an ID is included, update the record
+        if 'id' in payload:
+            path = self.entity_type + '/' + payload['id']
+            response = self.session.http_request(method='PUT', path=path, options=options)
+        # If no ID is included, create a new record
+        else:
+            path = self.entity_type
+            response = self.session.http_request(method='POST', path=path, options=options)
 
         if (response.status_code == 201):
             return response.json()

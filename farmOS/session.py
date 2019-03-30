@@ -112,7 +112,7 @@ class APISession(requests.Session):
         # The Python requests library converts POST to GET during a redirect.
         # Allow this to be overridden in options.
         allow_redirects = True
-        if method == 'POST':
+        if method in ['POST', 'PUT']:
             allow_redirects = False
         if options and 'allow_redirects' in options:
             allow_redirects = options['allow_redirects']
@@ -132,7 +132,7 @@ class APISession(requests.Session):
 
         # If this is a POST request, and a redirect occurred, attempt to re-POST.
         redirect_codes = [300, 301, 302, 303, 304, 305, 306, 307, 308]
-        if method == 'POST' and response.status_code in redirect_codes:
+        if method in ['POST', 'PUT'] and response.status_code in redirect_codes:
             if response.headers['Location']:
                 response = self.request(method, response.headers['Location'], headers=headers, allow_redirects=True, data=data, json=json, params=params)
 
