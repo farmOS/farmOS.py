@@ -10,6 +10,13 @@ test_asset = {
 #
 # Test farm asset methods
 #
+def test_create_asset(test_farm):
+    response = test_farm.asset.send(test_asset)
+
+    assert 'id' in response
+
+    # Once created, add 'id' to test_asset
+    test_asset['id'] = response['id']
 
 def test_get_all_assets(test_farm):
     assets = test_farm.asset.get()
@@ -17,7 +24,7 @@ def test_get_all_assets(test_farm):
     assert len(assets) > 0
 
 def test_get_assets_filtered_by_type(test_farm):
-    asset_type = 'animal'
+    asset_type = test_asset['type']
 
     asset = test_farm.asset.get({
         'type':asset_type
@@ -27,19 +34,11 @@ def test_get_assets_filtered_by_type(test_farm):
     assert asset[0]['type'] == asset_type
 
 def test_get_asset_by_id(test_farm):
-    asset_id = 1
+    asset_id = test_asset['id']
     asset = test_farm.asset.get(asset_id)
 
     assert 'id' in asset
-    assert int(asset['id']) == asset_id
-
-def test_create_asset(test_farm):
-    response = test_farm.asset.send(test_asset)
-
-    assert 'id' in response
-
-    # Once created, add 'id' to test_asset
-    test_asset['id'] = response['id']
+    assert asset['id'] == asset_id
 
 def test_update_asset(test_farm):
     test_asset_changes = {
