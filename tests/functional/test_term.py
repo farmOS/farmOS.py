@@ -2,7 +2,7 @@ def _search_for_vocab_id(name, vocabs):
     return [vocab for vocab in vocabs if vocab['machine_name'] == name]
 
 test_term = {
-    'name':'API Crop Test',
+    'name':'API Test Crop',
     'vocabulary': {
         'id':None,
         'resource':'taxonomy_vocabulary'
@@ -11,6 +11,24 @@ test_term = {
 #
 # Test farm taxonomy term methods
 #
+
+def test_get_all_taxonomy_vocabularies(test_farm):
+    vocabs = test_farm.term.vocabularies()
+
+    assert len(vocabs) > 0
+
+def test_create_taxonomy_term(test_farm):
+    # Find the vocab ID for farm_crops
+    vocabs = test_farm.term.vocabularies()
+    farm_crop_id = _search_for_vocab_id('farm_crops', vocabs)[0]['vid']
+    # Update the test_term with the vid
+    test_term['vocabulary']['id'] = farm_crop_id
+
+    response = test_farm.term.send(test_term)
+    assert 'id' in response
+
+    # Once created, add 'id' to test_asset
+    test_term['id'] = response['id']
 
 def test_get_all_taxonomy_terms(test_farm):
     terms = test_farm.term.get()
@@ -47,23 +65,16 @@ def test_get_farm_term_filtered_by_multiple_vocabulary(test_farm):
     assert 'name' in term[0]
     assert term[0]['name'] == term_name
 
-def test_get_all_taxonomy_vocabularies(test_farm):
-    vocabs = test_farm.term.vocabularies()
+def test_update_taxonomy_term(test_farm):
+    test_term_changes = {
+        'id':test_term['id'],
+        'name':'Crop changed name'
+    }
+    test_farm.term.send(test_term_changes)
 
-    assert len(vocabs) > 0
-
-def test_create_taxonomy_term(test_farm):
-    # Find the vocab ID for farm_crops
-    vocabs = test_farm.term.vocabularies()
-    farm_crop_id = _search_for_vocab_id('farm_crops', vocabs)[0]['vid']
-    # Update the test_term with the vid
-    test_term['vocabulary']['id'] = farm_crop_id
-
-    response = test_farm.term.send(test_term)
-    assert 'id' in response
-
-    # Once created, add 'id' to test_asset
-    test_term['id'] = response['id']
+    updated_term = test_farm.term.get(int(test_term['id']))
+    print(updated_term, test_term['id'])
+    assert updated_term['name'] == test_term_changes['name']
 
 def test_delete_taxonomy_term(test_farm):
     response = test_farm.term.delete(int(test_term['id']))
