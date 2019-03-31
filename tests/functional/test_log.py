@@ -14,29 +14,6 @@ test_log = {
 #
 # Test farm log methods
 #
-
-def test_get_all_logs(test_farm):
-    logs = test_farm.log.get()
-
-    assert len(logs) > 0
-
-def test_get_logs_filtered_by_type(test_farm):
-    log_type = 'farm_harvest'
-
-    logs = test_farm.log.get({
-        'type':log_type
-    })
-
-    assert len(logs) > 0
-    assert logs[0]['type'] == log_type
-
-def test_get_log_by_id(test_farm):
-    log_id = 164
-    log = test_farm.log.get(log_id)
-
-    assert 'id' in log
-    assert int(log['id']) == log_id
-
 def test_create_log(test_farm):
     response = test_farm.log.send(test_log)
     assert 'id' in response
@@ -46,6 +23,28 @@ def test_create_log(test_farm):
 
     created_log = test_farm.log.get(response['id'])
     assert created_log['timestamp'] == test_log['timestamp']
+
+def test_get_all_logs(test_farm):
+    logs = test_farm.log.get()
+
+    assert len(logs) > 0
+
+def test_get_logs_filtered_by_type(test_farm):
+    log_type = test_log['type']
+
+    logs = test_farm.log.get({
+        'type':log_type
+    })
+
+    assert len(logs) > 0
+    assert logs[0]['type'] == log_type
+
+def test_get_log_by_id(test_farm):
+    log_id = test_log['id']
+    log = test_farm.log.get(log_id)
+
+    assert 'id' in log
+    assert log['id'] == log_id
 
 def test_update_log(test_farm):
     test_log_changes = {
