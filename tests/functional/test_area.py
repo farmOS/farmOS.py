@@ -13,30 +13,6 @@ test_area = {
 #
 # Test farm area methods
 #
-
-def test_get_all_farm_areas(test_farm):
-    areas = test_farm.area.get()
-
-    assert len(areas) > 0
-
-def test_get_farm_areas_filtered_by_type(test_farm):
-    area_type = 'field'
-
-    areas = test_farm.area.get({
-        'area_type':area_type
-    })
-
-    assert len(areas) > 0
-    assert areas[0]['area_type'] == area_type
-
-def test_get_farm_areas_by_id(test_farm):
-    area_tid = 5
-    areas = test_farm.area.get(area_tid)
-    area = areas[0]
-
-    assert 'tid' in area
-    assert int(area['tid']) == area_tid
-
 def test_create_area(test_farm):
     # Find the vocab ID for farm_areas
     vocabs = test_farm.term.vocabularies()
@@ -50,6 +26,29 @@ def test_create_area(test_farm):
 
     # Once created, add 'id' to test_asset
     test_area['id'] = response['id']
+
+def test_get_all_farm_areas(test_farm):
+    areas = test_farm.area.get()
+
+    assert len(areas) > 0
+
+def test_get_farm_areas_filtered_by_type(test_farm):
+    area_type = test_area['area_type']
+
+    areas = test_farm.area.get({
+        'area_type':area_type
+    })
+
+    assert len(areas) > 0
+    assert areas[0]['area_type'] == area_type
+
+def test_get_farm_areas_by_id(test_farm):
+    area_tid = test_area['id']
+    areas = test_farm.area.get(int(area_tid))
+    area = areas[0]
+
+    assert 'tid' in area
+    assert area['tid'] == area_tid
 
 def test_delete_area(test_farm):
     response = test_farm.area.delete(int(test_area['id']))
