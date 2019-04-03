@@ -55,7 +55,7 @@ def test_get_farm_terms_filtered_by_single_vocabulary_tid(test_farm):
 
 def test_get_farm_term_filtered_by_multiple_vocabulary(test_farm):
     vocabulary_name = 'farm_crops'
-    term_name = 'Spinach'
+    term_name = 'API Test Crop'
 
     term = test_farm.term.get({
         'bundle':vocabulary_name,
