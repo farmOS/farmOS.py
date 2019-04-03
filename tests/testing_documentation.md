@@ -68,7 +68,7 @@ test_log_changes = {
 Call `farm.log.send(test_log_changes)` to update the log name.
 Call `farm.log.get(test_log['id'])` to retrieve the updated log and assert log has the updated `name`
 
-#### test_delete_log
+#### `test_delete_log`
 Call `farm.log.delete(test_log['id'])`
 Assert the `response.status_code == 200`
 
@@ -81,17 +81,6 @@ These tests are similar to those for **Logs** (see above)
 #### `test_get_all_assets`
 #### `test_get_assets_filtered_by_type`
 #### `test_get_asset_by_id`
-#### `test_update_asset`
-#### `test_delete_asset`
-
-### Areas
-These tests should live in `tests/functional/test_area.xx`
-All tests require an *authenticated* farmOS instance
-
-#### `test_create_area`
-#### `test_get_all_farm_areas`
-#### `test_get_farm_areas_filtered_by_type`
-#### `test_get_farm_areas_by_id`
 #### `test_update_asset`
 #### `test_delete_asset`
 
@@ -116,12 +105,56 @@ test_term = {
 Call` farm.term.vocabularies()` and assert `length`  `> 0`
 
 #### `test_create_taxonomy_term`
+Call `farm.term.send(test_term)` and assert `'id'` is in the response.
+Assign this `'id'` to the test_term so it can be referenced in later tests
+
 #### `test_get_all_taxonomy_terms`
+Call `farm.term.get()` and assert `length` of the response is `> 0`
+
 #### `test_get_farm_terms_filtered_by_single_vocabulary_tid`
-Call `farm.term.get('farm_crops')` to get terms of the `farm_crops` vocabulary.
+Call `farm.term.get('farm_crops')` to get terms of the `farm_crops` vocabulary. Assert there is at least one term.
 
 #### `test_farm_term_filtered_by_vocabulary_and_term_name`
 Call `farm.term.get({'bundle':'farm_crops', 'name':'API Test Crop'})` to get the "API Test Crop" term
 
 #### `test_update_taxonomy_term`
+Create a test_term_changes object:
+```python
+test_term_changes = {
+      'id':test_term['id'],
+      'name':'Crop changed name'
+  }
+```
+Call `farm.term.send(test_term_changes)`.
+Call `farm.term.get(int(test_term['id'])` and assert the `'name'` was changed
+
+
 #### `test_delete_taxonomy_term`
+Call `farm.term.delete(int(test_term['id']))` and assert 200 response.
+
+### Areas
+These tests should live in `tests/functional/test_area.xx`
+All tests require an *authenticated* farmOS instance
+
+Because Areas are Taxonomy_terms, this is very similar to the taxonomy_term tests. Some notes -
+
+Use a test_area object:
+**NOTE** - use a helper function to search the vocabularies from `farm.term.vocabularies()` to get the VID of `farm_crops`
+
+```python
+test_area = {
+    'name':'Testing area',
+    'area_type':'field',
+    'vocabulary': {
+        'id':None,
+        'resource':'taxonomy_vocabulary'
+    }
+}
+```
+
+#### `test_create_area`
+#### `test_get_all_farm_areas`
+#### `test_get_farm_areas_filtered_by_type`
+#### `test_get_farm_areas_by_id`
+#### `test_update_asset`
+#### `test_delete_asset`
