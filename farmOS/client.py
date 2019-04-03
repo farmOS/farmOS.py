@@ -58,8 +58,9 @@ class BaseAPI(object):
         options['json'] = payload
 
         # If an ID is included, update the record
-        if 'id' in payload:
-            path = self.entity_type + '/' + str(payload['id'])
+        id = payload.pop('id', None)
+        if id:
+            path = self.entity_type + '/' + str(id)
             response = self.session.http_request(method='PUT', path=path, options=options)
         # If no ID is included, create a new record
         else:
