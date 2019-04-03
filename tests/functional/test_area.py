@@ -1,6 +1,3 @@
-def _search_for_vocab_id(name, vocabs):
-    return [vocab for vocab in vocabs if vocab['machine_name'] == name]
-
 test_area = {
     'name':'Testing area',
     'area_type':'field',
@@ -15,8 +12,8 @@ test_area = {
 #
 def test_create_area(test_farm):
     # Find the vocab ID for farm_areas
-    vocabs = test_farm.vocabulary()
-    farm_areas_id = _search_for_vocab_id('farm_areas', vocabs)[0]['vid']
+    farm_areas_id = test_farm.vocabulary('farm_areas')[0]['vid']
+
     # Update the test_area with the vid
     test_area['vocabulary']['id'] = farm_areas_id
 

@@ -1,6 +1,3 @@
-def _search_for_vocab_id(name, vocabs):
-    return [vocab for vocab in vocabs if vocab['machine_name'] == name]
-
 test_term = {
     'name':'API Test Crop',
     'vocabulary': {
@@ -14,8 +11,8 @@ test_term = {
 
 def test_create_taxonomy_term(test_farm):
     # Find the vocab ID for farm_crops
-    vocabs = test_farm.vocabulary()
-    farm_crop_id = _search_for_vocab_id('farm_crops', vocabs)[0]['vid']
+    farm_crop_id = test_farm.vocabulary('farm_crops')[0]['vid']
+    
     # Update the test_term with the vid
     test_term['vocabulary']['id'] = farm_crop_id
 
