@@ -12,14 +12,9 @@ test_term = {
 # Test farm taxonomy term methods
 #
 
-def test_get_all_taxonomy_vocabularies(test_farm):
-    vocabs = test_farm.term.vocabularies()
-
-    assert len(vocabs) > 0
-
 def test_create_taxonomy_term(test_farm):
     # Find the vocab ID for farm_crops
-    vocabs = test_farm.term.vocabularies()
+    vocabs = test_farm.vocabulary()
     farm_crop_id = _search_for_vocab_id('farm_crops', vocabs)[0]['vid']
     # Update the test_term with the vid
     test_term['vocabulary']['id'] = farm_crop_id

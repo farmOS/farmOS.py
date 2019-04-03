@@ -15,7 +15,7 @@ test_area = {
 #
 def test_create_area(test_farm):
     # Find the vocab ID for farm_areas
-    vocabs = test_farm.term.vocabularies()
+    vocabs = test_farm.vocabulary()
     farm_areas_id = _search_for_vocab_id('farm_areas', vocabs)[0]['vid']
     # Update the test_area with the vid
     test_area['vocabulary']['id'] = farm_areas_id

@@ -41,6 +41,17 @@ class farmOS:
 
         return []
 
+    def vocabulary(self):
+        response = self.session.http_request(path='taxonomy_vocabulary.json')
+
+        if (response.status_code == 200):
+            data = response.json()
+            if 'list' in data:
+                return data['list']
+
+        return []
+
+
     def page_count(self, entity_type, filters={}):
         """
         Determines how many pages of records are available for
