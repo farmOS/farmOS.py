@@ -1,5 +1,7 @@
 import requests
 
+from .exceptions import NotAuthenticatedError
+
 # Use a Requests Session to store cookies across requests.
 #   http://docs.python-requests.org/en/master/user/advanced/#session-objects
 class APISession(requests.Session):
@@ -26,6 +28,8 @@ class APISession(requests.Session):
         # Store the authentication token
         self.token = ''
 
+        self.authenticated = False
+
     def authenticate(self):
         """Authenticates with the farmOS site.
 
@@ -46,24 +50,25 @@ class APISession(requests.Session):
         }
 
         # Login with the username and password to get a cookie.
-        response = self.http_request('user/login', 'POST', options)
+        response = self.http_request('user/login', 'POST', options, force=True)
         if response:
             if response.status_code != 200:
                 return False
 
         # Request a session token from the RESTful Web Services module
-        response = self.http_request('restws/session/token')
+        response = self.http_request('restws/session/token', force=True)
         if response:
             if response.status_code == 200:
                 self.token = response.text
 
         # Return True if the token was populated.
         if self.token:
+            self.authenticated = True
             return True
         else:
             return False
 
-    def http_request(self, path, method='GET', options=None, params=None):
+    def http_request(self, path, method='GET', options=None, params=None, force=False):
         """Raw HTTP request helper function.
 
         Keyword arguments:
@@ -72,6 +77,12 @@ class APISession(requests.Session):
         options - a dictionary of data and parameters to pass on to the request
 
         """
+
+        # If the session has not been authenticated
+        # and the request does not have force=True,
+        # raise NotAuthenticatedError
+        if not self.authenticated and not force:
+            raise NotAuthenticatedError()
 
         # Strip protocol, hostname, leading/trailing slashes, and whitespace from the path.
         remove = [
@@ -101,7 +112,7 @@ class APISession(requests.Session):
         # The Python requests library converts POST to GET during a redirect.
         # Allow this to be overridden in options.
         allow_redirects = True
-        if method == 'POST':
+        if method in ['POST', 'PUT']:
             allow_redirects = False
         if options and 'allow_redirects' in options:
             allow_redirects = options['allow_redirects']
@@ -111,14 +122,19 @@ class APISession(requests.Session):
         if options and 'data' in options:
             data = options['data']
 
+        # If there is a json data to be sent, include it.
+        json = None
+        if options and 'json' in options:
+            json = options['json']
+
         # Perform the request.
-        response = self.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data, params=params)
+        response = self.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data, json=json, params=params)
 
         # If this is a POST request, and a redirect occurred, attempt to re-POST.
         redirect_codes = [300, 301, 302, 303, 304, 305, 306, 307, 308]
-        if method == 'POST' and response.status_code in redirect_codes:
+        if method in ['POST', 'PUT'] and response.status_code in redirect_codes:
             if response.headers['Location']:
-                response = self.request(method, response.headers['Location'], headers=headers, allow_redirects=True, data=data, params=params)
+                response = self.request(method, response.headers['Location'], headers=headers, allow_redirects=True, data=data, json=json, params=params)
 
         # Return the response.
         return response

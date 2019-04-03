@@ -21,7 +21,7 @@ class BaseAPI(object):
         """Retrieve raw record data from the farmOS API."""
 
         # Determine if filters is an int (id) or dict (filters object)
-        if isinstance(filters, int):
+        if isinstance(filters, int) or isinstance(filters, str):
             # Set path to return record type by specific ID
             path = self.entity_type + '/' + str(filters) + '.json'
 
@@ -53,12 +53,47 @@ class BaseAPI(object):
         else:
             return []
 
+    def send(self, payload):
+        options = {}
+        options['json'] = payload
+
+        # If an ID is included, update the record
+        id = payload.pop('id', None)
+        if id:
+            path = self.entity_type + '/' + str(id)
+            response = self.session.http_request(method='PUT', path=path, options=options)
+        # If no ID is included, create a new record
+        else:
+            path = self.entity_type
+            response = self.session.http_request(method='POST', path=path, options=options)
+
+        if (response.status_code == 201):
+            return response.json()
+
+        return []
+
+    def delete(self, id):
+        path = self.entity_type + '/' + str(id)
+        response = self.session.http_request(method='DELETE', path=path)
+
+        return response
+
 class TermAPI(BaseAPI):
     """API for interacting with farm Terms"""
 
     def __init__(self, session):
         # Define 'taxonomy_term' as the farmOS API entity endpoint
         super().__init__(session=session, entity_type='taxonomy_term')
+
+    def vocabularies(self):
+        response = self.session.http_request(path='taxonomy_vocabulary.json')
+
+        if (response.status_code == 200):
+            data = response.json()
+            if 'list' in data:
+                return data['list']
+
+        return []
 
     def get(self, filters={}):
         """Get method that supports a bundle name as the 'filter' parameter"""
@@ -110,7 +145,7 @@ class AreaAPI(TermAPI):
         """
 
         # Determine if filters is an int (tid) or dict (filters object)
-        if isinstance(filters, int):
+        if isinstance(filters, int) or isinstance(filters, str):
             tid = str(filters)
             # Add tid to filters object
             filters = {
