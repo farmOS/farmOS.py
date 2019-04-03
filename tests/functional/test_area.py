@@ -50,6 +50,16 @@ def test_get_farm_areas_by_id(test_farm):
     assert 'tid' in area
     assert area['tid'] == area_tid
 
+def test_update_area(test_farm):
+    test_area_changes = {
+        'id':test_area['id'],
+        'name':'Area changed name'
+    }
+    test_farm.area.send(test_area_changes)
+
+    updated_area = test_farm.area.get(int(test_area['id']))
+    assert updated_area[0]['name'] == test_area_changes['name']
+
 def test_delete_area(test_farm):
     response = test_farm.area.delete(int(test_area['id']))
     assert response.status_code == 200

@@ -73,7 +73,6 @@ def test_update_taxonomy_term(test_farm):
     test_farm.term.send(test_term_changes)
 
     updated_term = test_farm.term.get(int(test_term['id']))
-    print(updated_term, test_term['id'])
     assert updated_term['name'] == test_term_changes['name']
 
 def test_delete_taxonomy_term(test_farm):
