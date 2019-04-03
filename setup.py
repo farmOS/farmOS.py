@@ -30,6 +30,7 @@ setuptools.setup(
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: OS Independent',
     ],
+    python_requires='>=3',
     setup_requires=setup_requires,
     install_requires=install_requires,
     tests_require=tests_require,
