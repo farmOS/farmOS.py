@@ -54,35 +54,3 @@ class farmOS:
                 return data['list']
 
         return []
-
-
-    def page_count(self, entity_type, filters={}):
-        """
-        Determines how many pages of records are available for
-        a given entity type and filter(s).
-        """
-        pages = 0
-
-        data = self.get_record_data(entity_type, filters)
-
-        # If the 'last' page is not set, return 0
-        if ('last' not in data):
-            return pages
-
-        # The number of pages is the last page + 1
-        parsed_url = urlparse(data['last'])
-        pages = parse_qs(parsed_url.query)['page'][0]
-        return int(pages) + 1
-
-    def _get_record_data(self, entity_type, filters={}):
-        """Retrieve raw record data from the farmOS API."""
-        path = entity_type + '.json'
-
-        if filters and 'id' in filters:
-            path = entity_type + '/' + filters['id'] + '.json'
-
-        response = self.session.http_request(path=path, params=filters)
-        if (response.status_code == 200):
-            return response.json()
-
-        return []
