@@ -31,7 +31,7 @@ class BaseAPI(object):
 
         return []
 
-    def _get_record_data(self, filters={}):
+    def _get_record_data(self, filters):
         """Retrieve one page of raw record data from the farmOS API."""
         # Set path to return record type + filters
         path = self.entity_type + '.json'
@@ -45,11 +45,11 @@ class BaseAPI(object):
 
         return []
 
-    def _get_all_record_data(self, page=0, filters={}, list=None):
+    def _get_all_record_data(self, filters, page=0, list=None):
         """Recursive function to retrieve multiple pages of raw record data from the farmOS API."""
         if list is None:
             list = []
-            
+
         filters['page'] = page
 
         data = self._get_record_data(filters=filters)
@@ -71,8 +71,10 @@ class BaseAPI(object):
 
         return list
 
-    def _get_records(self, filters={}):
+    def _get_records(self, filters=None):
         """Helper function that checks to retrieve one record, one page or multiple pages of farmOS records"""
+        if filters is None:
+            filters = {}
 
         # Determine if filters is an int (id) or dict (filters object)
         if isinstance(filters, int) or isinstance(filters, str):
@@ -93,8 +95,6 @@ class BaseAPI(object):
 
     def get(self, filters=None):
         """Simple get method"""
-        if filters is None:
-            filters = {}
 
         data = self._get_records(filters=filters)
 
@@ -132,7 +132,7 @@ class TermAPI(BaseAPI):
         # Define 'taxonomy_term' as the farmOS API entity endpoint
         super().__init__(session=session, entity_type='taxonomy_term')
 
-    def get(self, filters={}):
+    def get(self, filters=None):
         """Get method that supports a bundle name as the 'filter' parameter"""
 
         # Check if filters parameter is a str
@@ -167,7 +167,7 @@ class AreaAPI(TermAPI):
         super().__init__(session=session)
         self.filters['bundle'] = 'farm_areas'
 
-    def get(self, filters={}):
+    def get(self, filters=None):
         """Retrieve raw record data from the farmOS API.
 
         Override get() from BaseAPI to support TID (Taxonomy ID)
