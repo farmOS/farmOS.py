@@ -24,10 +24,16 @@ def test_create_log(test_farm):
     created_log = test_farm.log.get(response['id'])
     assert created_log['timestamp'] == test_log['timestamp']
 
-def test_get_all_logs(test_farm):
-    logs = test_farm.log.get()
+def test_get_one_page_of_logs(test_farm):
+    logs = test_farm.log.get({'page':0})
 
     assert len(logs) > 0
+
+def test_get_all_logs(test_farm):
+    one_page_logs = test_farm.log.get({'page':0})
+    all_logs = test_farm.log.get()
+
+    assert len(all_logs) > len(one_page_logs)
 
 def test_get_logs_filtered_by_type(test_farm):
     log_type = test_log['type']

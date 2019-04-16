@@ -1,3 +1,5 @@
+from urllib.parse import urlparse, parse_qs
+
 from .session import APISession
 
 class BaseAPI(object):
@@ -17,41 +19,86 @@ class BaseAPI(object):
         self.entity_type = entity_type
         self.filters = {}
 
-    def _get_record_data(self, filters={}):
-        """Retrieve raw record data from the farmOS API."""
+    def _get_single_record_data(self, id):
+        """Retrieve one record given the record ID"""
+        # Set path to return record type by specific ID
+        path = self.entity_type + '/' + str(id) + '.json'
 
-        # Determine if filters is an int (id) or dict (filters object)
-        if isinstance(filters, int) or isinstance(filters, str):
-            # Set path to return record type by specific ID
-            path = self.entity_type + '/' + str(filters) + '.json'
-
-            response = self.session.http_request(path=path)
-        elif isinstance(filters, dict):
-            # Set path to return record type + filters
-            path = self.entity_type + '.json'
-            # Combine instance filters and filters from the method call
-            filters = {**self.filters, **filters}
-
-            response = self.session.http_request(path=path, params=filters)
-
+        response = self.session.http_request(path=path)
 
         if (response.status_code == 200):
             return response.json()
 
         return []
 
-    def get(self, filters={}):
-        """Simple get method"""
+    def _get_record_data(self, filters={}):
+        """Retrieve one page of raw record data from the farmOS API."""
+        # Set path to return record type + filters
+        path = self.entity_type + '.json'
+        # Combine instance filters and filters from the method call
+        filters = {**self.filters, **filters}
+
+        response = self.session.http_request(path=path, params=filters)
+
+        if (response.status_code == 200):
+            return response.json()
+
+        return []
+
+    def _get_all_record_data(self, page=0, filters={}, list=None):
+        """Recursive function to retrieve multiple pages of raw record data from the farmOS API."""
+        if list is None:
+            list = []
+            
+        filters['page'] = page
+
         data = self._get_record_data(filters=filters)
 
-        # Check if response contains a list of objects
+        # Append record data to list of all requested data
         if ('list' in data):
-            return data['list']
-        # Check if response contains an object
-        elif len(data) > 0:
-            return data
-        else:
-            return []
+            list = list + data['list']
+
+        # Check to see if there are more pages
+        if ('last' in data):
+            parsed_url = urlparse(data['last'])
+            last_page = parse_qs(parsed_url.query)['page'][0]
+            # Last page, return the list
+            if (last_page == page):
+                return list
+            # Recursive call, get the next page
+            else:
+                return self._get_all_record_data(list=list, page=(page+1), filters=filters)
+
+        return list
+
+    def _get_records(self, filters={}):
+        """Helper function that checks to retrieve one record, one page or multiple pages of farmOS records"""
+
+        # Determine if filters is an int (id) or dict (filters object)
+        if isinstance(filters, int) or isinstance(filters, str):
+            data = self._get_single_record_data(filters)
+        elif isinstance(filters, dict):
+            # Check if the caller requests a specific page
+            if 'page' in filters:
+                print('special page' + str(filters['page']))
+                data = self._get_record_data(filters=filters)
+                if 'list' in data:
+                    return data['list']
+                else:
+                    return data
+            else:
+                data = self._get_all_record_data(filters=filters)
+
+        return data
+
+    def get(self, filters=None):
+        """Simple get method"""
+        if filters is None:
+            filters = {}
+
+        data = self._get_records(filters=filters)
+
+        return data
 
     def send(self, payload):
         options = {}
@@ -90,21 +137,14 @@ class TermAPI(BaseAPI):
 
         # Check if filters parameter is a str
         if isinstance(filters, str):
-            # Add filters to instance filter dict with keyword 'bundle'
+            # Add filters to instance requests.session filter dict with keyword 'bundle'
             self.filters['bundle'] = filters
             # Reset filters to empty dict
             filters = {}
 
-        data = self._get_record_data(filters=filters)
+        data = self._get_records(filters=filters)
 
-        # Check if response contains a list of objects
-        if ('list' in data):
-            return data['list']
-        # Check if response contains an object
-        elif len(data) > 0:
-            return data
-        else:
-            return []
+        return data
 
 class LogAPI(BaseAPI):
     """API for interacting with farm logs"""
@@ -127,10 +167,10 @@ class AreaAPI(TermAPI):
         super().__init__(session=session)
         self.filters['bundle'] = 'farm_areas'
 
-    def _get_record_data(self, filters={}):
+    def get(self, filters={}):
         """Retrieve raw record data from the farmOS API.
 
-        Override _get_record_data() from BaseAPI to support TID (Taxonomy ID)
+        Override get() from BaseAPI to support TID (Taxonomy ID)
         rather than record ID
         """
 
@@ -141,16 +181,7 @@ class AreaAPI(TermAPI):
             filters = {
                 'tid':tid
             }
-        elif isinstance(filters, dict):
-            # Combine instance filters and filters from the method call
-            filters = {**self.filters, **filters}
 
-        # Set path to return record type + filters
-        path = self.entity_type + '.json'
+        data = self._get_records(filters=filters)
 
-        response = self.session.http_request(path=path, params=filters)
-
-        if (response.status_code == 200):
-            return response.json()
-
-        return []
+        return data
