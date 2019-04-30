@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.2] - 2019-04-30
+### Added
+- Ability to get requests in pages (default to all pages)
+- Tests for paging of logs
+- This CHANGELOG.md file
+
+### Fixed
+- Return values for `.send()` methods making `PUT` requests
+
 ## [0.0.1] - 2019-04-02
 ### Added
 - `farm.authenticate()` method for authenticating with farmOS
