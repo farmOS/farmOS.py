@@ -46,6 +46,8 @@ def test_update_asset(test_farm):
         'serial_number':'0123456789'
     }
     response = test_farm.asset.send(test_asset_changes)
+    assert 'id' in response
+    assert response['id'] == test_asset['id']
 
     updated_asset = test_farm.asset.get(test_asset['id'])
 

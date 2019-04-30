@@ -114,10 +114,22 @@ class BaseAPI(object):
             path = self.entity_type
             response = self.session.http_request(method='POST', path=path, options=options)
 
+        # Handle response from POST requests
         if (response.status_code == 201):
             return response.json()
 
-        return []
+        # Handle response from PUT requests
+        if (response.status_code == 200):
+            # farmOS returns no response data for PUT requests
+            # response_data = response.json()
+
+            # Hard code the entity ID, path, and resource
+            entity_data = {
+                'id': id,
+                'uri': path,
+                'resource': self.entity_type,
+            }
+            return entity_data
 
     def delete(self, id):
         path = self.entity_type + '/' + str(id)

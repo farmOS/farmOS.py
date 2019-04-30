@@ -52,7 +52,9 @@ def test_update_area(test_farm):
         'id':test_area['id'],
         'name':'Area changed name'
     }
-    test_farm.area.send(test_area_changes)
+    response = test_farm.area.send(test_area_changes)
+    assert 'id' in response
+    assert response['id'] == test_area['id']
 
     updated_area = test_farm.area.get(int(test_area['id']))
     assert updated_area[0]['name'] == test_area_changes['name']

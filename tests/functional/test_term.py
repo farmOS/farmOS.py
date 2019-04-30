@@ -12,7 +12,7 @@ test_term = {
 def test_create_taxonomy_term(test_farm):
     # Find the vocab ID for farm_crops
     farm_crop_id = test_farm.vocabulary('farm_crops')[0]['vid']
-    
+
     # Update the test_term with the vid
     test_term['vocabulary']['id'] = farm_crop_id
 
@@ -62,7 +62,9 @@ def test_update_taxonomy_term(test_farm):
         'id':test_term['id'],
         'name':'Crop changed name'
     }
-    test_farm.term.send(test_term_changes)
+    response = test_farm.term.send(test_term_changes)
+    assert 'id' in response
+    assert response['id'] == test_term['id']
 
     updated_term = test_farm.term.get(int(test_term['id']))
     assert updated_term['name'] == test_term_changes['name']

@@ -58,6 +58,8 @@ def test_update_log(test_farm):
         'name':"Updated Log Name",
     }
     response = test_farm.log.send(test_log_changes)
+    assert 'id' in response
+    assert response['id'] == test_log['id']
 
     updated_log = test_farm.log.get(test_log['id'])
     assert updated_log['name'] == test_log_changes['name']
