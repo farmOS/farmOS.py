@@ -64,6 +64,7 @@ Automated tests are run with pytest
 
 ## MAINTAINERS
 
+ * Paul Weidner (paul121) - https://github.com/paul121
  * Michael Stenta (m.stenta) - https://github.com/mstenta
 
 This project has been sponsored by:
