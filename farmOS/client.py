@@ -82,7 +82,6 @@ class BaseAPI(object):
         elif isinstance(filters, dict):
             # Check if the caller requests a specific page
             if 'page' in filters:
-                print('special page' + str(filters['page']))
                 data = self._get_record_data(filters=filters)
                 if 'list' in data:
                     return data['list']
