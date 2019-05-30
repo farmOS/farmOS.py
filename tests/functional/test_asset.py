@@ -21,8 +21,9 @@ def test_create_asset(test_farm):
 def test_get_all_assets(test_farm):
     assets = test_farm.asset.get()
 
-    assert len(assets) > 0
     assert 'list' in assets
+    assert 'page' in assets
+    assert len(assets) > 0
 
 def test_get_assets_filtered_by_type(test_farm):
     asset_type = test_asset['type']

@@ -25,8 +25,10 @@ def test_create_taxonomy_term(test_farm):
 def test_get_all_taxonomy_terms(test_farm):
     terms = test_farm.term.get()
 
-    assert len(terms) > 0
     assert 'list' in terms
+    assert 'page' in terms
+    assert len(terms) > 0
+
 
 def test_get_farm_terms_filtered_by_single_vocabulary_name(test_farm):
     vocabulary_name = 'farm_crops'

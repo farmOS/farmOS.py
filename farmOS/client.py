@@ -40,10 +40,20 @@ class BaseAPI(object):
 
         response = self.session.http_request(path=path, params=filters)
 
-        if (response.status_code == 200):
-            return response.json()
+        # Return object
+        data = {}
 
-        return []
+        if (response.status_code == 200):
+            response = response.json()
+            if 'list' in response:
+                data['list'] = response['list']
+                data['page'] = {
+                    'self' : _parse_api_page(url=response['self']),
+                    'first': _parse_api_page(url=response['first']),
+                    'last' : _parse_api_page(url=response['last']),
+                }
+
+        return data
 
     def _get_all_record_data(self, filters, page=0, list=None):
         """Recursive function to retrieve multiple pages of raw record data from the farmOS API."""
@@ -52,23 +62,28 @@ class BaseAPI(object):
 
         filters['page'] = page
 
-        data = self._get_record_data(filters=filters)
+        response = self._get_record_data(filters=filters)
 
         # Append record data to list of all requested data
-        if ('list' in data):
-            list = list + data['list']
+        if ('list' in response):
+            list = list + response['list']
 
         # Check to see if there are more pages
-        if ('last' in data):
-            last_page = _parse_api_page(url=data['last'])
+        if ('page' in response):
+            last_page = response['page']['last']
             # Last page, return the list
             if (last_page == page):
-                return list
+                data = {
+                    'page': {
+                        'first': response['page']['first'],
+                        'last' : response['page']['last'],
+                    },
+                    'list': list,
+                }
+                return data
             # Recursive call, get the next page
             else:
                 return self._get_all_record_data(list=list, page=(page+1), filters=filters)
-
-        return list
 
     def _get_records(self, filters=None):
         """Helper function that checks to retrieve one record, one page or multiple pages of farmOS records"""

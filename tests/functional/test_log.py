@@ -27,13 +27,17 @@ def test_create_log(test_farm):
 def test_get_one_page_of_logs(test_farm):
     logs = test_farm.log.get({'page':0})
 
-    assert len(logs) > 0
     assert 'list' in logs
+    assert 'page' in logs
+    assert len(logs['list']) > 0
+    assert logs['page']['self'] == 0
 
 def test_get_all_logs(test_farm):
     one_page_logs = test_farm.log.get({'page':0})
     all_logs = test_farm.log.get()
 
+    assert 'page' in all_logs
+    assert all_logs['page']['last'] != all_logs['page']['first']
     assert len(all_logs['list']) > len(one_page_logs['list'])
 
 def test_get_logs_filtered_by_type(test_farm):

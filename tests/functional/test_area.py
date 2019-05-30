@@ -27,8 +27,10 @@ def test_create_area(test_farm):
 def test_get_all_farm_areas(test_farm):
     areas = test_farm.area.get()
 
-    assert len(areas) > 0
     assert 'list' in areas
+    assert 'page' in areas
+    assert len(areas) > 0
+    
 
 def test_get_farm_areas_filtered_by_type(test_farm):
     area_type = test_area['area_type']
