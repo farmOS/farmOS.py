@@ -26,6 +26,7 @@ def test_get_all_taxonomy_terms(test_farm):
     terms = test_farm.term.get()
 
     assert len(terms) > 0
+    assert 'list' in terms
 
 def test_get_farm_terms_filtered_by_single_vocabulary_name(test_farm):
     vocabulary_name = 'farm_crops'
@@ -35,7 +36,7 @@ def test_get_farm_terms_filtered_by_single_vocabulary_name(test_farm):
     assert len(terms) > 0
     # Assert all terms retrieved are from the same vocabulary
     # (cannot check vocabulary name in response)
-    assert terms[0]['vocabulary']['id'] == terms[1]['vocabulary']['id']
+    assert terms['list'][0]['vocabulary']['id'] == terms['list'][1]['vocabulary']['id']
 
 def test_get_farm_terms_filtered_by_single_vocabulary_tid(test_farm):
     vocabulary_tid = 7
@@ -54,8 +55,8 @@ def test_get_farm_term_filtered_by_multiple_vocabulary(test_farm):
         'name':term_name
     })
 
-    assert 'name' in term[0]
-    assert term[0]['name'] == term_name
+    assert 'name' in term['list'][0]
+    assert term['list'][0]['name'] == term_name
 
 def test_update_taxonomy_term(test_farm):
     test_term_changes = {

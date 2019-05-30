@@ -28,6 +28,7 @@ def test_get_all_farm_areas(test_farm):
     areas = test_farm.area.get()
 
     assert len(areas) > 0
+    assert 'list' in areas
 
 def test_get_farm_areas_filtered_by_type(test_farm):
     area_type = test_area['area_type']
@@ -37,12 +38,12 @@ def test_get_farm_areas_filtered_by_type(test_farm):
     })
 
     assert len(areas) > 0
-    assert areas[0]['area_type'] == area_type
+    assert areas['list'][0]['area_type'] == area_type
 
 def test_get_farm_areas_by_id(test_farm):
     area_tid = test_area['id']
     areas = test_farm.area.get(int(area_tid))
-    area = areas[0]
+    area = areas['list'][0]
 
     assert 'tid' in area
     assert area['tid'] == area_tid
@@ -57,7 +58,7 @@ def test_update_area(test_farm):
     assert response['id'] == test_area['id']
 
     updated_area = test_farm.area.get(int(test_area['id']))
-    assert updated_area[0]['name'] == test_area_changes['name']
+    assert updated_area['list'][0]['name'] == test_area_changes['name']
 
 def test_delete_area(test_farm):
     response = test_farm.area.delete(int(test_area['id']))

@@ -28,12 +28,13 @@ def test_get_one_page_of_logs(test_farm):
     logs = test_farm.log.get({'page':0})
 
     assert len(logs) > 0
+    assert 'list' in logs
 
 def test_get_all_logs(test_farm):
     one_page_logs = test_farm.log.get({'page':0})
     all_logs = test_farm.log.get()
 
-    assert len(all_logs) > len(one_page_logs)
+    assert len(all_logs['list']) > len(one_page_logs['list'])
 
 def test_get_logs_filtered_by_type(test_farm):
     log_type = test_log['type']
@@ -43,7 +44,7 @@ def test_get_logs_filtered_by_type(test_farm):
     })
 
     assert len(logs) > 0
-    assert logs[0]['type'] == log_type
+    assert logs['list'][0]['type'] == log_type
 
 def test_get_log_by_id(test_farm):
     log_id = test_log['id']
