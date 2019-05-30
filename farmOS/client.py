@@ -60,8 +60,7 @@ class BaseAPI(object):
 
         # Check to see if there are more pages
         if ('last' in data):
-            parsed_url = urlparse(data['last'])
-            last_page = parse_qs(parsed_url.query)['page'][0]
+            last_page = _parse_api_page(url=data['last'])
             # Last page, return the list
             if (last_page == page):
                 return list
@@ -200,3 +199,16 @@ class AreaAPI(TermAPI):
         data = self._get_records(filters=filters)
 
         return data
+
+def _parse_api_page(url):
+    """Helper function that returns page numbers from the API response.
+
+    The farmOS API returns URLs for the self, first and last pages of records
+    in requests that return many records. This function helps parse a raw page
+    number from the returned URL.
+    """
+
+    parsed_url = urlparse(url)
+    page_num = parse_qs(parsed_url.query)['page'][0]
+
+    return int(page_num)
