@@ -75,25 +75,15 @@ class BaseAPI(object):
         if filters is None:
             filters = {}
 
-        # Return object
-        data = {}
-
         # Determine if filters is an int (id) or dict (filters object)
         if isinstance(filters, int) or isinstance(filters, str):
-            data = self._get_single_record_data(filters)
+            return self._get_single_record_data(filters)
         elif isinstance(filters, dict):
             # Check if the caller requests a specific page
             if 'page' in filters:
-                response = self._get_record_data(filters=filters)
-                if 'list' in response:
-                    data['list'] = response['list']
-                else:
-                    return response
+                return self._get_record_data(filters=filters)
             else:
-                response = self._get_all_record_data(filters=filters)
-                data['list'] = response
-
-        return data
+                return self._get_all_record_data(filters=filters)
 
     def get(self, filters=None):
         """Simple get method"""
