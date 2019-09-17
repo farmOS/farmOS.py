@@ -1,15 +1,16 @@
-import requests
+from requests import Session
 
 from .exceptions import NotAuthenticatedError
 
 # Use a Requests Session to store cookies across requests.
 #   http://docs.python-requests.org/en/master/user/advanced/#session-objects
-class APISession(requests.Session):
+class DrupalAuthSession(Session):
 
     """APISession handles all HTTP requests for the farmOS API
 
-    This class stores cookies and tokens generated from authentication
-    across all requests made to the farmOS host.
+    This class stores cookies and tokens required for the Drupal
+    RESTFul Web Services HTTP Session Authentication method.
+    These values are use in all requests made to the farmOS host.
 
     Keyword Arguments:
     hostname - the farmOS hostname (without protocol)
@@ -18,7 +19,7 @@ class APISession(requests.Session):
     """
 
     def __init__(self, hostname, username, password, *args, **kwargs):
-        super(APISession, self).__init__(*args, **kwargs)
+        super(DrupalAuthSession, self).__init__(*args, **kwargs)
 
         # Store farmOS authentication credentials
         self.hostname = hostname

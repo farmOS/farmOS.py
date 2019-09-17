@@ -1,6 +1,6 @@
 from urllib.parse import urlparse, parse_qs
 
-from .session import APISession
+from .session import DrupalAuthSession
 from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
 
 class farmOS:

@@ -1,7 +1,5 @@
 from urllib.parse import urlparse, parse_qs
 
-from .session import APISession
-
 class BaseAPI(object):
     """Base class for API methods
 
