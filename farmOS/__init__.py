@@ -17,8 +17,38 @@ class farmOS:
 
     """
 
-    def __init__(self, hostname, username, password):
-        self.session = APISession(hostname, username, password)
+    def __init__(self, hostname, username=None, password=None, client_id=None, client_secret=None):
+        self.session = None
+
+        # TODO: validate the hostname
+        #   validate the url with urllib.parse
+
+        # A username or client_id is required for authentication to farmOS.
+        if username is None and client_id is None:
+            raise Exception("No authentication method provided.")
+
+        # Ask for password if username is given without a password.
+        if username is not None and password is None:
+            from getpass import getpass
+            password = getpass('Enter password: ')
+
+        # TODO: create OAuth Session
+        # If a client_id is supplied, try to create an OAuth Session
+        # if client_id is not None:
+
+        # Fallback to DrupalAPISession
+        if username is not None and password is not None:
+            # Create a session with requests
+            self.session = DrupalAuthSession(hostname, username, password)
+
+        self._username = username
+        self._client_id = client_id
+        self._client_secret = client_secret
+
+        if self.session is None:
+            raise Exception("Could not create a session object. Supply authentication credentials when "\
+                            "initializing a farmOS Client.")
+
         self.log = LogAPI(self.session)
         self.asset = AssetAPI(self.session)
         self.area = AreaAPI(self.session)
