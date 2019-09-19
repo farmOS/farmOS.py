@@ -1,6 +1,6 @@
 from urllib.parse import urlparse, parse_qs
 
-from .session import DrupalAuthSession
+from .session import DrupalAuthSession, OAuthSession
 from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
 
 class farmOS:
@@ -32,9 +32,10 @@ class farmOS:
             from getpass import getpass
             password = getpass('Enter password: ')
 
-        # TODO: create OAuth Session
         # If a client_id is supplied, try to create an OAuth Session
-        # if client_id is not None:
+        if client_id is not None:
+            self.session = OAuthSession(client_id, client_secret=client_secret,
+                                        hostname=hostname, redirect_uri="http://localhost/api/authorized")
 
         # Fallback to DrupalAPISession
         if username is not None and password is not None:

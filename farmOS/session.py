@@ -1,6 +1,80 @@
 from requests import Session
+from requests_oauthlib import OAuth2Session
 
 from .exceptions import NotAuthenticatedError
+
+# Allow authentication over HTTP
+import os
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+class OAuthSession(OAuth2Session):
+    """OAuthSession uses OAuth2 to authenticate with farmOS
+
+    This class stores access tokens and refresh tokens used to
+    authenticate with the farmOS server for all requests.
+
+    Keyword Arguments:
+        hostname - the farmOS hostname (without protocol)
+        client_id - the farmOS API Client ID
+        client_secret - the farmOS API Client Secret
+        username - the farmOS username (for OAuth2 Password Grant)
+        password - the farmOS user's password (for OAuth2 Password Grant)
+    """
+
+    def __init__(self, client_id, client_secret=None, hostname=None,
+                 redirect_uri=None, username=None, password=None, *args, **kwargs):
+        super(OAuthSession, self).__init__(client_id=client_id, redirect_uri=redirect_uri)
+
+        self._client_id = client_id
+        self._client_secret = client_secret
+        self._authorization_base_url = hostname + '/oauth2/authorize'
+        self._redirect_uri = redirect_uri
+        self._username = username
+        self._password = password
+
+        self.authenticated = False
+        self.hostname = hostname
+
+    def authenticate(self):
+        """Authenticates with the farmOS site.
+
+        Returns True or False indicating whether or not
+        the authentication was successful
+        """
+
+        authorization_url, state = self.authorization_url(self._authorization_base_url,
+                                                            access_type="offline", prompt="select_account")
+
+        print('Please go here and authorize,', authorization_url)
+
+        # Get the authorization verifier code from the callback url
+        redirect_response = input('Paste the full redirect URL here:')
+
+        # Fetch the access token
+        token_url = self.hostname + '/oauth2/token'
+        self.fetch_token(token_url, client_secret=self._client_secret, authorization_response=redirect_response)
+
+        self.authenticated = True
+
+    def http_request(self, path, method='GET', options=None, params=None):
+        """Raw HTTP request helper function.
+
+        Keyword arguments:
+        :param path: the URL path.
+        :param method: the HTTP method.
+        :param options: a dictionary of data and parameters to pass on to the request.
+        :param params: URL query parameters.
+        :return: requests response object.
+        """
+
+        # If the session has not been authenticated
+        # and the request does not have force=True,
+        # raise NotAuthenticatedError
+        if not self.authenticated:
+            raise NotAuthenticatedError()
+
+        # Return response from the _http_request helper function.
+        return _http_request(self, path, method, options, params)
 
 # Use a Requests Session to store cookies across requests.
 #   http://docs.python-requests.org/en/master/user/advanced/#session-objects
@@ -70,13 +144,15 @@ class DrupalAuthSession(Session):
             return False
 
     def http_request(self, path, method='GET', options=None, params=None, force=False):
-        """Raw HTTP request helper function.
+        """Make an HTTP request.
 
         Keyword arguments:
-        path - URL path (without hostname)
-        method - the HTTP method
-        options - a dictionary of data and parameters to pass on to the request
-
+        :param path: the URL path.
+        :param method: the HTTP method.
+        :param options: a dictionary of data and parameters to pass on to the request.
+        :param params: URL query parameters.
+        :param force: Force the request regardless of Authenticated status.
+        :return: requests response object.
         """
 
         # If the session has not been authenticated
@@ -84,20 +160,6 @@ class DrupalAuthSession(Session):
         # raise NotAuthenticatedError
         if not self.authenticated and not force:
             raise NotAuthenticatedError()
-
-        # Strip protocol, hostname, leading/trailing slashes, and whitespace from the path.
-        remove = [
-            'http://',
-            'https://',
-            self.hostname,
-        ]
-        for string in remove:
-            path = path.replace(string, '')
-        path = path.strip('/')
-        path = path.strip()
-
-        # Assemble the URL.
-        url = 'http://{}/{}'.format(self.hostname, path)
 
         # Start a headers dictionary.
         headers = {}
@@ -109,33 +171,59 @@ class DrupalAuthSession(Session):
         if self.token:
             headers['X-CSRF-Token'] = self.token
 
-        # Automatically follow redirects, unless this is a POST request.
-        # The Python requests library converts POST to GET during a redirect.
-        # Allow this to be overridden in options.
-        allow_redirects = True
-        if method in ['POST', 'PUT']:
-            allow_redirects = False
-        if options and 'allow_redirects' in options:
-            allow_redirects = options['allow_redirects']
+        # Return response from the _http_request helper function.
+        return _http_request(self, path, method, options, params, headers)
 
-        # If there is data to be sent, include it.
-        data = None
-        if options and 'data' in options:
-            data = options['data']
+def _http_request(session, path, method='GET', options=None, params=None, headers={}):
+    """Raw HTTP request helper function.
 
-        # If there is a json data to be sent, include it.
-        json = None
-        if options and 'json' in options:
-            json = options['json']
+    Keyword arguments:
+    :param session: The requests Session object to call a request with.
+    :param path: the URL path.
+    :param method: the HTTP method.
+    :param options: a dictionary of data and parameters to pass on to the request.
+    :param params: URL query parameters.
+    :param headers: Dictionary of HTTP headers to include in the request.
+    :return: requests response object.
 
-        # Perform the request.
-        response = self.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data, json=json, params=params)
+    """
+    # Strip protocol, hostname, leading/trailing slashes, and whitespace from the path.
+    path = path.strip('/')
+    path = path.strip()
 
-        # If this is a POST request, and a redirect occurred, attempt to re-POST.
-        redirect_codes = [300, 301, 302, 303, 304, 305, 306, 307, 308]
-        if method in ['POST', 'PUT'] and response.status_code in redirect_codes:
-            if response.headers['Location']:
-                response = self.request(method, response.headers['Location'], headers=headers, allow_redirects=True, data=data, json=json, params=params)
+    # Assemble the URL.
+    url = '{}/{}'.format(session.hostname, path)
 
-        # Return the response.
-        return response
+    # Automatically follow redirects, unless this is a POST request.
+    # The Python requests library converts POST to GET during a redirect.
+    # Allow this to be overridden in options.
+    allow_redirects = True
+    if method in ['POST', 'PUT']:
+        allow_redirects = False
+    if options and 'allow_redirects' in options:
+        allow_redirects = options['allow_redirects']
+
+    # If there is data to be sent, include it.
+    data = None
+    if options and 'data' in options:
+        data = options['data']
+
+    # If there is a json data to be sent, include it.
+    json = None
+    if options and 'json' in options:
+        json = options['json']
+
+    # Perform the request.
+    response = session.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data, json=json,
+                            params=params)
+
+    # If this is a POST request, and a redirect occurred, attempt to re-POST.
+    redirect_codes = [300, 301, 302, 303, 304, 305, 306, 307, 308]
+    if method in ['POST', 'PUT'] and response.status_code in redirect_codes:
+        if response.headers['Location']:
+            response = session.request(method, response.headers['Location'], headers=headers, allow_redirects=True, data=data,
+                                    json=json, params=params)
+
+    # Return the response.
+    return response
+
