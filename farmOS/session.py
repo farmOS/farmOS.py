@@ -21,9 +21,22 @@ class OAuthSession(OAuth2Session):
         password - the farmOS user's password (for OAuth2 Password Grant)
     """
 
-    def __init__(self, client_id, client_secret=None, hostname=None,
-                 redirect_uri=None, username=None, password=None, *args, **kwargs):
-        super(OAuthSession, self).__init__(client_id=client_id, redirect_uri=redirect_uri)
+    def __init__(self, hostname, client_id, client_secret=None, username=None, password=None,
+                 redirect_uri=None, token_url=None, token_updater = None, *args, **kwargs):
+        # Provide a default token_saver is nothing is provided.
+        if token_updater is None:
+            token_updater = self._token_saver
+
+        # Create a dictionary of credentials required to pass along with Refresh Tokens
+        # Required to generate a new access token
+        auto_refresh_kwargs = {'client_id': client_id,
+                               'client_secret': client_secret
+                               }
+        super(OAuthSession, self).__init__(client_id=client_id,
+                                           redirect_uri=redirect_uri,
+                                           auto_refresh_url=token_url,
+                                           auto_refresh_kwargs=auto_refresh_kwargs,
+                                           token_updater=token_updater)
 
         self._client_id = client_id
         self._client_secret = client_secret
@@ -75,6 +88,16 @@ class OAuthSession(OAuth2Session):
 
         # Return response from the _http_request helper function.
         return _http_request(self, path, method, options, params)
+
+    def _token_saver(self, token):
+        """A utility to save tokens in the OAuth Session
+
+        Saves Authentication and Refresh Tokens within the session.
+
+        :param token: The OAuth2 token dictionary.
+        """
+        print("Got a new token: " + token['access_token'] + " expires in " + token['expires_in'])
+        self.token = token
 
 # Use a Requests Session to store cookies across requests.
 #   http://docs.python-requests.org/en/master/user/advanced/#session-objects

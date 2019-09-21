@@ -34,8 +34,8 @@ class farmOS:
 
         # If a client_id is supplied, try to create an OAuth Session
         if client_id is not None:
-            self.session = OAuthSession(client_id, client_secret=client_secret,
-                                        hostname=hostname, redirect_uri="http://localhost/api/authorized")
+            self.session = OAuthSession(hostname=hostname, client_id=client_id, client_secret=client_secret,
+                                        redirect_uri="http://localhost/api/authorized", token_url="http://localhost/oauth2/token")
 
         # Fallback to DrupalAPISession
         if username is not None and password is not None:
