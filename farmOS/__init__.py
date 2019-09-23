@@ -66,7 +66,8 @@ class farmOS:
             token_url = self.config.get("OAuth", "oauth_token_url")
             authorization_url = self.config.get("OAuth", "oauth_authorization_url")
             self.session = OAuthSession(hostname=hostname, client_id=client_id, client_secret=client_secret,
-                                        redirect_uri=redirect_url, token_url=token_url, authorization_url=authorization_url)
+                                        token=token, redirect_uri=redirect_url, token_url=token_url,
+                                        authorization_url=authorization_url, token_updater=self.save_token)
 
         # Fallback to DrupalAPISession
         if username is not None and password is not None:
@@ -104,3 +105,37 @@ class farmOS:
             return response.json()
 
         return []
+
+    def save_token(self, token):
+        """Save an OAuth Token to config for later use.
+
+        This method accepts an OAuth token and saves values to the Authentication
+        section of the farm.config ClientConfig object. It is primarily used as
+        a callback for the requests-oauthlib OAuth2Session automatic token refreshing
+        functionality. But this method could be used by others to supply a farmOS client
+        with existing OAuth tokens to use (and persist).
+
+        :param token: OAuth token dict.
+        :return: None.
+        """
+        if 'access_token' in token:
+            self.config.set("Authentication", "access_token", token['access_token'])
+
+        if 'expires_in' in token:
+            self.config.set("Authentication", "expires_in", token['expires_in'])
+
+        if 'token_type' in token:
+            self.config.set("Authentication", "token_type", token['token_type'])
+
+        if 'refresh_token' in token:
+            self.config.set("Authentication", "refresh_token", token['refresh_token'])
+
+        if 'expires_at' in token:
+            # Save the 'expires_in' as a string. configparser only accepts strings, the
+            # requests-oauthlib module does not save this value as a string. Bug?
+            self.config.set("Authentication", "expires_at", str(token['expires_at']))
+
+        # TODO: Save the first token values retrieved from
+        #  a successful OAuth Authorization Code Grant
+
+        # TODO: rewrite the token values to config on every change.

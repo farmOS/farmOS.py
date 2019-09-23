@@ -17,7 +17,7 @@ class OAuthSession(OAuth2Session):
         password - the farmOS user's password (for OAuth2 Password Grant)
     """
 
-    def __init__(self, hostname, client_id, client_secret=None, username=None, password=None,
+    def __init__(self, hostname, client_id, client_secret=None, username=None, password=None, token=None,
                  redirect_uri=None, token_url=None, authorization_url=None, token_updater = None, *args, **kwargs):
         # Provide a default token_saver is nothing is provided.
         if token_updater is None:
