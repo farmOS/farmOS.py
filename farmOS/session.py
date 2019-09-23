@@ -3,10 +3,6 @@ from requests_oauthlib import OAuth2Session
 
 from .exceptions import NotAuthenticatedError
 
-# Allow authentication over HTTP
-import os
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
 class OAuthSession(OAuth2Session):
     """OAuthSession uses OAuth2 to authenticate with farmOS
 

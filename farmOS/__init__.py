@@ -34,6 +34,16 @@ class farmOS:
         # Read config files.
         self.config.read(config_file_list)
 
+        # Load the config boolean for development mode.
+        self.development = self.config.getboolean("client", "development", fallback=False)
+
+        # Allow authentication over HTTP in development mode
+        # or if the oauth_insecure_transport config is enabled.
+        oauth_insecure_transport = self.config.getboolean("oauth", "oauthlib_insecure_transport", fallback=False)
+        if self.development or oauth_insecure_transport:
+            import os
+            os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
         self.session = None
 
         # TODO: validate the hostname

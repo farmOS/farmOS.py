@@ -15,7 +15,7 @@ class ClientConfig(ConfigParser):
         self.set("oauth", "oauth_authorization_url", "${authentication:hostname}/oauth2/authorize")
         self.set("oauth", "oauth_redirect_url", "${authentication:hostname}/api/authorized")
         self.set("oauth", "oauth_token_url", "${authentication:hostname}/oauth2/token")
-        self.set("oauth", "oauthlib_insecure_transport", '0')
+        self.set("oauth", "oauthlib_insecure_transport", 'False')
 
     def write(self, path="farmos_default_config.cfg"):
         with open(path, "w") as config_file:
