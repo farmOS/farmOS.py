@@ -28,21 +28,28 @@ class OAuthSession(OAuth2Session):
         auto_refresh_kwargs = {'client_id': client_id,
                                'client_secret': client_secret
                                }
-        super(OAuthSession, self).__init__(client_id=client_id,
+        super(OAuthSession, self).__init__(token=token,
+                                           client_id=client_id,
                                            redirect_uri=redirect_uri,
                                            auto_refresh_url=token_url,
                                            auto_refresh_kwargs=auto_refresh_kwargs,
                                            token_updater=token_updater)
 
+        # Save values for later use.
         self._token_url = token_url
         self._authorization_base_url = authorization_url
         self._client_id = client_id
         self._client_secret = client_secret
         self._username = username
         self._password = password
-
-        self.authenticated = False
         self.hostname = hostname
+
+        # Check if an existing token was provided.
+        if token is not None and 'access_token' in token:
+            # TODO: Use a helper function to check if the client is authenticated.
+            self.authenticated = True
+        else:
+            self.authenticated = False
 
     def authenticate(self):
         """Authenticates with the farmOS site.

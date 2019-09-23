@@ -62,9 +62,19 @@ class farmOS:
 
         # If a client_id is supplied, try to create an OAuth Session
         if client_id is not None:
-            redirect_url = self.config.get("OAuth", "oauth_redirect_url")
             token_url = self.config.get("OAuth", "oauth_token_url")
+
+            # Load saved Authentication values from config.
+            token = dict(self.config.items("Authentication"))
+            # If an access_token is not saved, do not use the token dict.
+            if 'access_token' not in token:
+                token = None
+
+            # Load saved OAuth URLs from config.
             authorization_url = self.config.get("OAuth", "oauth_authorization_url")
+            redirect_url = self.config.get("OAuth", "oauth_redirect_url")
+
+            # Create an OAuth Session
             self.session = OAuthSession(hostname=hostname, client_id=client_id, client_secret=client_secret,
                                         token=token, redirect_uri=redirect_url, token_url=token_url,
                                         authorization_url=authorization_url, token_updater=self.save_token)
