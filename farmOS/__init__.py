@@ -104,17 +104,3 @@ class farmOS:
             return response.json()
 
         return []
-
-    def vocabulary(self, machine_name=None):
-        path='taxonomy_vocabulary.json'
-        params = {}
-        params['machine_name'] = machine_name
-
-        response = self.session.http_request(path=path, params=params)
-
-        if (response.status_code == 200):
-            data = response.json()
-            if 'list' in data:
-                return data['list']
-
-        return []
