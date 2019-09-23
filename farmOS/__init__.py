@@ -76,6 +76,8 @@ class farmOS:
         self.area = AreaAPI(self.session)
         self.term = TermAPI(self.session)
 
+        if self.config.getboolean("client", "auto_authenticate"):
+            self.session.authenticate()
 
     def authenticate(self):
         """Authenticates with the farmOS site.
