@@ -9,7 +9,7 @@ class ClientConfig(ConfigParser):
         self.set("Client", "development", 'False')
 
         self.add_section("Authentication")
-        self.set("Authentication", "hostname", "http://localhost")
+        self.set("Authentication", "hostname", "")
 
         self.add_section("OAuth")
         self.set("OAuth", "oauth_authorization_url", "${Authentication:hostname}/oauth2/authorize")
