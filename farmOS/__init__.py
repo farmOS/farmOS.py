@@ -1,7 +1,6 @@
-from urllib.parse import urlparse, parse_qs
-
 from .session import DrupalAuthSession, OAuthSession
 from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
+from .config import ClientConfig
 
 class farmOS:
 
@@ -17,7 +16,24 @@ class farmOS:
 
     """
 
-    def __init__(self, hostname, username=None, password=None, client_id=None, client_secret=None):
+    def __init__(self, hostname, username=None, password=None, client_id=None, client_secret=None, config_files=None):
+        # Start a list of config files.
+        config_file_list = ['farmos_default_config.cfg']
+
+        # Append additional config files.
+        if config_files is not None:
+            if isinstance(config_files, list):
+                config_file_list.extend(config_files)
+            elif isinstance(config_files, str):
+                config_file_list.append(config_files)
+            else:
+                print("config_files must be List or String.")
+
+        # Create a ClientConfig object.
+        self.config = ClientConfig()
+        # Read config files.
+        self.config.read(config_file_list)
+
         self.session = None
 
         # TODO: validate the hostname
@@ -34,8 +50,10 @@ class farmOS:
 
         # If a client_id is supplied, try to create an OAuth Session
         if client_id is not None:
+            redirect_uri = self.config.get("oauth", "oauth_redirect_uri")
+            token_url = self.config.get("oauth", "oauth_token_url")
             self.session = OAuthSession(hostname=hostname, client_id=client_id, client_secret=client_secret,
-                                        redirect_uri="http://localhost/api/authorized", token_url="http://localhost/oauth2/token")
+                                        redirect_uri=redirect_uri, token_url=token_url)
 
         # Fallback to DrupalAPISession
         if username is not None and password is not None:
