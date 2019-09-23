@@ -38,6 +38,8 @@ class farmOS:
 
         # TODO: validate the hostname
         #   validate the url with urllib.parse
+        # Save the hostname in the authentication configuration.
+        self.config.set("authentication", "hostname", hostname)
 
         # A username or client_id is required for authentication to farmOS.
         if username is None and client_id is None:
@@ -50,10 +52,11 @@ class farmOS:
 
         # If a client_id is supplied, try to create an OAuth Session
         if client_id is not None:
-            redirect_uri = self.config.get("oauth", "oauth_redirect_uri")
+            redirect_url = self.config.get("oauth", "oauth_redirect_url")
             token_url = self.config.get("oauth", "oauth_token_url")
+            authorization_url = self.config.get("oauth", "oauth_authorization_url")
             self.session = OAuthSession(hostname=hostname, client_id=client_id, client_secret=client_secret,
-                                        redirect_uri=redirect_uri, token_url=token_url)
+                                        redirect_uri=redirect_url, token_url=token_url, authorization_url=authorization_url)
 
         # Fallback to DrupalAPISession
         if username is not None and password is not None:
