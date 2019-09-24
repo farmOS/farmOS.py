@@ -18,7 +18,7 @@ class farmOS:
 
     """
 
-    def __init__(self, hostname, username=None, password=None, client_id=None, client_secret=None, config_file=None,
+    def __init__(self, hostname=None, username=None, password=None, client_id=None, client_secret=None, config_file=None,
                  profile_name=None):
         # Start a list of config files.
         config_file_list = ['farmos_default_config.cfg']
@@ -54,14 +54,27 @@ class farmOS:
 
         self.session = None
 
-        # TODO: validate the hostname
-        #   validate the url with urllib.parse
-        # Save the hostname in the authentication configuration.
-        self.config.set(self.profile_name, "hostname", hostname)
-
         # A username or client_id is required for authentication to farmOS.
         if username is None and client_id is None:
-            raise Exception("No authentication method provided.")
+            # Try to load values from config profile.
+            if self.has_profile():
+                hostname = self.config.get(self.profile_name, "hostname", fallback=None)
+                username = self.config.get(self.profile_name, "username", fallback=None)
+                password = self.config.get(self.profile_name, "password", fallback=None)
+                client_id = self.config.get(self.profile_name, "client_id", fallback=None)
+                client_secret = self.config.get(self.profile_name, "client_secret", fallback=None)
+
+            # Check if required values were populated.
+            if username is None and client_id is None:
+                raise Exception("No authentication method provided.")
+
+        # TODO: validate the hostname
+        #   validate the url with urllib.parse
+        if hostname is not None:
+            # Save the hostname in the authentication configuration.
+            self.config.set(self.profile_name, "hostname", hostname)
+        else:
+            raise Exception("No hostname provided in config file.")
 
         # Ask for password if username is given without a password.
         if username is not None and password is None:
@@ -75,6 +88,10 @@ class farmOS:
             # Load saved Authentication Profile from config.
             token = None
             if self.has_profile():
+                # Save OAuth Client ID to config.
+                self.config.set(self.profile_name, "client_id", client_id)
+                self.config.set(self.profile_name, "client_secret", client_secret)
+
                 token = dict(self.profile)
 
                 # If an access_token is not saved, do not use the token dict.
