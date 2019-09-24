@@ -16,7 +16,8 @@ class farmOS:
 
     """
 
-    def __init__(self, hostname, username=None, password=None, client_id=None, client_secret=None, config_file=None):
+    def __init__(self, hostname, username=None, password=None, client_id=None, client_secret=None, config_file=None,
+                 profile_name=None):
         # Start a list of config files.
         config_file_list = ['farmos_default_config.cfg']
 
@@ -43,6 +44,11 @@ class farmOS:
             import os
             os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
+        # Use a profile if provided.
+        self.profile = None
+        if profile_name is not None:
+            self.use_profile(profile_name, create_profile=True)
+
         self.session = None
 
         # TODO: validate the hostname
@@ -63,11 +69,14 @@ class farmOS:
         if client_id is not None:
             token_url = self.config.get("OAuth", "oauth_token_url")
 
-            # Load saved Authentication values from config.
-            token = dict(self.config.items("Authentication"))
-            # If an access_token is not saved, do not use the token dict.
-            if 'access_token' not in token:
-                token = None
+            # Load saved Authentication Profile from config.
+            token = None
+            if self.has_profile():
+                token = dict(self.profile)
+
+                # If an access_token is not saved, do not use the token dict.
+                if 'access_token' not in token:
+                    token = None
 
             # Load saved OAuth URLs from config.
             authorization_url = self.config.get("OAuth", "oauth_authorization_url")
@@ -127,24 +136,83 @@ class farmOS:
         :param token: OAuth token dict.
         :return: None.
         """
-        if 'access_token' in token:
-            self.config.set("Authentication", "access_token", token['access_token'])
+        # Only save values if a profile name was defined.
+        if self.has_profile():
+            profile_name = self.get_profile_name()
+            if 'access_token' in token:
+                self.config.set(profile_name, "access_token", token['access_token'])
 
-        if 'expires_in' in token:
-            self.config.set("Authentication", "expires_in", token['expires_in'])
+            if 'expires_in' in token:
+                self.config.set(profile_name, "expires_in", token['expires_in'])
 
-        if 'token_type' in token:
-            self.config.set("Authentication", "token_type", token['token_type'])
+            if 'token_type' in token:
+                self.config.set(profile_name, "token_type", token['token_type'])
 
-        if 'refresh_token' in token:
-            self.config.set("Authentication", "refresh_token", token['refresh_token'])
+            if 'refresh_token' in token:
+                self.config.set(profile_name, "refresh_token", token['refresh_token'])
 
-        if 'expires_at' in token:
-            # Save the 'expires_in' as a string. configparser only accepts strings, the
-            # requests-oauthlib module does not save this value as a string. Bug?
-            self.config.set("Authentication", "expires_at", str(token['expires_at']))
+            if 'expires_at' in token:
+                # Save the 'expires_in' as a string. configparser only accepts strings, the
+                # requests-oauthlib module does not save this value as a string. Bug?
+                self.config.set(profile_name, "expires_at", str(token['expires_at']))
 
         # TODO: Save the first token values retrieved from
         #  a successful OAuth Authorization Code Grant
 
         # TODO: rewrite the token values to config on every change.
+
+    def create_profile(self, profile_name):
+        """Creates a Section for profile_name in farm.config."""
+        if not self._profile_exists(profile_name):
+            self.config.add_section(profile_name)
+            return True
+        else:
+            # TODO: Write test for duplicate profile names.
+            raise Exception("Profile '" + profile_name + "' already exists.")
+
+    def has_profile(self, profile_name=None):
+        """Returns True or False if the client is configured with a profile.
+
+        Also returns whether a profile_name is found in the config.
+        """
+        if profile_name is not None:
+            return self._profile_exists(profile_name)
+        else:
+            return self.profile is not None
+
+    def get_profile_name(self):
+        """Returns the current profile name."""
+        if self.has_profile():
+            return self.profile_name
+        else:
+            raise Exception("No profile being used.")
+
+    def use_profile(self, profile_name, create_profile=False):
+        """Set the authentication profile to use from farm.config."""
+        profile = self._get_profile_config(profile_name)
+
+        if profile is None:
+            if create_profile is True:
+                self.create_profile(profile_name)
+                profile = self._get_profile_config(profile_name)
+            else:
+                # TODO: Write test for no profile name.
+                raise Exception("Profile '" + profile_name + "' does not exist.")
+
+        self.profile = profile
+        self.profile_name = profile_name
+
+    def _get_profile_config(self, profile_name=None):
+        """Helper function that returns the current profile config, or the config or profile_name."""
+        if self._profile_exists(profile_name):
+            return self.config[profile_name]
+        else:
+            return None
+
+    def _profile_exists(self, profile_name):
+        """Helper function to check if a profile for profile_name exists."""
+        if isinstance(profile_name, str):
+            return self.config.has_section(profile_name)
+        else:
+            # TODO: Write test for invalid profile_name.
+            raise Exception("profile_name not a String.")
