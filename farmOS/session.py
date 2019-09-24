@@ -1,5 +1,6 @@
 from requests import Session
 from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2 import LegacyApplicationClient
 
 from .exceptions import NotAuthenticatedError
 
@@ -17,7 +18,7 @@ class OAuthSession(OAuth2Session):
         password - the farmOS user's password (for OAuth2 Password Grant)
     """
 
-    def __init__(self, hostname, client_id, client_secret=None, username=None, password=None, token=None,
+    def __init__(self, hostname, client_id, grant_type, client_secret=None, username=None, password=None, token=None,
                  redirect_uri=None, token_url=None, authorization_url=None, token_updater = None, *args, **kwargs):
         # Initialize the session as not authenticated.
         self.authenticated = False
@@ -33,12 +34,28 @@ class OAuthSession(OAuth2Session):
         auto_refresh_kwargs = {'client_id': client_id,
                                'client_secret': client_secret
                                }
-        super(OAuthSession, self).__init__(token=token,
-                                           client_id=client_id,
-                                           redirect_uri=redirect_uri,
-                                           auto_refresh_url=token_url,
-                                           auto_refresh_kwargs=auto_refresh_kwargs,
-                                           token_updater=self.token_updater)
+
+        # Validate the grant type.
+        valid_grant_types = ["Authorization", "Password"]
+        if grant_type not in valid_grant_types:
+            raise Exception(grant_type + " is not a supported OAuth Grant Type")
+
+        # Save the Grant Type
+        self.grant_type = grant_type
+
+        if grant_type == "Authorization":
+            super(OAuthSession, self).__init__(token=token,
+                                               client_id=client_id,
+                                               redirect_uri=redirect_uri,
+                                               auto_refresh_url=token_url,
+                                               auto_refresh_kwargs=auto_refresh_kwargs,
+                                               token_updater=self.token_updater)
+        elif grant_type == "Password":
+            super(OAuthSession, self).__init__(token=token,
+                                               client=LegacyApplicationClient(client_id=client_id),
+                                               auto_refresh_url=token_url,
+                                               auto_refresh_kwargs=auto_refresh_kwargs,
+                                               token_updater=self.token_updater)
 
         # Save values for later use.
         self._token_url = token_url
@@ -59,17 +76,23 @@ class OAuthSession(OAuth2Session):
         Returns True or False indicating whether or not
         the authentication was successful
         """
+        if self.grant_type == "Authorization":
+            authorization_url, state = self.authorization_url(self._authorization_base_url,
+                                                                access_type="offline", prompt="select_account")
 
-        authorization_url, state = self.authorization_url(self._authorization_base_url,
-                                                            access_type="offline", prompt="select_account")
+            print('Please go here and authorize,', authorization_url)
 
-        print('Please go here and authorize,', authorization_url)
+            # Get the authorization verifier code from the callback url
+            redirect_response = input('Paste the full redirect URL here:')
 
-        # Get the authorization verifier code from the callback url
-        redirect_response = input('Paste the full redirect URL here:')
-
-        # Fetch the access token
-        token = self.fetch_token(self._token_url, client_secret=self._client_secret, authorization_response=redirect_response)
+            # Fetch the access token
+            token = self.fetch_token(self._token_url, client_secret=self._client_secret, authorization_response=redirect_response)
+        elif self.grant_type == "Password":
+            token = self.fetch_token(token_url=self._token_url,
+                                     client_id=self._client_id,
+                                     client_secret=self._client_secret,
+                                     username=self._username,
+                                     password=self._password)
 
         # Save the token.
         self.token_updater(token)

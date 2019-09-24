@@ -132,17 +132,39 @@ class farmOS:
                 # Unset the expires_at key.
                 token.pop('expires_at', None)
 
-            # Load saved OAuth URLs from config.
-            authorization_url = self.config.get(self.profile_name, "oauth_authorization_url")
-            redirect_url = self.config.get(self.profile_name, "oauth_redirect_url")
+            # Create an OAuth Session with the Password Credentials Grant.
+            if username is not None and password is not None:
+                self.config.set(self.profile_name, "username", username)
+                self.config.set(self.profile_name, "password", password)
+                self.session = OAuthSession(grant_type="Password",
+                                            hostname=hostname,
+                                            client_id=client_id,
+                                            client_secret=client_secret,
+                                            username=username,
+                                            password=password,
+                                            token=token,
+                                            token_url=token_url,
+                                            token_updater=token_updater)
 
-            # Create an OAuth Session
-            self.session = OAuthSession(hostname=hostname, client_id=client_id, client_secret=client_secret,
-                                        token=token, redirect_uri=redirect_url, token_url=token_url,
-                                        authorization_url=authorization_url, token_updater=token_updater)
+            # Create an OAuth Session with the Authorization Code Grant.
+            else:
+                # Load saved OAuth URLs from config.
+                authorization_url = self.config.get(self.profile_name, "oauth_authorization_url")
+                redirect_url = self.config.get(self.profile_name, "oauth_redirect_url")
+
+                # Create an OAuth Session
+                self.session = OAuthSession(grant_type="Authorization",
+                                            hostname=hostname,
+                                            client_id=client_id,
+                                            client_secret=client_secret,
+                                            token=token,
+                                            redirect_uri=redirect_url,
+                                            token_url=token_url,
+                                            authorization_url=authorization_url,
+                                            token_updater=token_updater)
 
         # Fallback to DrupalAPISession
-        if username is not None and password is not None:
+        if client_id is None and username is not None and password is not None:
             # Create a session with requests
             self.session = DrupalAuthSession(hostname, username, password)
 
