@@ -19,6 +19,9 @@ class OAuthSession(OAuth2Session):
 
     def __init__(self, hostname, client_id, client_secret=None, username=None, password=None, token=None,
                  redirect_uri=None, token_url=None, authorization_url=None, token_updater = None, *args, **kwargs):
+        # Initialize the session as not authenticated.
+        self.authenticated = False
+
         # Provide a default token_saver is nothing is provided.
         self.token_updater = self._token_saver
         # Save a provided token updater.
@@ -48,10 +51,7 @@ class OAuthSession(OAuth2Session):
 
         # Check if an existing token was provided.
         if token is not None and 'access_token' in token:
-            # TODO: Use a helper function to check if the client is authenticated.
-            self.authenticated = True
-        else:
-            self.authenticated = False
+            self.is_authenticated(check=True)
 
     def authenticate(self):
         """Authenticates with the farmOS site.
@@ -74,9 +74,9 @@ class OAuthSession(OAuth2Session):
         # Save the token.
         self.token_updater(token)
 
-        self.authenticated = True
+        return self.is_authenticated(check=True)
 
-    def http_request(self, path, method='GET', options=None, params=None):
+    def http_request(self, path, method='GET', options=None, params=None, force=False):
         """Raw HTTP request helper function.
 
         Keyword arguments:
@@ -90,11 +90,18 @@ class OAuthSession(OAuth2Session):
         # If the session has not been authenticated
         # and the request does not have force=True,
         # raise NotAuthenticatedError
-        if not self.authenticated:
+        if not self.is_authenticated() and not force:
             raise NotAuthenticatedError()
 
         # Return response from the _http_request helper function.
         return _http_request(self, path, method, options, params)
+
+    def is_authenticated(self, check=False):
+        """Helper function that returns True or False if the Session is Authenticated"""
+        if check is False:
+            return self.authenticated
+        else:
+            return _is_authenticated(self)
 
     def _token_saver(self, token):
         """A utility to save tokens in the OAuth Session
@@ -125,6 +132,9 @@ class DrupalAuthSession(Session):
     def __init__(self, hostname, username, password, *args, **kwargs):
         super(DrupalAuthSession, self).__init__(*args, **kwargs)
 
+        # Initialize the session as not authenticated.
+        self.authenticated = False
+
         # Store farmOS authentication credentials
         self.hostname = hostname
         self.username = username
@@ -132,8 +142,6 @@ class DrupalAuthSession(Session):
 
         # Store the authentication token
         self.token = ''
-
-        self.authenticated = False
 
     def authenticate(self):
         """Authenticates with the farmOS site.
@@ -168,8 +176,7 @@ class DrupalAuthSession(Session):
 
         # Return True if the token was populated.
         if self.token:
-            self.authenticated = True
-            return True
+            return self.is_authenticated(check=True)
         else:
             return False
 
@@ -188,7 +195,7 @@ class DrupalAuthSession(Session):
         # If the session has not been authenticated
         # and the request does not have force=True,
         # raise NotAuthenticatedError
-        if not self.authenticated and not force:
+        if not self.is_authenticated() and not force:
             raise NotAuthenticatedError()
 
         # Start a headers dictionary.
@@ -203,6 +210,13 @@ class DrupalAuthSession(Session):
 
         # Return response from the _http_request helper function.
         return _http_request(self, path, method, options, params, headers)
+
+    def is_authenticated(self, check=False):
+        """Helper function that returns True or False if the Session is Authenticated"""
+        if check is False:
+            return self.authenticated
+        else:
+            return _is_authenticated(self)
 
 def _http_request(session, path, method='GET', options=None, params=None, headers={}):
     """Raw HTTP request helper function.
@@ -257,3 +271,17 @@ def _http_request(session, path, method='GET', options=None, params=None, header
     # Return the response.
     return response
 
+def _is_authenticated(session):
+    """Helper function to check if the Session is authenticated."""
+
+    try:
+        response = session.http_request(path='farm.json', force=True)
+    except NotAuthenticatedError:
+        return False
+
+    if (response.status_code == 200):
+        session.authenticated = True
+        return True
+    else:
+        session.authenticated = False
+        return False
