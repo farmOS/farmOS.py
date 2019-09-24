@@ -16,18 +16,17 @@ class farmOS:
 
     """
 
-    def __init__(self, hostname, username=None, password=None, client_id=None, client_secret=None, config_files=None):
+    def __init__(self, hostname, username=None, password=None, client_id=None, client_secret=None, config_file=None):
         # Start a list of config files.
         config_file_list = ['farmos_default_config.cfg']
 
         # Append additional config files.
-        if config_files is not None:
-            if isinstance(config_files, list):
-                config_file_list.extend(config_files)
-            elif isinstance(config_files, str):
-                config_file_list.append(config_files)
+        if config_file is not None:
+            if isinstance(config_file, str):
+                config_file_list.append(config_file)
+                self.config_file = config_file
             else:
-                print("config_files must be List or String.")
+                raise Exception("Config file must be a string.")
 
         # Create a ClientConfig object.
         self.config = ClientConfig()
