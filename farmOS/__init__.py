@@ -156,10 +156,8 @@ class farmOS:
                 # requests-oauthlib module does not save this value as a string. Bug?
                 self.config.set(profile_name, "expires_at", str(token['expires_at']))
 
-        # TODO: Save the first token values retrieved from
-        #  a successful OAuth Authorization Code Grant
-
-        # TODO: rewrite the token values to config on every change.
+        if self.config_file is not None:
+            self.config.write(path=self.config_file)
 
     def create_profile(self, profile_name):
         """Creates a Section for profile_name in farm.config."""

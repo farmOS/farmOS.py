@@ -20,8 +20,10 @@ class OAuthSession(OAuth2Session):
     def __init__(self, hostname, client_id, client_secret=None, username=None, password=None, token=None,
                  redirect_uri=None, token_url=None, authorization_url=None, token_updater = None, *args, **kwargs):
         # Provide a default token_saver is nothing is provided.
-        if token_updater is None:
-            token_updater = self._token_saver
+        self.token_updater = self._token_saver
+        # Save a provided token updater.
+        if token_updater is not None:
+            self.token_updater = token_updater
 
         # Create a dictionary of credentials required to pass along with Refresh Tokens
         # Required to generate a new access token
@@ -33,7 +35,7 @@ class OAuthSession(OAuth2Session):
                                            redirect_uri=redirect_uri,
                                            auto_refresh_url=token_url,
                                            auto_refresh_kwargs=auto_refresh_kwargs,
-                                           token_updater=token_updater)
+                                           token_updater=self.token_updater)
 
         # Save values for later use.
         self._token_url = token_url
@@ -67,7 +69,10 @@ class OAuthSession(OAuth2Session):
         redirect_response = input('Paste the full redirect URL here:')
 
         # Fetch the access token
-        self.fetch_token(self._token_url, client_secret=self._client_secret, authorization_response=redirect_response)
+        token = self.fetch_token(self._token_url, client_secret=self._client_secret, authorization_response=redirect_response)
+
+        # Save the token.
+        self.token_updater(token)
 
         self.authenticated = True
 
