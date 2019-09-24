@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib.parse import urlparse
 
 from .session import DrupalAuthSession, OAuthSession
 from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
@@ -68,11 +69,21 @@ class farmOS:
             if username is None and client_id is None:
                 raise Exception("No authentication method provided.")
 
-        # TODO: validate the hostname
-        #   validate the url with urllib.parse
         if hostname is not None:
-            # Save the hostname in the authentication configuration.
-            self.config.set(self.profile_name, "hostname", hostname)
+            valid_schemes = ["http", "https"]
+            o = urlparse(hostname)
+
+            # Validate the hostname.
+            if not o.scheme and not o.netloc:
+                raise Exception("Invalid hostname. Must have scheme and netloc.")
+            elif o.scheme not in valid_schemes:
+                raise Exception("Not a valid scheme.")
+            elif o.path or o.params or o.query:
+                raise Exception("Hostname cannot include path and query parameters.")
+            else:
+                # Save the hostname in the authentication configuration.
+                self.config.set(self.profile_name, "hostname", hostname)
+
         else:
             raise Exception("No hostname provided in config file.")
 
