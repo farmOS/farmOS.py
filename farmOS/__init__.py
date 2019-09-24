@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from .session import DrupalAuthSession, OAuthSession
 from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
 from .config import ClientConfig
@@ -77,6 +79,25 @@ class farmOS:
                 # If an access_token is not saved, do not use the token dict.
                 if 'access_token' not in token:
                     token = None
+
+                # Unset the expires_in key.
+                token.pop('expires_in')
+
+                # Check the token expiration time.
+                if 'expires_at' in token:
+                    # Create datetime objects for comparison.
+                    now = datetime.now()
+                    expiration_time = datetime.fromtimestamp(float(token['expires_at']))
+
+                    # Calculate seconds until expiration.
+                    timedelta = expiration_time - now
+                    expires_in = timedelta.total_seconds()
+
+                    # Update the token expires_in value
+                    token['expires_in'] = expires_in
+
+                # Unset the expires_at key.
+                token.pop('expires_at')
 
             # Load saved OAuth URLs from config.
             authorization_url = self.config.get("OAuth", "oauth_authorization_url")
