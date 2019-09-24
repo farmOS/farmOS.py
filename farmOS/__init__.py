@@ -19,7 +19,7 @@ class farmOS:
     """
 
     def __init__(self, hostname=None, username=None, password=None, client_id=None, client_secret=None, config_file=None,
-                 profile_name=None):
+                 profile_name=None, token_updater=None):
         # Start a list of config files.
         config_file_list = ['farmos_default_config.cfg']
 
@@ -81,6 +81,10 @@ class farmOS:
             from getpass import getpass
             password = getpass('Enter password: ')
 
+        # Default to simple token_saver to save tokens to config.
+        if token_updater is None:
+            token_updater = self.save_token
+
         # If a client_id is supplied, try to create an OAuth Session
         if client_id is not None:
             token_url = self.config.get(self.profile_name, "oauth_token_url")
@@ -124,7 +128,7 @@ class farmOS:
             # Create an OAuth Session
             self.session = OAuthSession(hostname=hostname, client_id=client_id, client_secret=client_secret,
                                         token=token, redirect_uri=redirect_url, token_url=token_url,
-                                        authorization_url=authorization_url, token_updater=self.save_token)
+                                        authorization_url=authorization_url, token_updater=token_updater)
 
         # Fallback to DrupalAPISession
         if username is not None and password is not None:
