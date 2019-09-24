@@ -36,27 +36,28 @@ class farmOS:
         # Read config files.
         self.config.read(config_file_list)
 
+        # Use a profile if provided.
+        self.profile = None
+        self.profile_name = None
+        if profile_name is not None:
+            self.use_profile(profile_name, create_profile=True)
+
         # Load the config boolean for development mode.
-        self.development = self.config.getboolean("Client", "development", fallback=False)
+        self.development = self.config.getboolean(self.profile_name, "development", fallback=False)
 
         # Allow authentication over HTTP in development mode
         # or if the oauth_insecure_transport config is enabled.
-        oauth_insecure_transport = self.config.getboolean("OAuth", "oauthlib_insecure_transport", fallback=False)
+        oauth_insecure_transport = self.config.getboolean(self.profile_name, "oauthlib_insecure_transport", fallback=False)
         if self.development or oauth_insecure_transport:
             import os
             os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
-        # Use a profile if provided.
-        self.profile = None
-        if profile_name is not None:
-            self.use_profile(profile_name, create_profile=True)
 
         self.session = None
 
         # TODO: validate the hostname
         #   validate the url with urllib.parse
         # Save the hostname in the authentication configuration.
-        self.config.set("Authentication", "hostname", hostname)
+        self.config.set(self.profile_name, "hostname", hostname)
 
         # A username or client_id is required for authentication to farmOS.
         if username is None and client_id is None:
@@ -69,7 +70,7 @@ class farmOS:
 
         # If a client_id is supplied, try to create an OAuth Session
         if client_id is not None:
-            token_url = self.config.get("OAuth", "oauth_token_url")
+            token_url = self.config.get(self.profile_name, "oauth_token_url")
 
             # Load saved Authentication Profile from config.
             token = None
@@ -78,10 +79,10 @@ class farmOS:
 
                 # If an access_token is not saved, do not use the token dict.
                 if 'access_token' not in token:
-                    token = None
+                    token = {}
 
                 # Unset the expires_in key.
-                token.pop('expires_in')
+                token.pop('expires_in', None)
 
                 # Check the token expiration time.
                 if 'expires_at' in token:
@@ -97,11 +98,11 @@ class farmOS:
                     token['expires_in'] = expires_in
 
                 # Unset the expires_at key.
-                token.pop('expires_at')
+                token.pop('expires_at', None)
 
             # Load saved OAuth URLs from config.
-            authorization_url = self.config.get("OAuth", "oauth_authorization_url")
-            redirect_url = self.config.get("OAuth", "oauth_redirect_url")
+            authorization_url = self.config.get(self.profile_name, "oauth_authorization_url")
+            redirect_url = self.config.get(self.profile_name, "oauth_redirect_url")
 
             # Create an OAuth Session
             self.session = OAuthSession(hostname=hostname, client_id=client_id, client_secret=client_secret,
@@ -126,7 +127,7 @@ class farmOS:
         self.area = AreaAPI(self.session)
         self.term = TermAPI(self.session)
 
-        if self.config.getboolean("Client", "auto_authenticate"):
+        if self.config.getboolean(self.profile_name, "auto_authenticate", fallback=True):
             self.session.authenticate()
 
     def authenticate(self):

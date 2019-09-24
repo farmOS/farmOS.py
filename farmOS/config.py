@@ -1,21 +1,17 @@
-from configparser import ConfigParser, ExtendedInterpolation
+from configparser import ConfigParser, BasicInterpolation
 
 class ClientConfig(ConfigParser):
     def __init__(self):
-        super(ClientConfig, self).__init__(interpolation=ExtendedInterpolation())
+        defaults = {
+            'auto_authenticate': True,
+            'development': False,
+            'oauthlib_insecure_transport': False,
+            'oauth_authorization_url': '%(hostname)s/oauth2/authorize',
+            'oauth_redirect_url': '%(hostname)s/api/authorized',
+            'oauth_token_url': '%(hostname)s/oauth2/token',
+        }
 
-        self.add_section("Client")
-        self.set("Client", "auto_authenticate", 'True')
-        self.set("Client", "development", 'False')
-
-        self.add_section("Authentication")
-        self.set("Authentication", "hostname", "")
-
-        self.add_section("OAuth")
-        self.set("OAuth", "oauth_authorization_url", "${Authentication:hostname}/oauth2/authorize")
-        self.set("OAuth", "oauth_redirect_url", "${Authentication:hostname}/api/authorized")
-        self.set("OAuth", "oauth_token_url", "${Authentication:hostname}/oauth2/token")
-        self.set("OAuth", "oauthlib_insecure_transport", 'False')
+        super(ClientConfig, self).__init__(defaults=defaults, interpolation=BasicInterpolation())
 
     def write(self, path="farmos_default_config.cfg"):
         with open(path, "w") as config_file:
