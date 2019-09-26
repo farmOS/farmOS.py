@@ -1,5 +1,5 @@
 from datetime import datetime
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 from .session import DrupalAuthSession, OAuthSession
 from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
@@ -72,21 +72,39 @@ class farmOS:
 
         if hostname is not None:
             valid_schemes = ["http", "https"]
-            o = urlparse(hostname)
+            default_scheme = "http" if self.development else "https"
+            parsed_url = urlparse(hostname)
 
             # Validate the hostname.
-            if not o.scheme and not o.netloc:
-                raise Exception("Invalid hostname. Must have scheme and netloc.")
-            elif o.scheme not in valid_schemes:
+            # Add a default scheme if not provided.
+            if not parsed_url.scheme:
+                parsed_url = parsed_url._replace(scheme=default_scheme)
+
+            # Check for a valid scheme.
+            if parsed_url.scheme not in valid_schemes:
                 raise Exception("Not a valid scheme.")
-            elif o.path or o.params or o.query:
+
+            # If not netloc was provided, it was probably parsed as the path.
+            if not parsed_url.netloc and parsed_url.path:
+                parsed_url = parsed_url._replace(netloc=parsed_url.path)
+                parsed_url = parsed_url._replace(path='')
+
+            # Check for netloc.
+            if not parsed_url.netloc:
+                raise Exception("Invalid hostname. Must have netloc.")
+
+            # Don't allow path, params, or query.
+            if parsed_url.path or parsed_url.params or parsed_url.query:
                 raise Exception("Hostname cannot include path and query parameters.")
-            else:
-                # Save the hostname in the authentication configuration.
-                self.config.set(self.profile_name, "hostname", hostname)
+
+            # Build the url again to include changes.
+            hostname = urlunparse(parsed_url)
+
+            # Save the hostname in the config.
+            self.config.set(self.profile_name, "hostname", hostname)
 
         else:
-            raise Exception("No hostname provided in config file.")
+            raise Exception("No hostname provided and could not be loaded from config.")
 
         # Ask for password if username is given without a password.
         if username is not None and password is None:
