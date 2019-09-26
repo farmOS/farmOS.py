@@ -224,7 +224,9 @@ class farmOS:
                 self.config.set(profile_name, "access_token", token['access_token'])
 
             if 'expires_in' in token:
-                self.config.set(profile_name, "expires_in", token['expires_in'])
+                # token['expires_in'] is an int, the access_token lifetime.
+                # Must be saved as a string in the config.
+                self.config.set(profile_name, "expires_in", str(token['expires_in']))
 
             if 'token_type' in token:
                 self.config.set(profile_name, "token_type", token['token_type'])
@@ -233,8 +235,10 @@ class farmOS:
                 self.config.set(profile_name, "refresh_token", token['refresh_token'])
 
             if 'expires_at' in token:
-                # Save the 'expires_in' as a string. configparser only accepts strings, the
-                # requests-oauthlib module does not save this value as a string. Bug?
+                # token['expires_at'] is a float, the access_token expiration time.
+                # requests-oauthlib generates this value as
+                #       expires_at = time.time() + expires_in
+                # Must be saved as a string in the config.
                 self.config.set(profile_name, "expires_at", str(token['expires_at']))
 
         if self.config_file is not None:
