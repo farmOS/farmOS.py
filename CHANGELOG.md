@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2019-09-25
+### Added
+- Allow hostnames without a scheme, try to build a valid URL.
+
+### Fixed
+- Convert token values to string when saving to farm.config.
+- Initialize self.profile_name to DEFAULT so default values are loaded from farm.config.
+- Initialize self.config_file to None.
+- Make default config values strings.
+
 ## [0.1.0] - 2019-09-24
 ### **This release brings early support for farmOS OAuth! [#18](https://github.com/farmOS/farmOS.py/issues/18)**
 - Structure the library to support multiple types of authentication
