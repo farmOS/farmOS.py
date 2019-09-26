@@ -25,6 +25,7 @@ class farmOS:
         config_file_list = ['farmos_default_config.cfg']
 
         # Append additional config files.
+        self.config_file = None
         if config_file is not None:
             if isinstance(config_file, str):
                 config_file_list.append(config_file)
