@@ -3,9 +3,9 @@ from configparser import ConfigParser, BasicInterpolation
 class ClientConfig(ConfigParser):
     def __init__(self):
         defaults = {
-            'auto_authenticate': True,
-            'development': False,
-            'oauthlib_insecure_transport': False,
+            'auto_authenticate': 'True',
+            'development': 'False',
+            'oauthlib_insecure_transport': 'False',
             'oauth_authorization_url': '%(hostname)s/oauth2/authorize',
             'oauth_redirect_url': '%(hostname)s/api/authorized',
             'oauth_token_url': '%(hostname)s/oauth2/token',
