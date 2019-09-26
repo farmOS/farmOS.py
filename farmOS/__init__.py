@@ -40,7 +40,7 @@ class farmOS:
 
         # Use a profile if provided.
         self.profile = None
-        self.profile_name = None
+        self.profile_name = "DEFAULT"
         if profile_name is not None:
             self.use_profile(profile_name, create_profile=True)
 
