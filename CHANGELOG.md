@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2019-09-24
+### **This release brings early support for farmOS OAuth! [#18](https://github.com/farmOS/farmOS.py/issues/18)**
+- Structure the library to support multiple types of authentication
+- Use configparser and config files to configure the client
+- Add support the OAuth Authorization Flow
+- Add support the OAuth Password Credentials Flow
+- Auto-refresh Authentication Tokens by default
+- Allow external methods to save tokens
+- Save Authentication to a Profile in config file
+
+### Added
+- Update the format of response objects [#15](https://github.com/farmOS/farmOS.py/issues/15)
+
 ## [0.0.2] - 2019-04-30
 ### Added
 - Ability to get requests in pages (default to all pages)
