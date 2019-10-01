@@ -5,6 +5,7 @@ from .session import DrupalAuthSession, OAuthSession
 from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
 from .config import ClientConfig
 
+
 class farmOS:
 
     """Create a new farmOS instance.
