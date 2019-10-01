@@ -193,7 +193,7 @@ class farmOS:
         self._client_secret = client_secret
 
         if self.session is None:
-            raise Exception("Could not create a session object. Supply authentication credentials when "\
+            raise Exception("Could not create a session object. Supply authentication credentials when "
                             "initializing a farmOS Client.")
 
         self.log = LogAPI(self.session)
