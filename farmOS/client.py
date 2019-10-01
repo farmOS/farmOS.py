@@ -107,8 +107,7 @@ class BaseAPI(object):
         return data
 
     def send(self, payload):
-        options = {}
-        options['json'] = payload
+        options = {'json': payload}
 
         # If an ID is included, update the record
         id = payload.pop('id', None)
