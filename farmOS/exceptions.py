@@ -18,5 +18,6 @@ class FarmosAPIError(Exception):
 
 
 class NotAuthenticatedError(FarmosAPIError):
-    message = "APISession not authenticated before the request was made. Call farm.authentiate() before making requests"
+    message = "APISession not authenticated before the request was made." \
+              "Call farm.authenticate() before making requests."
     pass
