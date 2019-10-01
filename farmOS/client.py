@@ -47,9 +47,9 @@ class BaseAPI(object):
             if 'list' in response:
                 data['list'] = response['list']
                 data['page'] = {
-                    'self' : _parse_api_page(url=response['self']),
+                    'self': _parse_api_page(url=response['self']),
                     'first': _parse_api_page(url=response['first']),
-                    'last' : _parse_api_page(url=response['last']),
+                    'last': _parse_api_page(url=response['last']),
                 }
 
         return data
@@ -75,7 +75,7 @@ class BaseAPI(object):
                 data = {
                     'page': {
                         'first': response['page']['first'],
-                        'last' : response['page']['last'],
+                        'last': response['page']['last'],
                     },
                     'list': list,
                 }
@@ -201,7 +201,7 @@ class AreaAPI(TermAPI):
             tid = str(filters)
             # Add tid to filters object
             filters = {
-                'tid':tid
+                'tid': tid,
             }
 
         data = self._get_records(filters=filters)
