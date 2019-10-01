@@ -4,6 +4,7 @@ from oauthlib.oauth2 import LegacyApplicationClient
 
 from .exceptions import NotAuthenticatedError
 
+
 class OAuthSession(OAuth2Session):
     """OAuthSession uses OAuth2 to authenticate with farmOS
 
@@ -137,6 +138,7 @@ class OAuthSession(OAuth2Session):
         print("Got a new token: " + token['access_token'] + " expires in " + token['expires_in'])
         self.token = token
 
+
 # Use a Requests Session to store cookies across requests.
 #   http://docs.python-requests.org/en/master/user/advanced/#session-objects
 class DrupalAuthSession(Session):
@@ -242,6 +244,7 @@ class DrupalAuthSession(Session):
         else:
             return _is_authenticated(self)
 
+
 def _http_request(session, path, method='GET', options=None, params=None, headers={}):
     """Raw HTTP request helper function.
 
@@ -294,6 +297,7 @@ def _http_request(session, path, method='GET', options=None, params=None, header
 
     # Return the response.
     return response
+
 
 def _is_authenticated(session):
     """Helper function to check if the Session is authenticated."""

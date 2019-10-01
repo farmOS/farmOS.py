@@ -1,5 +1,6 @@
 from configparser import ConfigParser, BasicInterpolation
 
+
 class ClientConfig(ConfigParser):
     def __init__(self):
         defaults = {

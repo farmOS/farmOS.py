@@ -16,6 +16,7 @@ class FarmosAPIError(Exception):
             return '{}: {}'.format(self.code, self.message)
         return self.message
 
+
 class NotAuthenticatedError(FarmosAPIError):
     message = "APISession not authenticated before the request was made. Call farm.authentiate() before making requests"
     pass

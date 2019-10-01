@@ -1,5 +1,6 @@
 from urllib.parse import urlparse, parse_qs
 
+
 class BaseAPI(object):
     """Base class for API methods
 
@@ -142,6 +143,7 @@ class BaseAPI(object):
 
         return response
 
+
 class TermAPI(BaseAPI):
     """API for interacting with farm Terms"""
 
@@ -163,6 +165,7 @@ class TermAPI(BaseAPI):
 
         return data
 
+
 class LogAPI(BaseAPI):
     """API for interacting with farm logs"""
 
@@ -170,12 +173,14 @@ class LogAPI(BaseAPI):
         # Define 'log' as the farmOS API entity endpoint
         super().__init__(session=session, entity_type='log')
 
+
 class AssetAPI(BaseAPI):
     """API for interacting with farm assets"""
 
     def __init__(self, session):
         # Define 'farm_asset' as the farmOS API entity endpoint
         super().__init__(session=session, entity_type='farm_asset')
+
 
 class AreaAPI(TermAPI):
     """API for interacting with farm areas, a subset of farm terms"""
@@ -202,6 +207,7 @@ class AreaAPI(TermAPI):
         data = self._get_records(filters=filters)
 
         return data
+
 
 def _parse_api_page(url):
     """Helper function that returns page numbers from the API response.
