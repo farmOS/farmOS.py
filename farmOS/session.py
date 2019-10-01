@@ -107,6 +107,7 @@ class OAuthSession(OAuth2Session):
         :param method: the HTTP method.
         :param options: a dictionary of data and parameters to pass on to the request.
         :param params: URL query parameters.
+        :param force: Force the request regardless of Authenticated status.
         :return: requests response object.
         """
 
