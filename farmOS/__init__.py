@@ -229,7 +229,7 @@ class farmOS:
     def info(self):
         """Retrieve info about the farmOS instance"""
         response = self.session.http_request(path='farm.json')
-        if (response.status_code == 200):
+        if response.status_code == 200:
             return response.json()
 
         return []

@@ -25,7 +25,7 @@ class BaseAPI(object):
 
         response = self.session.http_request(path=path)
 
-        if (response.status_code == 200):
+        if response.status_code == 200:
             return response.json()
 
         return []
@@ -42,7 +42,7 @@ class BaseAPI(object):
         # Return object
         data = {}
 
-        if (response.status_code == 200):
+        if response.status_code == 200:
             response = response.json()
             if 'list' in response:
                 data['list'] = response['list']
@@ -64,14 +64,14 @@ class BaseAPI(object):
         response = self._get_record_data(filters=filters)
 
         # Append record data to list of all requested data
-        if ('list' in response):
+        if 'list' in response:
             list = list + response['list']
 
         # Check to see if there are more pages
-        if ('page' in response):
+        if 'page' in response:
             last_page = response['page']['last']
             # Last page, return the list
-            if (last_page == page):
+            if last_page == page:
                 data = {
                     'page': {
                         'first': response['page']['first'],
@@ -121,11 +121,11 @@ class BaseAPI(object):
             response = self.session.http_request(method='POST', path=path, options=options)
 
         # Handle response from POST requests
-        if (response.status_code == 201):
+        if response.status_code == 201:
             return response.json()
 
         # Handle response from PUT requests
-        if (response.status_code == 200):
+        if response.status_code == 200:
             # farmOS returns no response data for PUT requests
             # response_data = response.json()
 
