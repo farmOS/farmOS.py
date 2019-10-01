@@ -88,6 +88,8 @@ class OAuthSession(OAuth2Session):
         Returns True or False indicating whether or not
         the authentication was successful
         """
+        token = None
+
         if self.grant_type == "Authorization":
             authorization_url, state = self.authorization_url(self._authorization_base_url,
                                                               access_type="offline",
