@@ -173,7 +173,7 @@ class DrupalAuthSession(Session):
     """
 
     def __init__(self, hostname, username, password, *args, **kwargs):
-        super(DrupalAuthSession, self).__init__(*args, **kwargs)
+        super(DrupalAuthSession, self).__init__()
 
         # Initialize the session as not authenticated.
         self.authenticated = False
