@@ -19,8 +19,19 @@ class OAuthSession(OAuth2Session):
         password - the farmOS user's password (for OAuth2 Password Grant)
     """
 
-    def __init__(self, hostname, client_id, grant_type, client_secret=None, username=None, password=None, token=None,
-                 redirect_uri=None, token_url=None, authorization_url=None, token_updater = None, *args, **kwargs):
+    def __init__(self, hostname,
+                 client_id,
+                 grant_type,
+                 client_secret=None,
+                 username=None,
+                 password=None,
+                 token=None,
+                 redirect_uri=None,
+                 token_url=None,
+                 authorization_url=None,
+                 token_updater=None,
+                 *args, **kwargs):
+
         # Initialize the session as not authenticated.
         self.authenticated = False
 
@@ -79,7 +90,8 @@ class OAuthSession(OAuth2Session):
         """
         if self.grant_type == "Authorization":
             authorization_url, state = self.authorization_url(self._authorization_base_url,
-                                                                access_type="offline", prompt="select_account")
+                                                              access_type="offline",
+                                                              prompt="select_account")
 
             print('Please go here and authorize,', authorization_url)
 
@@ -87,7 +99,10 @@ class OAuthSession(OAuth2Session):
             redirect_response = input('Paste the full redirect URL here:')
 
             # Fetch the access token
-            token = self.fetch_token(self._token_url, client_secret=self._client_secret, authorization_response=redirect_response)
+            token = self.fetch_token(self._token_url,
+                                     client_secret=self._client_secret,
+                                     authorization_response=redirect_response)
+
         elif self.grant_type == "Password":
             token = self.fetch_token(token_url=self._token_url,
                                      client_id=self._client_id,
@@ -285,15 +300,24 @@ def _http_request(session, path, method='GET', options=None, params=None, header
         json = options['json']
 
     # Perform the request.
-    response = session.request(method, url, headers=headers, allow_redirects=allow_redirects, data=data, json=json,
-                            params=params)
+    response = session.request(method,
+                               url,
+                               headers=headers,
+                               allow_redirects=allow_redirects,
+                               data=data,
+                               json=json,
+                               params=params)
 
     # If this is a POST request, and a redirect occurred, attempt to re-POST.
     redirect_codes = [300, 301, 302, 303, 304, 305, 306, 307, 308]
     if method in ['POST', 'PUT'] and response.status_code in redirect_codes:
         if response.headers['Location']:
-            response = session.request(method, response.headers['Location'], headers=headers, allow_redirects=True, data=data,
-                                    json=json, params=params)
+            response = session.request(method,
+                                       response.headers['Location'],
+                                       headers=headers,
+                                       allow_redirects=True,
+                                       data=data,
+                                       json=json, params=params)
 
     # Return the response.
     return response

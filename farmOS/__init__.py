@@ -20,8 +20,16 @@ class farmOS:
 
     """
 
-    def __init__(self, hostname=None, username=None, password=None, client_id=None, client_secret=None, config_file=None,
-                 profile_name=None, token_updater=None):
+    def __init__(self,
+                 hostname=None,
+                 username=None,
+                 password=None,
+                 client_id=None,
+                 client_secret=None,
+                 config_file=None,
+                 profile_name=None,
+                 token_updater=None):
+
         # Start a list of config files.
         config_file_list = ['farmos_default_config.cfg']
 
@@ -50,7 +58,9 @@ class farmOS:
 
         # Allow authentication over HTTP in development mode
         # or if the oauth_insecure_transport config is enabled.
-        oauth_insecure_transport = self.config.getboolean(self.profile_name, "oauthlib_insecure_transport", fallback=False)
+        oauth_insecure_transport = self.config.getboolean(self.profile_name,
+                                                          "oauthlib_insecure_transport",
+                                                          fallback=False)
         if self.development or oauth_insecure_transport:
             import os
             os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
