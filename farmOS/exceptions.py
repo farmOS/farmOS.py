@@ -3,7 +3,7 @@ class FarmosAPIError(Exception):
     code = -1
     message = "An unknown error occurred"
 
-    def __init__(self, message=None, code=None, data={}, response=None):
+    def __init__(self, message=None, code=None, data=None, response=None):
         if message:
             self.message = message
         if code:

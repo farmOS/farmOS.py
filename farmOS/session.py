@@ -260,7 +260,7 @@ class DrupalAuthSession(Session):
             return _is_authenticated(self)
 
 
-def _http_request(session, path, method='GET', options=None, params=None, headers={}):
+def _http_request(session, path, method='GET', options=None, params=None, headers=None):
     """Raw HTTP request helper function.
 
     Keyword arguments:
@@ -298,6 +298,9 @@ def _http_request(session, path, method='GET', options=None, params=None, header
     json = None
     if options and 'json' in options:
         json = options['json']
+
+    if headers is None:
+        headers = {}
 
     # Perform the request.
     response = session.request(method,
