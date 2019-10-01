@@ -331,7 +331,7 @@ def _is_authenticated(session):
     except NotAuthenticatedError:
         return False
 
-    if (response.status_code == 200):
+    if response.status_code == 200:
         session.authenticated = True
         return True
     else:
