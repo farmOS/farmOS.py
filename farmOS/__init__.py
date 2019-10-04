@@ -51,7 +51,7 @@ class farmOS:
             raise Exception("Config is not a FarmConfig object.")
         # Create a new object if none is provided.
         elif config is None:
-            self.config = ClientConfig(hostname, profile_name=profile_name)
+            self.config = ClientConfig(profile_name=profile_name)
 
         # Read config files.
         self.config.read(config_file_list)
