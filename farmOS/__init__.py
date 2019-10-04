@@ -26,6 +26,7 @@ class farmOS:
                  password=None,
                  client_id=None,
                  client_secret=None,
+                 config=None,
                  config_file=None,
                  profile_name=None,
                  token_updater=None):
@@ -42,8 +43,15 @@ class farmOS:
             else:
                 raise Exception("Config file must be a string.")
 
-        # Create a ClientConfig object.
-        self.config = ClientConfig()
+        # Check for a provided configuration object.
+        if isinstance(config, ClientConfig):
+            self.config = config
+        elif config is not None and not isinstance(config, ClientConfig):
+            raise Exception("Config is not a FarmConfig object.")
+        # Create a new object if none is provided.
+        elif config is None:
+            self.config = ClientConfig(hostname, profile_name=profile_name)
+
         # Read config files.
         self.config.read(config_file_list)
 
@@ -70,12 +78,11 @@ class farmOS:
         # A username or client_id is required for authentication to farmOS.
         if username is None and client_id is None:
             # Try to load values from config profile.
-            if self.has_profile():
-                hostname = self.config.get(self.profile_name, "hostname", fallback=None)
-                username = self.config.get(self.profile_name, "username", fallback=None)
-                password = self.config.get(self.profile_name, "password", fallback=None)
-                client_id = self.config.get(self.profile_name, "client_id", fallback=None)
-                client_secret = self.config.get(self.profile_name, "client_secret", fallback=None)
+            hostname = self.config.get(self.profile_name, "hostname", fallback=None)
+            username = self.config.get(self.profile_name, "username", fallback=None)
+            password = self.config.get(self.profile_name, "password", fallback=None)
+            client_id = self.config.get(self.profile_name, "client_id", fallback=None)
+            client_secret = self.config.get(self.profile_name, "client_secret", fallback=None)
 
             # Check if required values were populated.
             if username is None and client_id is None:

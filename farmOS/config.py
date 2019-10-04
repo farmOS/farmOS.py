@@ -2,8 +2,13 @@ from configparser import ConfigParser, BasicInterpolation
 
 
 class ClientConfig(ConfigParser):
-    def __init__(self):
-        defaults = {
+    def __init__(
+            self,
+            profile_name=None,
+            defaults=None,
+            **kwargs):
+
+        config_defaults = {
             'auto_authenticate': 'True',
             'development': 'False',
             'oauthlib_insecure_transport': 'False',
@@ -12,8 +17,25 @@ class ClientConfig(ConfigParser):
             'oauth_token_url': '%(hostname)s/oauth2/token',
         }
 
-        super(ClientConfig, self).__init__(defaults=defaults, interpolation=BasicInterpolation())
+        # Merge additional default values if provided.
+        if defaults is not None:
+            config_defaults = {**config_defaults, **defaults}
+
+        # Initialize the config object.
+        super().__init__(defaults=config_defaults, interpolation=BasicInterpolation())
+
+        # Add a section for the profile.
+        if profile_name is not None:
+            self.add_section(profile_name)
+        else:
+            profile_name = 'DEFAULT'
+
+        # Load additional kwargs into the config.
+        for key, value in kwargs.items():
+            if value is not None:
+                self.set(profile_name, key, value)
+
 
     def write(self, path="farmos_default_config.cfg"):
         with open(path, "w") as config_file:
-            super(ClientConfig, self).write(config_file)
+            super().write(config_file)
