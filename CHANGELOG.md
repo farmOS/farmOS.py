@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2019-10-03
+### Added
+- Inject a profile_id into the token before saving.
+- Allow a ClientConfig object to be passed to the client.
+
+### Fixed
+- PEP8 Code Fixes [#20](https://github.com/farmOS/farmOS.py/issues/20)
+
 ## [0.1.1] - 2019-09-25
 ### Added
 - Allow hostnames without a scheme, try to build a valid URL.
