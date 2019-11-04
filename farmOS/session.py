@@ -34,6 +34,7 @@ class OAuthSession(OAuth2Session):
 
         # Initialize the session as not authenticated.
         self.authenticated = False
+        self.csrf_token = None
 
         # Provide a default token_saver is nothing is provided.
         self.token_updater = self._token_saver
@@ -80,6 +81,9 @@ class OAuthSession(OAuth2Session):
 
         # Check if an existing token was provided.
         if token is not None and 'access_token' in token:
+            # Request a session token from the RESTful Web Services module
+            self.csrf_token = _get_csrf_token(self)
+
             self.is_authenticated(check=True)
 
     def authenticate(self):
@@ -115,6 +119,9 @@ class OAuthSession(OAuth2Session):
         # Save the token.
         self.token_updater(token)
 
+        # Request a session token from the RESTful Web Services module
+        self.csrf_token = _get_csrf_token(self)
+
         return self.is_authenticated(check=True)
 
     def http_request(self, path, method='GET', options=None, params=None, force=False):
@@ -135,11 +142,23 @@ class OAuthSession(OAuth2Session):
         if not self.is_authenticated() and not force:
             raise NotAuthenticatedError()
 
+        headers = {}
+        # Automatically add the token to the request, if it exists.
+        # Give precedence to a token passed in with options['headers']['X-CSRF-Token'].
+        if options and 'headers' in options and 'X-CSRF-Token' in options['headers']:
+            headers['X-CSRF-Token'] = options['headers']['X-CSRF-Token']
+        if self.csrf_token is not None:
+            headers['X-CSRF-Token'] = self.csrf_token
+
         # Return response from the _http_request helper function.
-        return _http_request(self, path, method, options, params)
+        return _http_request(self, path, method, options, params, headers)
 
     def is_authenticated(self, check=False):
         """Helper function that returns True or False if the Session is Authenticated"""
+        # Check if the session has a csrf_token
+        if self.csrf_token is None:
+            return False
+
         if check is False:
             return self.authenticated
         else:
@@ -184,7 +203,7 @@ class DrupalAuthSession(Session):
         self.password = password
 
         # Store the authentication token
-        self.token = ''
+        self.csrf_token = None
 
     def authenticate(self):
         """Authenticates with the farmOS site.
@@ -192,10 +211,6 @@ class DrupalAuthSession(Session):
         Returns True or False indicating whether or not
         the authentication was successful
         """
-
-        # Clear any previously populated token.
-        self.token = ''
-
         # Prepare the data payload
         options = {
             'data': {
@@ -212,16 +227,9 @@ class DrupalAuthSession(Session):
                 return False
 
         # Request a session token from the RESTful Web Services module
-        response = self.http_request('restws/session/token', force=True)
-        if response:
-            if response.status_code == 200:
-                self.token = response.text
+        self.csrf_token = _get_csrf_token(self)
 
-        # Return True if the token was populated.
-        if self.token:
-            return self.is_authenticated(check=True)
-        else:
-            return False
+        return self.is_authenticated(check=True)
 
     def http_request(self, path, method='GET', options=None, params=None, force=False):
         """Make an HTTP request.
@@ -248,14 +256,18 @@ class DrupalAuthSession(Session):
         # Give precedence to a token passed in with options['headers']['X-CSRF-Token'].
         if options and 'headers' in options and 'X-CSRF-Token' in options['headers']:
             headers['X-CSRF-Token'] = options['headers']['X-CSRF-Token']
-        if self.token:
-            headers['X-CSRF-Token'] = self.token
+        if self.csrf_token:
+            headers['X-CSRF-Token'] = self.csrf_token
 
         # Return response from the _http_request helper function.
         return _http_request(self, path, method, options, params, headers)
 
     def is_authenticated(self, check=False):
         """Helper function that returns True or False if the Session is Authenticated"""
+        # Check if the session has a csrf_token
+        if self.csrf_token is None:
+            return False
+
         if check is False:
             return self.authenticated
         else:
@@ -326,6 +338,18 @@ def _http_request(session, path, method='GET', options=None, params=None, header
 
     # Return the response.
     return response
+
+def _get_csrf_token(session):
+    """Helper function to retrieve a CSRF Session Token"""
+    csrf_token = None
+
+    # Request a session token from the RESTful Web Services module
+    response = session.http_request('restws/session/token', force=True)
+    if response:
+        if response.status_code == 200:
+            csrf_token = response.text
+
+    return csrf_token
 
 
 def _is_authenticated(session):
