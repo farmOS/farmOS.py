@@ -149,8 +149,10 @@ class farmOS:
             token = None
             if self.has_profile():
                 # Save OAuth Client ID to config.
-                self.config.set(self.profile_name, "client_id", client_id)
-                self.config.set(self.profile_name, "client_secret", client_secret)
+                if client_id is not None:
+                    self.config.set(self.profile_name, "client_id", client_id)
+                if client_secret is not None:
+                    self.config.set(self.profile_name, "client_secret", client_secret)
 
                 token = dict(self.profile)
 
