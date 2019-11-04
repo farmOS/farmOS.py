@@ -241,9 +241,9 @@ class farmOS:
         """
         return self.session.authenticate()
 
-    def info(self):
+    def info(self, path='farm.json'):
         """Retrieve info about the farmOS instance"""
-        response = self.session.http_request(path='farm.json')
+        response = self.session.http_request(path)
         if response.status_code == 200:
             return response.json()
 
