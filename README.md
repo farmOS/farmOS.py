@@ -37,7 +37,7 @@ For more information on farmOS, visit [farmOS.org](https://farmOS.org).
     # Get all assets
     assets = farm.asset.get()
     # Get all animal assets
-    animals = farm.log.get({
+    animals = farm.asset.get({
       'type':'animal'
       })
 
