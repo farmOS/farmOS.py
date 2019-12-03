@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] -- 2019-12-02
+### Added
+- Only save the client_id and client_secret to a profile if provided.
+- Add a path attribute to farm.info() to allow requesting other endpoints.
+
+### Fixed
+- Include X-CSRF token in all requests. Fixes [#22](https://github.com/farmOS/farmOS.py/issues/22)
+
 ## [0.1.3] - 2019-10-03
 ### Fixed
 - Remove hostname parameter when creating ClientConfig.
