@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from urllib.parse import urlparse, urlunparse
 
@@ -5,6 +6,7 @@ from .session import DrupalAuthSession, OAuthSession
 from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
 from .config import ClientConfig
 
+logger = logging.getLogger(__name__)
 
 class farmOS:
 
@@ -32,6 +34,8 @@ class farmOS:
                  profile_id=None,
                  token_updater=None):
 
+        logger.debug('Creating farmOS client.')
+
         # Start a list of config files.
         config_file_list = ['farmos_default_config.cfg']
 
@@ -39,6 +43,7 @@ class farmOS:
         self.config_file = None
         if config_file is not None:
             if isinstance(config_file, str):
+                logger.debug('Using config file: %s', config_file)
                 config_file_list.append(config_file)
                 self.config_file = config_file
             else:
@@ -46,42 +51,54 @@ class farmOS:
 
         # Check for a provided configuration object.
         if isinstance(config, ClientConfig):
+            logger.debug('Using provided ClientConfig object.')
             self.config = config
         elif config is not None and not isinstance(config, ClientConfig):
-            raise Exception("Config is not a FarmConfig object.")
+            raise Exception("Config is not a ClientConfig object.")
         # Create a new object if none is provided.
         elif config is None:
+            logger.debug('No ClientConfig object provided, using defaults.')
             self.config = ClientConfig(profile_name=profile_name)
 
         # Read config files.
         self.config.read(config_file_list)
+        logger.debug('Loaded config files: %s', config_file_list)
 
         # Use a profile if provided.
         self.profile = None
         self.profile_name = "DEFAULT"
         if profile_name is not None:
             self.use_profile(profile_name, create_profile=True)
+            logger.debug('Using profile name "%s"', profile_name)
 
         # Set the profile_id if provided.
         if profile_id is not None:
+            logger.debug('Using profile id "%s"', profile_id)
             self.config.set(self.profile_name, 'profile_id', profile_id)
 
         # Load the config boolean for development mode.
         self.development = self.config.getboolean(self.profile_name, "development", fallback=False)
+        if self.development:
+            logger.warning('Development mode enabled.')
 
         # Allow authentication over HTTP in development mode
         # or if the oauth_insecure_transport config is enabled.
         oauth_insecure_transport = self.config.getboolean(self.profile_name,
                                                           "oauthlib_insecure_transport",
                                                           fallback=False)
+        if oauth_insecure_transport:
+            logger.warning('OAuth Insecure Transport enabled in configuration.')
+
         if self.development or oauth_insecure_transport:
             import os
             os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+            logger.warning('OAuth Insecure Transport is enabled.')
 
         # Load the token updater function.
         # Default to simple token_saver to save tokens to config.
         self.token_updater = self.save_token
         if token_updater is not None:
+            logger.debug('Using provided token_updater utility.')
             self.token_updater = token_updater
 
 
@@ -90,6 +107,8 @@ class farmOS:
         # A username or client_id is required for authentication to farmOS.
         if username is None and client_id is None:
             # Try to load values from config profile.
+            logger.debug('No username or client_id provided. Loading from config...')
+
             hostname = self.config.get(self.profile_name, "hostname", fallback=None)
             username = self.config.get(self.profile_name, "username", fallback=None)
             password = self.config.get(self.profile_name, "password", fallback=None)
@@ -109,6 +128,7 @@ class farmOS:
             # Add a default scheme if not provided.
             if not parsed_url.scheme:
                 parsed_url = parsed_url._replace(scheme=default_scheme)
+                logger.debug('No scheme provided. Using %s', default_scheme)
 
             # Check for a valid scheme.
             if parsed_url.scheme not in valid_schemes:
@@ -129,6 +149,7 @@ class farmOS:
 
             # Build the url again to include changes.
             hostname = urlunparse(parsed_url)
+            logger.debug('Complete hostname configured as %s', hostname)
 
             # Save the hostname in the config.
             self.config.set(self.profile_name, "hostname", hostname)
@@ -143,11 +164,14 @@ class farmOS:
 
         # If a client_id is supplied, try to create an OAuth Session
         if client_id is not None:
+            logger.debug('Creating an OAuth Session...')
             token_url = self.config.get(self.profile_name, "oauth_token_url")
 
             # Load saved Authentication Profile from config.
             token = None
             if self.has_profile():
+                logger.debug('Loading Authentication Profile from config.')
+
                 # Save OAuth Client ID to config.
                 if client_id is not None:
                     self.config.set(self.profile_name, "client_id", client_id)
@@ -181,6 +205,8 @@ class farmOS:
 
             # Create an OAuth Session with the Password Credentials Grant.
             if username is not None and password is not None:
+                logger.debug('Using OAuth Password Credentials Grant.')
+
                 self.config.set(self.profile_name, "username", username)
                 self.config.set(self.profile_name, "password", password)
                 self.session = OAuthSession(grant_type="Password",
@@ -195,6 +221,8 @@ class farmOS:
 
             # Create an OAuth Session with the Authorization Code Grant.
             else:
+                logger.debug('Starting OAuth Authorization Code flow.')
+
                 # Load saved OAuth URLs from config.
                 authorization_url = self.config.get(self.profile_name, "oauth_authorization_url")
                 redirect_url = self.config.get(self.profile_name, "oauth_redirect_url")
@@ -212,6 +240,7 @@ class farmOS:
 
         # Fallback to DrupalAPISession
         if client_id is None and username is not None and password is not None:
+            logger.debug('Authenticating with Drupal RESTws Authentication.')
             # Create a session with requests
             self.session = DrupalAuthSession(hostname, username, password)
 
@@ -233,7 +262,9 @@ class farmOS:
         # (OAuthSession will authenticate if an existing token was provided at startup)
         auto_authenticate = self.config.getboolean(self.profile_name, "auto_authenticate", fallback=True)
         if auto_authenticate and not self.session.is_authenticated():
-            self.session.authenticate()
+            logger.debug('Auto authenticate set to true.')
+            status = self.session.authenticate()
+            logger.debug('Authenticated: %s', status)
 
     def authenticate(self):
         """Authenticates with the farmOS site.
@@ -241,10 +272,12 @@ class farmOS:
         Returns True or False indicating whether or not
         the authentication was successful
         """
+        logger.debug('Authenticating with farmOS server.')
         return self.session.authenticate()
 
     def info(self, path='farm.json'):
         """Retrieve info about the farmOS instance"""
+        logger.debug('Retrieving farmOS server info.')
         response = self.session.http_request(path)
         if response.status_code == 200:
             return response.json()
@@ -282,6 +315,8 @@ class farmOS:
         # Only save values if a profile name was defined.
         if self.has_profile():
             profile_name = self.get_profile_name()
+            logger.debug('Saving new OAuth token to profile %s', profile_name)
+
             if 'access_token' in token:
                 self.config.set(profile_name, "access_token", token['access_token'])
 
@@ -304,6 +339,7 @@ class farmOS:
                 self.config.set(profile_name, "expires_at", str(token['expires_at']))
 
         if self.config_file is not None:
+            logger.debug('No profile configured. New OAuth token will not be saved to config.')
             self.config.write(path=self.config_file)
 
     def create_profile(self, profile_name):
