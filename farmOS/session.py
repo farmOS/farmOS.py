@@ -7,6 +7,7 @@ from oauthlib.oauth2 import LegacyApplicationClient
 from .exceptions import NotAuthenticatedError
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 class OAuthSession(OAuth2Session):
     """OAuthSession uses OAuth2 to authenticate with farmOS

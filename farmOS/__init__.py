@@ -7,6 +7,7 @@ from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
 from .config import ClientConfig
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 class farmOS:
 

@@ -2,6 +2,7 @@ import logging
 from urllib.parse import urlparse, parse_qs
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 class BaseAPI(object):
     """Base class for API methods
