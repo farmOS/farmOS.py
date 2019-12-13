@@ -1,9 +1,12 @@
+import logging
+
 from requests import Session
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import LegacyApplicationClient
 
 from .exceptions import NotAuthenticatedError
 
+logger = logging.getLogger(__name__)
 
 class OAuthSession(OAuth2Session):
     """OAuthSession uses OAuth2 to authenticate with farmOS
@@ -81,6 +84,7 @@ class OAuthSession(OAuth2Session):
 
         # Check if an existing token was provided.
         if token is not None and 'access_token' in token:
+            logger.debug('Using provided OAuth Token. Finishing authentication.')
             # Request a session token from the RESTful Web Services module
             self.csrf_token = _get_csrf_token(self)
 
@@ -93,6 +97,8 @@ class OAuthSession(OAuth2Session):
         the authentication was successful
         """
         token = None
+
+        logger.debug('Retrieving new OAuth Token.')
 
         if self.grant_type == "Authorization":
             authorization_url, state = self.authorization_url(self._authorization_base_url,
@@ -116,7 +122,10 @@ class OAuthSession(OAuth2Session):
                                      username=self._username,
                                      password=self._password)
 
+        logger.debug('Fetched OAuth Access Token %s', token)
+
         # Save the token.
+        logger.debug('Saving token with token_updater utility.')
         self.token_updater(token)
 
         # Request a session token from the RESTful Web Services module
@@ -211,6 +220,7 @@ class DrupalAuthSession(Session):
         Returns True or False indicating whether or not
         the authentication was successful
         """
+        logger.debug('Authenticating with Drupal Login Form')
         # Prepare the data payload
         options = {
             'data': {
@@ -342,6 +352,8 @@ def _http_request(session, path, method='GET', options=None, params=None, header
 def _get_csrf_token(session):
     """Helper function to retrieve a CSRF Session Token"""
     csrf_token = None
+
+    logger.debug('Retrieving new csrf_token.')
 
     # Request a session token from the RESTful Web Services module
     response = session.http_request('restws/session/token', force=True)
