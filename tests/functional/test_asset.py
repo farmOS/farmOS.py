@@ -1,3 +1,5 @@
+from tests.conftest import farmOS_testing_server
+
 # Create a test asset
 test_asset = {
   "name": "Tractor",
@@ -10,6 +12,7 @@ test_asset = {
 #
 # Test farm asset methods
 #
+@farmOS_testing_server
 def test_create_asset(test_farm):
     response = test_farm.asset.send(test_asset)
 
@@ -18,6 +21,8 @@ def test_create_asset(test_farm):
     # Once created, add 'id' to test_asset
     test_asset['id'] = response['id']
 
+
+@farmOS_testing_server
 def test_get_all_assets(test_farm):
     assets = test_farm.asset.get()
 
@@ -25,6 +30,8 @@ def test_get_all_assets(test_farm):
     assert 'page' in assets
     assert len(assets) > 0
 
+
+@farmOS_testing_server
 def test_get_assets_filtered_by_type(test_farm):
     asset_type = test_asset['type']
 
@@ -35,6 +42,8 @@ def test_get_assets_filtered_by_type(test_farm):
     assert len(asset) > 0
     assert asset['list'][0]['type'] == asset_type
 
+
+@farmOS_testing_server
 def test_get_asset_by_id(test_farm):
     asset_id = test_asset['id']
     asset = test_farm.asset.get(asset_id)
@@ -42,6 +51,8 @@ def test_get_asset_by_id(test_farm):
     assert 'id' in asset
     assert asset['id'] == asset_id
 
+
+@farmOS_testing_server
 def test_update_asset(test_farm):
     test_asset_changes = {
         'id':test_asset['id'],
@@ -55,6 +66,8 @@ def test_update_asset(test_farm):
 
     assert updated_asset['serial_number'] == test_asset_changes['serial_number']
 
+
+@farmOS_testing_server
 def test_delete_asset(test_farm):
     response = test_farm.asset.delete(test_asset['id'])
 

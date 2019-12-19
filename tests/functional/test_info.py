@@ -1,7 +1,9 @@
+from tests.conftest import farmOS_testing_server
+
 #
 # Test farm info method
 #
-
+@farmOS_testing_server
 def test_get_farm_info(test_farm):
     info = test_farm.info()
 
