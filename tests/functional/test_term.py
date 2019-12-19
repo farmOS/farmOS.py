@@ -11,7 +11,15 @@ test_term = {
 
 def test_create_taxonomy_term(test_farm):
     # Find the vocab ID for farm_crops
-    farm_crop_id = test_farm.vocabulary('farm_crops')[0]['vid']
+    content = test_farm.info()
+
+    # Check that farm info includes farm_crops vid
+    assert 'resources' in content
+    assert 'taxonomy_term' in content['resources']
+    assert 'farm_crops' in content['resources']['taxonomy_term']
+    assert 'vid' in content['resources']['taxonomy_term']['farm_crops']
+
+    farm_crop_id = content['resources']['taxonomy_term']['farm_crops']['vid']
 
     # Update the test_term with the vid
     test_term['vocabulary']['id'] = farm_crop_id
