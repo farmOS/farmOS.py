@@ -12,7 +12,15 @@ test_area = {
 #
 def test_create_area(test_farm):
     # Find the vocab ID for farm_areas
-    farm_areas_id = test_farm.vocabulary('farm_areas')[0]['vid']
+    content = test_farm.info()
+
+    # Check that farm info includes farm_areas vid
+    assert 'resources' in content
+    assert 'taxonomy_term' in content['resources']
+    assert 'farm_areas' in content['resources']['taxonomy_term']
+    assert 'vid' in content['resources']['taxonomy_term']['farm_areas']
+
+    farm_areas_id = content['resources']['taxonomy_term']['farm_areas']['vid']
 
     # Update the test_area with the vid
     test_area['vocabulary']['id'] = farm_areas_id
