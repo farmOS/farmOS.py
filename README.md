@@ -69,9 +69,14 @@ logging.getLogger("farmOS.session").setLevel(logging.WARNING)
 More info on logging in Python [here](https://docs.python.org/3/howto/logging.html#logging-basic-tutorial).
 
 ## TESTING
-Configure credentials for the farmOS instance used to test in
+Functional tests require a live instance of farmOS to communicate with.
+Configure credentials for the farmOS instance to test against by setting the following environment variables: 
 
-    tests/test_credentials.py
+For farmOS Drupal Authentication:
+`FARMOS_HOSTNAME`, `FARMOS_RESTWS_USERNAME`, and `FARMOS_RESTWS_PASSWORD`
+
+For farmOS OAuth Authentication (Password Flow):
+`FARMOS_HOSTNAME`, `FARMOS_OAUTH_USERNAME`, `FARMOS_OAUTH_PASSWORD`, `FARMOS_OAUTH_CLIENT_ID`, `FARMOS_OAUTH_CLIENT_SECRET`
 
 Automated tests are run with pytest
 
