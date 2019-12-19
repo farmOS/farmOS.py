@@ -14,3 +14,9 @@ before_script:
 test:
   script:
     - python setup.py test
+
+test-pull-requests:
+  script:
+    - python setup.py test
+  only:
+    - external_pull_requests
