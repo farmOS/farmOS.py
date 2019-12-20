@@ -1,5 +1,8 @@
+import logging
 from urllib.parse import urlparse, parse_qs
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 class BaseAPI(object):
     """Base class for API methods
@@ -23,6 +26,7 @@ class BaseAPI(object):
         # Set path to return record type by specific ID
         path = self.entity_type + '/' + str(id) + '.json'
 
+        logger.debug('Getting single record data for id: %s of entity type: %s', id, self.entity_type)
         response = self.session.http_request(path=path)
 
         if response.status_code == 200:
@@ -61,6 +65,7 @@ class BaseAPI(object):
 
         filters['page'] = page
 
+        logger.debug('Getting page: %s of record data of entity type: %s', filters['page'], self.entity_type)
         response = self._get_record_data(filters=filters)
 
         # Append record data to list of all requested data
@@ -95,8 +100,10 @@ class BaseAPI(object):
         elif isinstance(filters, dict):
             # Check if the caller requests a specific page
             if 'page' in filters:
+                logger.debug('Getting page: %s of record data of entity type: %s', filters['page'], self.entity_type)
                 return self._get_record_data(filters=filters)
             else:
+                logger.debug('Getting all record data of entity type: %s', self.entity_type)
                 return self._get_all_record_data(filters=filters)
 
     def get(self, filters=None):
@@ -112,19 +119,23 @@ class BaseAPI(object):
         # If an ID is included, update the record
         id = payload.pop('id', None)
         if id:
+            logger.debug('Updating record id: of entity type: %s', id, self.entity_type)
             path = self.entity_type + '/' + str(id)
             response = self.session.http_request(method='PUT', path=path, options=options)
         # If no ID is included, create a new record
         else:
+            logger.debug('Creating record of entity type: %s', self.entity_type)
             path = self.entity_type
             response = self.session.http_request(method='POST', path=path, options=options)
 
         # Handle response from POST requests
         if response.status_code == 201:
+            logger.debug('Record created.')
             return response.json()
 
         # Handle response from PUT requests
         if response.status_code == 200:
+            logger.debug('Record updated.')
             # farmOS returns no response data for PUT requests
             # response_data = response.json()
 
@@ -137,6 +148,7 @@ class BaseAPI(object):
             return entity_data
 
     def delete(self, id):
+        logger.debug('Deleted record id: %s of entity type: %s', id, self.entity_type)
         path = self.entity_type + '/' + str(id)
         response = self.session.http_request(method='DELETE', path=path)
 

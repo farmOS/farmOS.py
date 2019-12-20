@@ -6,7 +6,13 @@
 ## Functional Tests
 
 Functional tests require a live instance of farmOS to communicate with.
-Configure credentials for the farmOS instance to test against within the `tests/test_credentials.py` file
+Configure credentials for the farmOS instance to test against by setting the following environment variables: 
+For farmOS Drupal Authentication:
+`FARMOS_HOSTNAME`, `FARMOS_RESTWS_USERNAME`, and `FARMOS_RESTWS_PASSWORD`
+
+For farmOS OAuth Authentication (Password Flow):
+`FARMOS_HOSTNAME`, `FARMOS_OAUTH_USERNAME`, `FARMOS_OAUTH_PASSWORD`, `FARMOS_OAUTH_CLIENT_ID`, `FARMOS_OAUTH_CLIENT_SECRET`
+
 ### Authentication
 These tests should live in `tests/functional/test_auth.xx`
 
