@@ -66,13 +66,15 @@ class OAuthSession(OAuth2Session):
                                                redirect_uri=redirect_uri,
                                                auto_refresh_url=token_url,
                                                auto_refresh_kwargs=auto_refresh_kwargs,
-                                               token_updater=self.token_updater)
+                                               token_updater=self.token_updater,
+                                               scope="user_access")
         elif grant_type == "Password":
             super(OAuthSession, self).__init__(token=token,
                                                client=LegacyApplicationClient(client_id=client_id),
                                                auto_refresh_url=token_url,
                                                auto_refresh_kwargs=auto_refresh_kwargs,
-                                               token_updater=self.token_updater)
+                                               token_updater=self.token_updater,
+                                               scope="user_access")
 
         # Save values for later use.
         self._token_url = token_url
@@ -121,7 +123,8 @@ class OAuthSession(OAuth2Session):
                                      client_id=self._client_id,
                                      client_secret=self._client_secret,
                                      username=self._username,
-                                     password=self._password)
+                                     password=self._password,
+                                     scope="user_access")
 
         logger.debug('Fetched OAuth Access Token %s', token)
 

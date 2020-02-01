@@ -29,6 +29,7 @@ class farmOS:
                  password=None,
                  client_id=None,
                  client_secret=None,
+                 scopes=None,
                  config=None,
                  config_file=None,
                  profile_name=None,
@@ -113,8 +114,9 @@ class farmOS:
             hostname = self.config.get(self.profile_name, "hostname", fallback=None)
             username = self.config.get(self.profile_name, "username", fallback=None)
             password = self.config.get(self.profile_name, "password", fallback=None)
-            client_id = self.config.get(self.profile_name, "client_id", fallback=None)
-            client_secret = self.config.get(self.profile_name, "client_secret", fallback=None)
+            client_id = self.config.get(self.profile_name, "oauth_client_id", fallback=None)
+            client_secret = self.config.get(self.profile_name, "oauth_client_secret", fallback=None)
+            scopes = self.config.get(self.profile_name, "oauth_scopes", fallback=None)
 
             # Check if required values were populated.
             if username is None and client_id is None:
@@ -158,8 +160,14 @@ class farmOS:
         else:
             raise Exception("No hostname provided and could not be loaded from config.")
 
-        # Ask for password if username is given without a password.
-        if username is not None and password is None:
+        # Check if we have a token
+        has_token = False
+        if 'access_token' in dict(self.profile):
+            has_token = True
+
+        # Ask for password if username is given without a password
+        # and the profile does not have an OAuth Token.
+        if username is not None and password is None and not has_token:
             from getpass import getpass
             password = getpass('Enter password: ')
 
@@ -175,9 +183,11 @@ class farmOS:
 
                 # Save OAuth Client ID to config.
                 if client_id is not None:
-                    self.config.set(self.profile_name, "client_id", client_id)
+                    self.config.set(self.profile_name, "oauth_client_id", client_id)
                 if client_secret is not None:
-                    self.config.set(self.profile_name, "client_secret", client_secret)
+                    self.config.set(self.profile_name, "oauth_client_secret", client_secret)
+                if scopes is not None:
+                    self.config.set(self.profile_name, "oauth_scopes", scopes)
 
                 token = dict(self.profile)
 
@@ -209,7 +219,6 @@ class farmOS:
                 logger.debug('Using OAuth Password Credentials Grant.')
 
                 self.config.set(self.profile_name, "username", username)
-                self.config.set(self.profile_name, "password", password)
                 self.session = OAuthSession(grant_type="Password",
                                             hostname=hostname,
                                             client_id=client_id,
@@ -339,8 +348,9 @@ class farmOS:
                 # Must be saved as a string in the config.
                 self.config.set(profile_name, "expires_at", str(token['expires_at']))
 
-        if self.config_file is not None:
+        if self.config_file is None:
             logger.debug('No profile configured. New OAuth token will not be saved to config.')
+        else:
             self.config.write(path=self.config_file)
 
     def create_profile(self, profile_name):
