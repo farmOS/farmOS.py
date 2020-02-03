@@ -32,7 +32,6 @@ class farmOS:
                  config=None,
                  config_file=None,
                  profile_name=None,
-                 profile_id=None,
                  token_updater=None):
 
         logger.debug('Creating farmOS client.')
@@ -71,11 +70,6 @@ class farmOS:
         if profile_name is not None:
             self.use_profile(profile_name, create_profile=True)
             logger.debug('Using profile name "%s"', profile_name)
-
-        # Set the profile_id if provided.
-        if profile_id is not None:
-            logger.debug('Using profile id "%s"', profile_id)
-            self.config.set(self.profile_name, 'profile_id', profile_id)
 
         # Load the config boolean for development mode.
         self.development = self.config.getboolean(self.profile_name, "development", fallback=False)
@@ -218,7 +212,7 @@ class farmOS:
                                             password=password,
                                             token=token,
                                             token_url=token_url,
-                                            token_updater=self._token_injector)
+                                            token_updater=self.token_updater)
 
             # Create an OAuth Session with the Authorization Code Grant.
             else:
@@ -237,7 +231,7 @@ class farmOS:
                                             redirect_uri=redirect_url,
                                             token_url=token_url,
                                             authorization_url=authorization_url,
-                                            token_updater=self._token_injector)
+                                            token_updater=self.token_updater)
 
         # Fallback to DrupalAPISession
         if client_id is None and username is not None and password is not None:
@@ -284,22 +278,6 @@ class farmOS:
             return response.json()
 
         return []
-
-    def _token_injector(self, token):
-        """Add a profile_id to a token object.
-
-        This method intercepts the call from OAuth2Session to token_updater
-        to add a profile_id to the token before it is saved. This is useful
-        in cases where there might be many farmOS clients and the client
-        needs to be identified.
-
-        :param token: The OAuth Token.
-        """
-        if self.config.has_option(self.profile_name, 'profile_id'):
-            token['profile_id'] = self.config.get(self.profile_name, 'profile_id')
-
-        self.token_updater(token)
-
 
     def save_token(self, token):
         """Save an OAuth Token to config for later use.
