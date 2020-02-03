@@ -24,9 +24,10 @@ class OAuthSession(OAuth2Session):
     """
 
     def __init__(self, hostname,
-                 client_id,
                  grant_type,
+                 client_id,
                  client_secret=None,
+                 scope=None,
                  username=None,
                  password=None,
                  token=None,
@@ -39,12 +40,6 @@ class OAuthSession(OAuth2Session):
         # Initialize the session as not authenticated.
         self.authenticated = False
         self.csrf_token = None
-
-        # Provide a default token_saver is nothing is provided.
-        self.token_updater = self._token_saver
-        # Save a provided token updater.
-        if token_updater is not None:
-            self.token_updater = token_updater
 
         # Create a dictionary of credentials required to pass along with Refresh Tokens
         # Required to generate a new access token
@@ -66,13 +61,20 @@ class OAuthSession(OAuth2Session):
                                                redirect_uri=redirect_uri,
                                                auto_refresh_url=token_url,
                                                auto_refresh_kwargs=auto_refresh_kwargs,
-                                               token_updater=self.token_updater)
+                                               token_updater=token_updater,
+                                               scope=scope)
         elif grant_type == "Password":
             super(OAuthSession, self).__init__(token=token,
                                                client=LegacyApplicationClient(client_id=client_id),
                                                auto_refresh_url=token_url,
                                                auto_refresh_kwargs=auto_refresh_kwargs,
-                                               token_updater=self.token_updater)
+                                               token_updater=token_updater,
+                                               scope=scope)
+
+        # Check if 'user_access' scope is included.
+        # If so, indicate that we have full User Access and should request
+        # a CSRF token to allow making non-GET requests.
+        self.has_user_access = scope.find('user_access') > -1
 
         # Save values for later use.
         self._token_url = token_url
@@ -83,54 +85,51 @@ class OAuthSession(OAuth2Session):
         self._password = password
         self.hostname = hostname
 
-        # Check if an existing token was provided.
-        if token is not None and 'access_token' in token:
-            logger.debug('Using provided OAuth Token. Finishing authentication.')
-            # Request a session token from the RESTful Web Services module
-            self.csrf_token = _get_csrf_token(self)
-
-            self.is_authenticated(check=True)
-
     def authenticate(self):
         """Authenticates with the farmOS site.
 
         Returns True or False indicating whether or not
         the authentication was successful
         """
-        token = None
+        token = self.token
 
-        logger.debug('Retrieving new OAuth Token.')
+        if 'access_token' not in token:
+            logger.debug('Retrieving new OAuth Token.')
 
-        if self.grant_type == "Authorization":
-            authorization_url, state = self.authorization_url(self._authorization_base_url,
-                                                              access_type="offline",
-                                                              prompt="select_account")
+            if self.grant_type == "Authorization":
+                authorization_url, state = self.authorization_url(self._authorization_base_url,
+                                                                  access_type="offline",
+                                                                  prompt="select_account")
 
-            print('Please go here and authorize,', authorization_url)
+                print('Please go here and authorize,', authorization_url)
 
-            # Get the authorization verifier code from the callback url
-            redirect_response = input('Paste the full redirect URL here:')
+                # Get the authorization verifier code from the callback url
+                redirect_response = input('Paste the full redirect URL here:')
 
-            # Fetch the access token
-            token = self.fetch_token(self._token_url,
-                                     client_secret=self._client_secret,
-                                     authorization_response=redirect_response)
+                # Fetch the access token
+                token = self.fetch_token(self._token_url,
+                                         client_secret=self._client_secret,
+                                         authorization_response=redirect_response)
 
-        elif self.grant_type == "Password":
-            token = self.fetch_token(token_url=self._token_url,
-                                     client_id=self._client_id,
-                                     client_secret=self._client_secret,
-                                     username=self._username,
-                                     password=self._password)
+            elif self.grant_type == "Password":
+                token = self.fetch_token(token_url=self._token_url,
+                                         client_id=self._client_id,
+                                         client_secret=self._client_secret,
+                                         username=self._username,
+                                         password=self._password,
+                                         scope=self.scope)
 
-        logger.debug('Fetched OAuth Access Token %s', token)
+            logger.debug('Fetched OAuth Access Token %s', token)
 
-        # Save the token.
-        logger.debug('Saving token with token_updater utility.')
-        self.token_updater(token)
+            # Save the token.
+            logger.debug('Saving token with token_updater utility.')
+            self.token_updater(token)
 
-        # Request a session token from the RESTful Web Services module
-        self.csrf_token = _get_csrf_token(self)
+        # If the OAuth Token has user access, request a session token
+        # from the RESTful Web Services module. This is required for
+        # non HTTP GET requests.
+        if self.has_user_access:
+            self.csrf_token = _get_csrf_token(self)
 
         return self.is_authenticated(check=True)
 
@@ -165,24 +164,15 @@ class OAuthSession(OAuth2Session):
 
     def is_authenticated(self, check=False):
         """Helper function that returns True or False if the Session is Authenticated"""
-        # Check if the session has a csrf_token
-        if self.csrf_token is None:
+        # If the OAuth Token has user access, check if the session
+        # has a csrf_token. This is required for non HTTP GET requests.
+        if self.has_user_access and self.csrf_token is None:
             return False
 
         if check is False:
             return self.authenticated
         else:
             return _is_authenticated(self)
-
-    def _token_saver(self, token):
-        """A utility to save tokens in the OAuth Session
-
-        Saves Authentication and Refresh Tokens within the session.
-
-        :param token: The OAuth2 token dictionary.
-        """
-        print("Got a new token: " + token['access_token'] + " expires in " + token['expires_in'])
-        self.token = token
 
 
 # Use a Requests Session to store cookies across requests.
