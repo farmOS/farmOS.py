@@ -149,7 +149,7 @@ class farmOS:
             logger.debug('Complete hostname configured as %s', hostname)
 
             # Save the hostname in the config.
-            self.config.set(self.profile_name, "hostname", hostname)
+            self.config[self.profile_name]["hostname"] = hostname
 
         else:
             raise Exception("No hostname provided and could not be loaded from config.")
@@ -177,20 +177,20 @@ class farmOS:
 
                 # Save OAuth Client ID to config.
                 if client_id is not None:
-                    self.config.set(self.profile_name, "oauth_client_id", client_id)
+                    self.config[self.profile_name]["oauth_client_id"] = client_id
                 if client_secret is not None:
-                    self.config.set(self.profile_name, "oauth_client_secret", client_secret)
+                    self.config[self.profile_name]["oauth_client_secret"] = client_secret
                 if scope is not None:
-                    self.config.set(self.profile_name, "oauth_scope", scope)
+                    self.config[self.profile_name]["oauth_scope"] = scope
 
                 # Initialize an empty token dict.
                 token = {}
 
                 if 'access_token' in self.config[profile_name]:
-                    token['access_token'] = self.config[profile_name]['access_token'],
+                    token['access_token'] = self.config[profile_name]['access_token']
 
                 if 'refresh_token' in self.config[profile_name]:
-                    token['refresh_token'] = self.config[profile_name]['refresh_token'],
+                    token['refresh_token'] = self.config[profile_name]['refresh_token']
 
                 # Check the token expiration time.
                 if 'expires_at' in self.config[profile_name]:
@@ -209,7 +209,7 @@ class farmOS:
             if username is not None and password is not None:
                 logger.debug('Using OAuth Password Credentials Grant.')
 
-                self.config.set(self.profile_name, "username", username)
+                self.config[self.profile_name]["username"] = username
                 self.session = OAuthSession(grant_type="Password",
                                             hostname=hostname,
                                             client_id=client_id,
@@ -305,25 +305,25 @@ class farmOS:
             logger.debug('Saving new OAuth token to profile %s', profile_name)
 
             if 'access_token' in token:
-                self.config.set(profile_name, "access_token", token['access_token'])
+                self.config[self.profile_name]["access_token"] = token['access_token']
 
             if 'expires_in' in token:
                 # token['expires_in'] is an int, the access_token lifetime.
                 # Must be saved as a string in the config.
-                self.config.set(profile_name, "expires_in", str(token['expires_in']))
+                self.config[self.profile_name]["expires_in"] = str(token['expires_in'])
 
             if 'token_type' in token:
-                self.config.set(profile_name, "token_type", token['token_type'])
+                self.config[self.profile_name]["token_type"] = token['token_type']
 
             if 'refresh_token' in token:
-                self.config.set(profile_name, "refresh_token", token['refresh_token'])
+                self.config[self.profile_name]["refresh_token"] = token['refresh_token']
 
             if 'expires_at' in token:
                 # token['expires_at'] is a float, the access_token expiration time.
                 # requests-oauthlib generates this value as
                 #       expires_at = time.time() + expires_in
                 # Must be saved as a string in the config.
-                self.config.set(profile_name, "expires_at", str(token['expires_at']))
+                self.config[self.profile_name]["expires_at"] = str(token['expires_at'])
 
         if self.config_file is None:
             logger.debug('No profile configured. New OAuth token will not be saved to config.')
