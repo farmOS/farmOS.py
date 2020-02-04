@@ -107,7 +107,7 @@ class farmOS:
 
             hostname = self.config.get(self.profile_name, "hostname", fallback=None)
             username = self.config.get(self.profile_name, "username", fallback=None)
-            password = self.config.get(self.profile_name, "password", fallback=None)
+            password = self.config.get(self.profile_name, "password", fallback=None, raw=True)
             client_id = self.config.get(self.profile_name, "oauth_client_id", fallback=None)
             client_secret = self.config.get(self.profile_name, "oauth_client_secret", fallback=None)
             scope = self.config.get(self.profile_name, "oauth_scope", fallback=None)
