@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6b2] -- 2020-02-04
+### Fixed
+- Fix spelling of default `oauth_scope` config key
+- Use mapping protocol access instead of the Legacy get/set API for ConfigParser. Fixes bug for loading tokens from config.
+
 ## [0.1.6b1] -- 2020-02-03
 ### Added
 - Support for custom OAuth Clients [#32](https://github.com/farmOS/farmOS.py/pull/32)
