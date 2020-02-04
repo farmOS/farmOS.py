@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6b1] -- 2020-02-03
+### Added
+- Support for custom OAuth Clients [#32](https://github.com/farmOS/farmOS.py/pull/32)
+
+### Fixed
+- Complex passwords are not correctly read from config file. [#29](https://github.com/farmOS/farmOS.py/issues/29)
+
 ## [0.1.5] -- 2019-12-19
 ### Added
 - Add logging with the Python standard logging module. [#21](https://github.com/farmOS/farmOS.py/issues/21)
