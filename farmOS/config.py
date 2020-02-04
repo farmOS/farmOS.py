@@ -16,7 +16,7 @@ class ClientConfig(ConfigParser):
             'oauth_client_id': 'farmos_api_client',
             'oauth_client_secret': '',
             'oauth_redirect_url': '%(hostname)s/api/authorized',
-            'oauth_scopes': 'user_access',
+            'oauth_scope': 'user_access',
             'oauth_token_url': '%(hostname)s/oauth2/token',
         }
 
