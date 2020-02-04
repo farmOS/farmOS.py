@@ -156,7 +156,7 @@ class farmOS:
 
         # Check if we have a token
         has_token = False
-        if 'access_token' in dict(self.profile):
+        if self.profile and 'access_token' in dict(self.profile):
             has_token = True
 
         # Ask for password if username is given without a password
