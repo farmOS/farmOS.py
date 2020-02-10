@@ -30,6 +30,7 @@ class farmOS:
                  client_id=None,
                  client_secret=None,
                  scope=None,
+                 token=None,
                  config=None,
                  config_file=None,
                  profile_name=None,
@@ -156,7 +157,9 @@ class farmOS:
 
         # Check if we have a token
         has_token = False
-        if self.profile and 'access_token' in dict(self.profile):
+        if token is not None:
+            has_token = True
+        elif self.profile and 'access_token' in dict(self.profile):
             has_token = True
 
         # Ask for password if username is given without a password
@@ -171,8 +174,7 @@ class farmOS:
             token_url = self.config.get(self.profile_name, "oauth_token_url")
 
             # Load saved Authentication Profile from config.
-            token = None
-            if self.has_profile():
+            if token is None and self.has_profile():
                 logger.debug('Loading Authentication Profile from config.')
 
                 # Save OAuth Client ID to config.
@@ -192,18 +194,21 @@ class farmOS:
                 if 'refresh_token' in self.config[profile_name]:
                     token['refresh_token'] = self.config[profile_name]['refresh_token']
 
-                # Check the token expiration time.
                 if 'expires_at' in self.config[profile_name]:
-                    # Create datetime objects for comparison.
-                    now = datetime.now()
-                    expiration_time = datetime.fromtimestamp(float(self.config[profile_name]['expires_at']))
+                    token['expires_at'] = self.config[profile_name]['expires_at']
 
-                    # Calculate seconds until expiration.
-                    timedelta = expiration_time - now
-                    expires_in = timedelta.total_seconds()
+            # Check the token expiration time.
+            if token is not None and 'expires_at' in token:
+                # Create datetime objects for comparison.
+                now = datetime.now()
+                expiration_time = datetime.fromtimestamp(float(token['expires_at']))
 
-                    # Update the token expires_in value
-                    token['expires_in'] = expires_in
+                # Calculate seconds until expiration.
+                timedelta = expiration_time - now
+                expires_in = timedelta.total_seconds()
+
+                # Update the token expires_in value
+                token['expires_in'] = expires_in
 
             # Create an OAuth Session with the Password Credentials Grant.
             if username is not None and password is not None:
