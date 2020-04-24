@@ -9,6 +9,7 @@ from .config import ClientConfig
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+
 class farmOS:
 
     """Create a new farmOS instance.
@@ -97,7 +98,6 @@ class farmOS:
         if token_updater is not None:
             logger.debug('Using provided token_updater utility.')
             self.token_updater = token_updater
-
 
         self.session = None
 

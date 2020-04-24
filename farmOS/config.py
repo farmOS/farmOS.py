@@ -38,7 +38,6 @@ class ClientConfig(ConfigParser):
             if value is not None:
                 self.set(profile_name, key, value)
 
-
     def write(self, path="farmos_default_config.cfg"):
         with open(path, "w") as config_file:
             super().write(config_file)
