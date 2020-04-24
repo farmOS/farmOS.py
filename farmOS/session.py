@@ -41,6 +41,14 @@ class OAuthSession(OAuth2Session):
         self.authenticated = False
         self.csrf_token = None
 
+        # Check if 'user_access' scope is included.
+        # If so, indicate that we have full User Access and should request
+        # a CSRF token to allow making non-GET requests.
+        self.has_user_access = False
+        if scope is None:
+            scope = 'user_access'
+        self.has_user_access = scope.find('user_access') > -1
+
         # Create a dictionary of credentials required to pass along with Refresh Tokens
         # Required to generate a new access token
         auto_refresh_kwargs = {'client_id': client_id,
@@ -70,11 +78,6 @@ class OAuthSession(OAuth2Session):
                                                auto_refresh_kwargs=auto_refresh_kwargs,
                                                token_updater=token_updater,
                                                scope=scope)
-
-        # Check if 'user_access' scope is included.
-        # If so, indicate that we have full User Access and should request
-        # a CSRF token to allow making non-GET requests.
-        self.has_user_access = scope.find('user_access') > -1
 
         # Save values for later use.
         self._token_url = token_url
