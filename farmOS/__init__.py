@@ -210,6 +210,9 @@ class farmOS:
                 # Update the token expires_in value
                 token['expires_in'] = expires_in
 
+                # Unset the 'expires_at' key.
+                token.pop('expires_at')
+
             # Create an OAuth Session with the Password Credentials Grant.
             if username is not None and password is not None:
                 logger.debug('Using OAuth Password Credentials Grant.')
