@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6] -- 2020-04-24
+
+### Added
+- Support for OAuth Clients on the farmOS Server!
+- Default to `user_access` OAuth Scope
+- Set default `oauth_client_id` to `farm`
+- Updated documentation.
+
+### Fixed
+- Unset the 'expires_at' key to avoid Requests Exception
+
 ## [0.1.6b3] -- 2020-02-10
 ### Added
 - Add an optional `token` parameter to the client API for supplying OAuth tokens.
