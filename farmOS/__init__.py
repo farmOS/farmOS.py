@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from urllib.parse import urlparse, urlunparse
 
-from .session import DrupalAuthSession, OAuthSession
+from .session import OAuthSession
 from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
 from .config import ClientConfig
 
@@ -248,12 +248,6 @@ class farmOS:
                                             token_url=token_url,
                                             authorization_url=authorization_url,
                                             token_updater=self.token_updater)
-
-        # Fallback to DrupalAPISession
-        if client_id is None and username is not None and password is not None:
-            logger.debug('Authenticating with Drupal RESTws Authentication.')
-            # Create a session with requests
-            self.session = DrupalAuthSession(hostname, username, password)
 
         self._username = username
         self._client_id = client_id
