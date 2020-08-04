@@ -24,14 +24,10 @@ class OAuthSession(OAuth2Session):
     """
 
     def __init__(self, hostname,
-                 grant_type,
                  client_id,
                  client_secret=None,
                  scope=None,
-                 username=None,
-                 password=None,
                  token=None,
-                 redirect_uri=None,
                  token_url=None,
                  authorization_url=None,
                  token_updater=None,
@@ -47,40 +43,21 @@ class OAuthSession(OAuth2Session):
                                'client_secret': client_secret
                                }
 
-        # Validate the grant type.
-        valid_grant_types = ["Authorization", "Password"]
-        if grant_type not in valid_grant_types:
-            raise Exception(grant_type + " is not a supported OAuth Grant Type")
-
-        # Save the Grant Type
-        self.grant_type = grant_type
-
-        if grant_type == "Authorization":
-            super(OAuthSession, self).__init__(token=token,
-                                               client_id=client_id,
-                                               redirect_uri=redirect_uri,
-                                               auto_refresh_url=token_url,
-                                               auto_refresh_kwargs=auto_refresh_kwargs,
-                                               token_updater=token_updater,
-                                               scope=scope)
-        elif grant_type == "Password":
-            super(OAuthSession, self).__init__(token=token,
-                                               client=LegacyApplicationClient(client_id=client_id),
-                                               auto_refresh_url=token_url,
-                                               auto_refresh_kwargs=auto_refresh_kwargs,
-                                               token_updater=token_updater,
-                                               scope=scope)
+        super(OAuthSession, self).__init__(token=token,
+                                           client=LegacyApplicationClient(client_id=client_id),
+                                           auto_refresh_url=token_url,
+                                           auto_refresh_kwargs=auto_refresh_kwargs,
+                                           token_updater=token_updater,
+                                           scope=scope)
 
         # Save values for later use.
         self._token_url = token_url
         self._authorization_base_url = authorization_url
         self._client_id = client_id
         self._client_secret = client_secret
-        self._username = username
-        self._password = password
         self.hostname = hostname
 
-    def authenticate(self):
+    def authorize(self, username, password, scope):
         """Authenticates with the farmOS site.
 
         Returns True or False indicating whether or not
@@ -88,39 +65,32 @@ class OAuthSession(OAuth2Session):
         """
         token = self.token
 
-        if 'access_token' not in token:
-            logger.debug('Retrieving new OAuth Token.')
+        logger.debug('Retrieving new OAuth Token.')
 
-            if self.grant_type == "Authorization":
-                authorization_url, state = self.authorization_url(self._authorization_base_url,
-                                                                  access_type="offline",
-                                                                  prompt="select_account")
+        # Ask for username if not provided.
+        if username is None:
+            from getpass import getpass
+            username = getpass('Enter username: ')
 
-                print('Please go here and authorize,', authorization_url)
+        # Ask for password if not provided.
+        if password is None:
+            from getpass import getpass
+            password = getpass('Enter password: ')
 
-                # Get the authorization verifier code from the callback url
-                redirect_response = input('Paste the full redirect URL here:')
+        token = self.fetch_token(token_url=self._token_url,
+                                 client_id=self._client_id,
+                                 client_secret=self._client_secret,
+                                 username=username,
+                                 password=password,
+                                 scope=scope)
 
-                # Fetch the access token
-                token = self.fetch_token(self._token_url,
-                                         client_secret=self._client_secret,
-                                         authorization_response=redirect_response)
+        logger.debug('Fetched OAuth Access Token %s', token)
 
-            elif self.grant_type == "Password":
-                token = self.fetch_token(token_url=self._token_url,
-                                         client_id=self._client_id,
-                                         client_secret=self._client_secret,
-                                         username=self._username,
-                                         password=self._password,
-                                         scope=self.scope)
+        # Save the token.
+        logger.debug('Saving token with token_updater utility.')
+        self.token_updater(token)
 
-            logger.debug('Fetched OAuth Access Token %s', token)
-
-            # Save the token.
-            logger.debug('Saving token with token_updater utility.')
-            self.token_updater(token)
-        else:
-            return True
+        return token
 
     def http_request(self, path, method='GET', options=None, params=None, force=False):
         """Raw HTTP request helper function.

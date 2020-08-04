@@ -25,12 +25,10 @@ class farmOS:
     """
 
     def __init__(self,
-                 hostname=None,
-                 username=None,
-                 password=None,
-                 client_id=None,
+                 hostname,
+                 client_id='farm',
                  client_secret=None,
-                 scope=None,
+                 scope='user_access',
                  token=None,
                  config=None,
                  config_file=None,
@@ -101,22 +99,6 @@ class farmOS:
 
         self.session = None
 
-        # A username or client_id is required for authentication to farmOS.
-        if username is None and client_id is None:
-            # Try to load values from config profile.
-            logger.debug('No username or client_id provided. Loading from config...')
-
-            hostname = self.config.get(self.profile_name, "hostname", fallback=None)
-            username = self.config.get(self.profile_name, "username", fallback=None)
-            password = self.config.get(self.profile_name, "password", fallback=None, raw=True)
-            client_id = self.config.get(self.profile_name, "oauth_client_id", fallback=None)
-            client_secret = self.config.get(self.profile_name, "oauth_client_secret", fallback=None)
-            scope = self.config.get(self.profile_name, "oauth_scope", fallback=None)
-
-            # Check if required values were populated.
-            if username is None and client_id is None:
-                raise Exception("No authentication method provided.")
-
         if hostname is not None:
             valid_schemes = ["http", "https"]
             default_scheme = "http" if self.development else "https"
@@ -162,94 +144,60 @@ class farmOS:
         elif self.profile and 'access_token' in dict(self.profile):
             has_token = True
 
-        # Ask for password if username is given without a password
-        # and the profile does not have an OAuth Token.
-        if username is not None and password is None and not has_token:
-            from getpass import getpass
-            password = getpass('Enter password: ')
+        logger.debug('Creating an OAuth Session...')
+        token_url = self.config.get(self.profile_name, "oauth_token_url")
 
-        # If a client_id is supplied, try to create an OAuth Session
-        if client_id is not None:
-            logger.debug('Creating an OAuth Session...')
-            token_url = self.config.get(self.profile_name, "oauth_token_url")
+        # Load saved Authentication Profile from config.
+        if token is None and self.has_profile():
+            logger.debug('Loading Authentication Profile from config.')
 
-            # Load saved Authentication Profile from config.
-            if token is None and self.has_profile():
-                logger.debug('Loading Authentication Profile from config.')
+            # Save OAuth Client ID to config.
+            if client_id is not None:
+                self.config[self.profile_name]["oauth_client_id"] = client_id
+            if client_secret is not None:
+                self.config[self.profile_name]["oauth_client_secret"] = client_secret
+            if scope is not None:
+                self.config[self.profile_name]["oauth_scope"] = scope
 
-                # Save OAuth Client ID to config.
-                if client_id is not None:
-                    self.config[self.profile_name]["oauth_client_id"] = client_id
-                if client_secret is not None:
-                    self.config[self.profile_name]["oauth_client_secret"] = client_secret
-                if scope is not None:
-                    self.config[self.profile_name]["oauth_scope"] = scope
+            # Initialize an empty token dict.
+            token = {}
 
-                # Initialize an empty token dict.
-                token = {}
+            if 'access_token' in self.config[profile_name]:
+                token['access_token'] = self.config[profile_name]['access_token']
 
-                if 'access_token' in self.config[profile_name]:
-                    token['access_token'] = self.config[profile_name]['access_token']
+            if 'refresh_token' in self.config[profile_name]:
+                token['refresh_token'] = self.config[profile_name]['refresh_token']
 
-                if 'refresh_token' in self.config[profile_name]:
-                    token['refresh_token'] = self.config[profile_name]['refresh_token']
+            if 'expires_at' in self.config[profile_name]:
+                token['expires_at'] = self.config[profile_name]['expires_at']
 
-                if 'expires_at' in self.config[profile_name]:
-                    token['expires_at'] = self.config[profile_name]['expires_at']
+        # Check the token expiration time.
+        if token is not None and 'expires_at' in token:
+            # Create datetime objects for comparison.
+            now = datetime.now()
+            expiration_time = datetime.fromtimestamp(float(token['expires_at']))
 
-            # Check the token expiration time.
-            if token is not None and 'expires_at' in token:
-                # Create datetime objects for comparison.
-                now = datetime.now()
-                expiration_time = datetime.fromtimestamp(float(token['expires_at']))
+            # Calculate seconds until expiration.
+            timedelta = expiration_time - now
+            expires_in = timedelta.total_seconds()
 
-                # Calculate seconds until expiration.
-                timedelta = expiration_time - now
-                expires_in = timedelta.total_seconds()
+            # Update the token expires_in value
+            token['expires_in'] = expires_in
 
-                # Update the token expires_in value
-                token['expires_in'] = expires_in
+            # Unset the 'expires_at' key.
+            token.pop('expires_at')
 
-                # Unset the 'expires_at' key.
-                token.pop('expires_at')
+        logger.debug('Creating OAuth Session from existing token.')
 
-            # Create an OAuth Session with the Password Credentials Grant.
-            if username is not None and password is not None:
-                logger.debug('Using OAuth Password Credentials Grant.')
+        # Create an OAuth Session
+        self.session = OAuthSession(hostname=hostname,
+                                    client_id=client_id,
+                                    client_secret=client_secret,
+                                    scope=scope,
+                                    token=token,
+                                    token_url=token_url,
+                                    token_updater=self.token_updater)
 
-                self.config[self.profile_name]["username"] = username
-                self.session = OAuthSession(grant_type="Password",
-                                            hostname=hostname,
-                                            client_id=client_id,
-                                            client_secret=client_secret,
-                                            scope=scope,
-                                            username=username,
-                                            password=password,
-                                            token=token,
-                                            token_url=token_url,
-                                            token_updater=self.token_updater)
-
-            # Create an OAuth Session with the Authorization Code Grant.
-            else:
-                logger.debug('Starting OAuth Authorization Code flow.')
-
-                # Load saved OAuth URLs from config.
-                authorization_url = self.config.get(self.profile_name, "oauth_authorization_url")
-                redirect_url = self.config.get(self.profile_name, "oauth_redirect_url")
-
-                # Create an OAuth Session
-                self.session = OAuthSession(grant_type="Authorization",
-                                            hostname=hostname,
-                                            client_id=client_id,
-                                            client_secret=client_secret,
-                                            scope=scope,
-                                            token=token,
-                                            redirect_uri=redirect_url,
-                                            token_url=token_url,
-                                            authorization_url=authorization_url,
-                                            token_updater=self.token_updater)
-
-        self._username = username
         self._client_id = client_id
         self._client_secret = client_secret
 
@@ -262,14 +210,9 @@ class farmOS:
         self.area = AreaAPI(self.session)
         self.term = TermAPI(self.session)
 
-    def authenticate(self):
-        """Authenticates with the farmOS site.
-
-        Returns True or False indicating whether or not
-        the authentication was successful
-        """
-        logger.debug('Authenticating with farmOS server.')
-        return self.session.authenticate()
+    def authorize(self, username=None, password=None, scope='user_access'):
+        """Authorize with the farmOS server. """
+        return self.session.authorize(username, password, scope)
 
     def info(self, path='farm.json'):
         """Retrieve info about the farmOS instance"""

@@ -14,7 +14,6 @@ class ClientConfig(ConfigParser):
             'oauth_authorization_url': '%(hostname)s/oauth2/authorize',
             'oauth_client_id': 'farm',
             'oauth_client_secret': '',
-            'oauth_redirect_url': '%(hostname)s/api/authorized',
             'oauth_scope': 'user_access',
             'oauth_token_url': '%(hostname)s/oauth2/token',
         }
