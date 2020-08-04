@@ -9,7 +9,6 @@ class ClientConfig(ConfigParser):
             **kwargs):
 
         config_defaults = {
-            'auto_authenticate': 'True',
             'development': 'False',
             'oauthlib_insecure_transport': 'False',
             'oauth_authorization_url': '%(hostname)s/oauth2/authorize',

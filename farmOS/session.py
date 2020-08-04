@@ -37,9 +37,6 @@ class OAuthSession(OAuth2Session):
                  token_updater=None,
                  *args, **kwargs):
 
-        # Initialize the session as not authenticated.
-        self.authenticated = False
-
         # Default to the "user_access" scope.
         if scope is None:
             scope = 'user_access'
@@ -137,22 +134,8 @@ class OAuthSession(OAuth2Session):
         :return: requests response object.
         """
 
-        # If the session has not been authenticated
-        # and the request does not have force=True,
-        # raise NotAuthenticatedError
-        if not self.is_authenticated() and not force:
-            raise NotAuthenticatedError()
-
         # Return response from the _http_request helper function.
         return _http_request(self, path, method, options, params)
-
-    def is_authenticated(self, check=False):
-        """Helper function that returns True or False if the Session is Authenticated"""
-        if check is False:
-            return self.authenticated
-        else:
-            return _is_authenticated(self)
-
 
 def _http_request(session, path, method='GET', options=None, params=None, headers=None):
     """Raw HTTP request helper function.
@@ -218,19 +201,3 @@ def _http_request(session, path, method='GET', options=None, params=None, header
 
     # Return the response.
     return response
-
-
-def _is_authenticated(session):
-    """Helper function to check if the Session is authenticated."""
-
-    try:
-        response = session.http_request(path='farm.json', force=True)
-    except NotAuthenticatedError:
-        return False
-
-    if response.status_code == 200:
-        session.authenticated = True
-        return True
-    else:
-        session.authenticated = False
-        return False

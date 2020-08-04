@@ -262,15 +262,6 @@ class farmOS:
         self.area = AreaAPI(self.session)
         self.term = TermAPI(self.session)
 
-        # Authenticate the session if auto_authenticate is enabled
-        # and the session has not already been authenticated.
-        # (OAuthSession will authenticate if an existing token was provided at startup)
-        auto_authenticate = self.config.getboolean(self.profile_name, "auto_authenticate", fallback=True)
-        if auto_authenticate and not self.session.is_authenticated():
-            logger.debug('Auto authenticate set to true.')
-            status = self.session.authenticate()
-            logger.debug('Authenticated: %s', status)
-
     def authenticate(self):
         """Authenticates with the farmOS site.
 
