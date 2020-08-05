@@ -6,6 +6,7 @@ from oauthlib.oauth2 import LegacyApplicationClient
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+
 class OAuthSession(OAuth2Session):
     """OAuthSession uses OAuth2 to authenticate with farmOS
 
@@ -90,7 +91,7 @@ class OAuthSession(OAuth2Session):
 
         return token
 
-    def http_request(self, path, method='GET', options=None, params=None, force=False):
+    def http_request(self, path, method='GET', options=None, params=None):
         """Raw HTTP request helper function.
 
         Keyword arguments:
@@ -98,74 +99,52 @@ class OAuthSession(OAuth2Session):
         :param method: the HTTP method.
         :param options: a dictionary of data and parameters to pass on to the request.
         :param params: URL query parameters.
-        :param force: Force the request regardless of Authenticated status.
         :return: requests response object.
         """
 
-        # Return response from the _http_request helper function.
-        return _http_request(self, path, method, options, params)
+        # Strip protocol, hostname, leading/trailing slashes, and whitespace from the path.
+        path = path.strip('/')
+        path = path.strip()
 
-def _http_request(session, path, method='GET', options=None, params=None, headers=None):
-    """Raw HTTP request helper function.
+        # Assemble the URL.
+        url = '{}/{}'.format(self.hostname, path)
 
-    Keyword arguments:
-    :param session: The requests Session object to call a request with.
-    :param path: the URL path.
-    :param method: the HTTP method.
-    :param options: a dictionary of data and parameters to pass on to the request.
-    :param params: URL query parameters.
-    :param headers: Dictionary of HTTP headers to include in the request.
-    :return: requests response object.
+        # Automatically follow redirects, unless this is a POST request.
+        # The Python requests library converts POST to GET during a redirect.
+        # Allow this to be overridden in options.
+        allow_redirects = True
+        if method in ['POST', 'PUT']:
+            allow_redirects = False
+        if options and 'allow_redirects' in options:
+            allow_redirects = options['allow_redirects']
 
-    """
-    # Strip protocol, hostname, leading/trailing slashes, and whitespace from the path.
-    path = path.strip('/')
-    path = path.strip()
+        # If there is data to be sent, include it.
+        data = None
+        if options and 'data' in options:
+            data = options['data']
 
-    # Assemble the URL.
-    url = '{}/{}'.format(session.hostname, path)
+        # If there is a json data to be sent, include it.
+        json = None
+        if options and 'json' in options:
+            json = options['json']
 
-    # Automatically follow redirects, unless this is a POST request.
-    # The Python requests library converts POST to GET during a redirect.
-    # Allow this to be overridden in options.
-    allow_redirects = True
-    if method in ['POST', 'PUT']:
-        allow_redirects = False
-    if options and 'allow_redirects' in options:
-        allow_redirects = options['allow_redirects']
+        # Perform the request.
+        response = self.request(method,
+                                url,
+                                allow_redirects=allow_redirects,
+                                data=data,
+                                json=json,
+                                params=params)
 
-    # If there is data to be sent, include it.
-    data = None
-    if options and 'data' in options:
-        data = options['data']
+        # If this is a POST request, and a redirect occurred, attempt to re-POST.
+        redirect_codes = [300, 301, 302, 303, 304, 305, 306, 307, 308]
+        if method in ['POST', 'PUT'] and response.status_code in redirect_codes:
+            if response.headers['Location']:
+                response = self.request(method,
+                                        response.headers['Location'],
+                                        allow_redirects=True,
+                                        data=data,
+                                        json=json, params=params)
 
-    # If there is a json data to be sent, include it.
-    json = None
-    if options and 'json' in options:
-        json = options['json']
-
-    if headers is None:
-        headers = {}
-
-    # Perform the request.
-    response = session.request(method,
-                               url,
-                               headers=headers,
-                               allow_redirects=allow_redirects,
-                               data=data,
-                               json=json,
-                               params=params)
-
-    # If this is a POST request, and a redirect occurred, attempt to re-POST.
-    redirect_codes = [300, 301, 302, 303, 304, 305, 306, 307, 308]
-    if method in ['POST', 'PUT'] and response.status_code in redirect_codes:
-        if response.headers['Location']:
-            response = session.request(method,
-                                       response.headers['Location'],
-                                       headers=headers,
-                                       allow_redirects=True,
-                                       data=data,
-                                       json=json, params=params)
-
-    # Return the response.
-    return response
+        # Return the response.
+        return response
