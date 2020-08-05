@@ -2,6 +2,8 @@ import logging
 from datetime import datetime
 from urllib.parse import urlparse, urlunparse
 
+from requests import HTTPError
+
 from .session import OAuthSession
 from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
 
