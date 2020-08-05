@@ -146,5 +146,8 @@ class OAuthSession(OAuth2Session):
                                         data=data,
                                         json=json, params=params)
 
+        # Raise exception if error.
+        response.raise_for_status()
+
         # Return the response.
         return response
