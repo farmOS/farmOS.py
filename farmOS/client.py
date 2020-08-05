@@ -29,10 +29,7 @@ class BaseAPI(object):
         logger.debug('Getting single record data for id: %s of entity type: %s', id, self.entity_type)
         response = self.session.http_request(path=path)
 
-        if response.status_code == 200:
-            return response.json()
-
-        return []
+        return response.json()
 
     def _get_record_data(self, filters):
         """Retrieve one page of raw record data from the farmOS API."""
@@ -46,15 +43,14 @@ class BaseAPI(object):
         # Return object
         data = {}
 
-        if response.status_code == 200:
-            response = response.json()
-            if 'list' in response:
-                data['list'] = response['list']
-                data['page'] = {
-                    'self': _parse_api_page(url=response['self']),
-                    'first': _parse_api_page(url=response['first']),
-                    'last': _parse_api_page(url=response['last']),
-                }
+        response = response.json()
+        if 'list' in response:
+            data['list'] = response['list']
+            data['page'] = {
+                'self': _parse_api_page(url=response['self']),
+                'first': _parse_api_page(url=response['first']),
+                'last': _parse_api_page(url=response['last']),
+            }
 
         return data
 
