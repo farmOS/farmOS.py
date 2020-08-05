@@ -50,14 +50,12 @@ $ pip install farmOS
 
 ### Authentication
 
-#### OAuth (Added in v0.1.6)
+The farmOS.py client authenticates with the farmOS server via OAuth `Bearer`
+tokens. Before authenticating with the server, a farmOS client must be 
+created and an OAuth Authorization flow must be completed (unless an optional 
+`token` was provided when creating the client).
 
-Support for OAuth was added to [farmOS.py] starting with v0.1.6. To authorize
-and authenticate via OAuth, just supply the required parameters when creating
-a client. The library will know to use an OAuth Password Credentials or 
-Authorization Code flow.
-
-##### OAuth Password Credentials (most common)
+##### Authorizing with Password Credentials (most common)
 
 ```python
 from farmOS import farmOS
@@ -66,49 +64,61 @@ hostname = "myfarm.farmos.net"
 username = "username"
 password = "password"
 
+# Create the client.
 farm_client = farmOS(
     hostname=hostname,
-    username=username,
-    password=password,
-    client_id = "farm", # The default oauth client_id enabled on all farmOS servers.
-    # scope="farm_info" # The default scope is "user_access". Only needed if testing different scope.
+    client_id = "farm", # Optional. The default oauth client_id "farm" is enabled on all farmOS servers.
+    scope="user_access" # Optional. The default scope is "user_access". Only needed if authorizing with a differnt scope.
 )
+
+# Authorize the client, save the token.
+token = farm_client.authorize(username, password, scope="user_access")
 ```
 
-Running from a Python Console, the `password` can also be omitted and entered
-at runtime. This allows testing without saving a password in plaintext:
+Running from a Python Console, the `username` and `password` can also be 
+omitted and entered at runtime. This allows testing without saving 
+credentials in plaintext:
 
 ```python
 >>> from farmOS import farmOS
->>> farm_client = farmOS(hostname=hostname, username=username, client_id="farm")
->>> Warning: Password input may be echoed.
->>> Enter password: >? MY_PASSWORD
+>>> farm_client = farmOS(hostname="myfarm.farmos.net", client_id="farm", scope="user_access")
+>>> farm_client.authorize()
+Warning: Password input may be echoed.
+Enter username: >? username
+Warning: Password input may be echoed.
+Enter password: >? password
 >>> farm_client.info()
 'name': 'server-name', 'url': 'http://localhost', 'api_version': '1.2', 'user': ....
 ```
 
-##### OAuth Authorization Flow (advanced)
+##### Authorizing with existing OAuth Token (advanced)
 
-It's also possible to run the Authorization Code Flow from the Python console.
-This is great way to test the Authorization process users will go through. The
-console will print a link to navigate to where you sign in to farmOS and 
-complete the authorization process. You then copy the `link` from the page you
-are redirected to back into the console. This supplies the `farm_client` with
-an an authorization `code` that it uses to request an OAuth `token`. 
+An existing token can be provided when creating the farmOS client. This is
+useful for advanced use cases where an OAuth token may be persisted.
 
 ```python
->>> farm_client = farmOS(hostname=hostname, client_id="farm")
-Please go here and authorize, http://localhost/oauth2/authorize?response_type=code&client_id=farmos_development&redirect_uri=http%3A%2F%2Flocalhost%2Fapi%2Fauthorized&scope=user_access&state=V9RCDd4yrSWZP8iGXt6qW51sYxsFZs&access_type=offline&prompt=select_account
-Paste the full redirect URL here:>? http://localhost/api/authorized?code=33429f3530e36f4bdf3c2adbbfcd5b7d73e89d5c&state=V9RCDd4yrSWZP8iGXt6qW51sYxsFZs
->>> farm_client.info()
-'name': 'server-name', 'url': 'http://localhost', 'api_version': '1.2', 'user': ....
+from farmOS import farmOS
+
+hostname = "myfarm.farmos.net"
+token = {
+    "access_token": "abcd",
+    "refresh_token": "abcd",
+    "expires_at": "timestamp",
+}
+
+# Create the client with existing token.
+farm_client = farmOS(
+    hostname=hostname,
+    token=token,
+)
 ```
 
 ##### Saving OAuth Tokens
 
-farmOS.py can save OAuth Tokens to a config file so that they can be used at a
-later time. To do this, supply a `config_file` and `profile_name` to save the
-connection info under.
+By default, `access_tokens` expire in 1 hour. This means that requests sent 
+1 hour after authorization will trigger a `refresh` flow, providing the 
+client with a new `access_token` to use. A `token_updater` utility must be 
+provided to save tokens when automatic refreshing occurs. 
 
 ```python
 from farmOS import farmOS
@@ -117,46 +127,24 @@ hostname = "myfarm.farmos.net"
 username = "username"
 password = "password"
 
+# Maintain an external state of the token.
+current_token = None
+
+# Callback function to save new tokens.
+def token_updater(new_token):
+    print(f"Got a new token! {new_token}")
+    # Update state.
+    current_token = new_token
+
+# Create the client.
 farm_client = farmOS(
     hostname=hostname,
-    username=username,
-    password=password,
-    client_id="farm", # The default oauth client_id enabled on all farmOS servers.
-    config_file="farmos_config.cfg",    
-    profile_name="My farmOS Server"
+    token_updater=token_updater, # Provide the token updater callback.
 )
-```
 
-After initial connection, the config will be saved to `profile_name` in `config_file`.
-
-Later authentication can then simply be done by supplying just the `config_file` and
-`profile_name` when creating a farmOS client (as long as OAuth tokens have not expired):
-
-```python
-from farmOS import farmOS
-
-farm_client = farmOS(
-    config_file="farmos_config.cfg",    
-    profile_name="My farmOS Server"
-)
-```
-
-#### Drupal Auth
-
-Simple one-time communication to the farmOS server can be completed via Drupal Auth:
-
-```python
-from farmOS import farmOS
-
-hostname = "myfarm.farmos.net"
-username = "username"
-password = "password"
-
-farm_client = farmOS(
-    hostname=hostname,
-    username=username,
-    password=password,
-)
+# Authorize the client.
+# Save the initial token that is created.
+current_token = farm_client.authorize(username, password, scope="user_access")
 ```
 
 ### Server Info
