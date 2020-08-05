@@ -3,8 +3,6 @@ import logging
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import LegacyApplicationClient
 
-from .exceptions import NotAuthenticatedError
-
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
