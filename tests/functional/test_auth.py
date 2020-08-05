@@ -1,7 +1,7 @@
 import pytest
 import os
 
-import farmOS
+from farmOS import farmOS, HTTPError
 from oauthlib.oauth2 import InvalidGrantError
 
 from tests.conftest import farmOS_testing_server
@@ -11,8 +11,15 @@ from tests.conftest import farmOS_testing_server
 @farmOS_testing_server
 def test_invalid_login():
     with pytest.raises(InvalidGrantError):
-        farm = farmOS.farmOS('test.farmos.net')
+        farm = farmOS('test.farmos.net')
         farm.authorize('username', 'password')
+
+
+@farmOS_testing_server
+def test_unauthorized_request(test_farm):
+    with pytest.raises(HTTPError, match=r"403 *."):
+        farm = farmOS('test.farmos.net')
+        farm.log.get()
 
 
 @farmOS_testing_server
