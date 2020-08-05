@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] -- 2020-08-05
+### Removed
+- Removed support for the Drupal Session Auth has been removed from the client.
+- Removed `farm.authenticate()` method (use `farm.authorize()` instead).
+- Removed dependency on ConfigParser used to save default OAuth config and profiles.
+- Removed support for OAuth Authorization flow. This can be completed externally of the farmOS.py library.
+
+### Added
+- Add `farm.authorize()` method for consistency with OAuth and farmOS.js API.
+- Re-export `HTTPError` and OAuth exceptions for convenience.
+- Additional OAuth tests.
+- [Black](https://black.readthedocs.io/en/stable/) code formatting.
+
+### Fixed
+- Don't make requests to `/farm.json` and `/restws/session/token` [#37](https://github.com/farmOS/farmOS.py/issues/37)
+- Write tests for OAuth Integration [#33](https://github.com/farmOS/farmOS.py/issues/33)
+
 ## [0.1.6] -- 2020-04-24
 
 ### Added
