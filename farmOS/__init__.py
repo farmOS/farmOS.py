@@ -16,13 +16,15 @@ logger.addHandler(logging.NullHandler())
 class farmOS:
     """A client that connects to the farmOS server."""
 
-    def __init__(self,
-                 hostname,
-                 client_id='farm',
-                 client_secret=None,
-                 scope='user_access',
-                 token=None,
-                 token_updater=None):
+    def __init__(
+        self,
+        hostname,
+        client_id="farm",
+        client_secret=None,
+        scope="user_access",
+        token=None,
+        token_updater=None,
+    ):
         """
         Initialize instance of the farmOS client that connects to a single farmOS server.
 
@@ -35,12 +37,12 @@ class farmOS:
         :param token_updater: A function used to save OAuth tokens outside of the client.
         """
 
-        logger.debug('Creating farmOS client.')
+        logger.debug("Creating farmOS client.")
 
         # Load the token updater function.
         self.token_updater = None
         if token_updater is not None:
-            logger.debug('Using provided token_updater utility.')
+            logger.debug("Using provided token_updater utility.")
             self.token_updater = token_updater
 
         self.session = None
@@ -54,7 +56,7 @@ class farmOS:
             # Add a default scheme if not provided.
             if not parsed_url.scheme:
                 parsed_url = parsed_url._replace(scheme=default_scheme)
-                logger.debug('No scheme provided. Using %s', default_scheme)
+                logger.debug("No scheme provided. Using %s", default_scheme)
 
             # Check for a valid scheme.
             if parsed_url.scheme not in valid_schemes:
@@ -63,7 +65,7 @@ class farmOS:
             # If not netloc was provided, it was probably parsed as the path.
             if not parsed_url.netloc and parsed_url.path:
                 parsed_url = parsed_url._replace(netloc=parsed_url.path)
-                parsed_url = parsed_url._replace(path='')
+                parsed_url = parsed_url._replace(path="")
 
             # Check for netloc.
             if not parsed_url.netloc:
@@ -75,45 +77,49 @@ class farmOS:
 
             # Build the url again to include changes.
             hostname = urlunparse(parsed_url)
-            logger.debug('Complete hostname configured as %s', hostname)
+            logger.debug("Complete hostname configured as %s", hostname)
 
         else:
             raise Exception("No hostname provided and could not be loaded from config.")
 
-        logger.debug('Creating an OAuth Session.')
-        token_url = hostname + '/oauth2/token'
+        logger.debug("Creating an OAuth Session.")
+        token_url = hostname + "/oauth2/token"
 
         # Check the token expiration time.
-        if token is not None and 'expires_at' in token:
+        if token is not None and "expires_at" in token:
             # Create datetime objects for comparison.
             now = datetime.now()
-            expiration_time = datetime.fromtimestamp(float(token['expires_at']))
+            expiration_time = datetime.fromtimestamp(float(token["expires_at"]))
 
             # Calculate seconds until expiration.
             timedelta = expiration_time - now
             expires_in = timedelta.total_seconds()
 
             # Update the token expires_in value
-            token['expires_in'] = expires_in
+            token["expires_in"] = expires_in
 
             # Unset the 'expires_at' key.
-            token.pop('expires_at')
+            token.pop("expires_at")
 
         # Create an OAuth Session
-        self.session = OAuthSession(hostname=hostname,
-                                    client_id=client_id,
-                                    client_secret=client_secret,
-                                    scope=scope,
-                                    token=token,
-                                    token_url=token_url,
-                                    token_updater=self.token_updater)
+        self.session = OAuthSession(
+            hostname=hostname,
+            client_id=client_id,
+            client_secret=client_secret,
+            scope=scope,
+            token=token,
+            token_url=token_url,
+            token_updater=self.token_updater,
+        )
 
         self._client_id = client_id
         self._client_secret = client_secret
 
         if self.session is None:
-            raise Exception("Could not create a session object. Supply authentication credentials when "
-                            "initializing a farmOS Client.")
+            raise Exception(
+                "Could not create a session object. Supply authentication credentials when "
+                "initializing a farmOS Client."
+            )
 
         self.log = LogAPI(self.session)
         self.asset = AssetAPI(self.session)
@@ -121,7 +127,7 @@ class farmOS:
         self.term = TermAPI(self.session)
         self.info = partial(info, self.session)
 
-    def authorize(self, username=None, password=None, scope='user_access'):
+    def authorize(self, username=None, password=None, scope="user_access"):
         """Authorize with the farmOS server.
 
         The client must be authorized with the farmOS server before making requests.

@@ -4,6 +4,7 @@ from urllib.parse import urlparse, parse_qs
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+
 class BaseAPI(object):
     """Base class for API methods
 
@@ -24,9 +25,13 @@ class BaseAPI(object):
     def _get_single_record_data(self, id):
         """Retrieve one record given the record ID"""
         # Set path to return record type by specific ID
-        path = self.entity_type + '/' + str(id) + '.json'
+        path = self.entity_type + "/" + str(id) + ".json"
 
-        logger.debug('Getting single record data for id: %s of entity type: %s', id, self.entity_type)
+        logger.debug(
+            "Getting single record data for id: %s of entity type: %s",
+            id,
+            self.entity_type,
+        )
         response = self.session.http_request(path=path)
 
         return response.json()
@@ -34,7 +39,7 @@ class BaseAPI(object):
     def _get_record_data(self, filters):
         """Retrieve one page of raw record data from the farmOS API."""
         # Set path to return record type + filters
-        path = self.entity_type + '.json'
+        path = self.entity_type + ".json"
         # Combine instance filters and filters from the method call
         filters = {**self.filters, **filters}
 
@@ -44,12 +49,12 @@ class BaseAPI(object):
         data = {}
 
         response = response.json()
-        if 'list' in response:
-            data['list'] = response['list']
-            data['page'] = {
-                'self': _parse_api_page(url=response['self']),
-                'first': _parse_api_page(url=response['first']),
-                'last': _parse_api_page(url=response['last']),
+        if "list" in response:
+            data["list"] = response["list"]
+            data["page"] = {
+                "self": _parse_api_page(url=response["self"]),
+                "first": _parse_api_page(url=response["first"]),
+                "last": _parse_api_page(url=response["last"]),
             }
 
         return data
@@ -59,31 +64,37 @@ class BaseAPI(object):
         if list is None:
             list = []
 
-        filters['page'] = page
+        filters["page"] = page
 
-        logger.debug('Getting page: %s of record data of entity type: %s', filters['page'], self.entity_type)
+        logger.debug(
+            "Getting page: %s of record data of entity type: %s",
+            filters["page"],
+            self.entity_type,
+        )
         data = self._get_record_data(filters=filters)
 
         # Append record data to list of all requested data
-        if 'list' in data:
-            list = list + data['list']
+        if "list" in data:
+            list = list + data["list"]
 
         # Check to see if there are more pages
-        if 'page' in data:
-            last_page = data['page']['last']
+        if "page" in data:
+            last_page = data["page"]["last"]
             # Last page, return the list
             if last_page == page:
                 data = {
-                    'page': {
-                        'first': data['page']['first'],
-                        'last': data['page']['last'],
+                    "page": {
+                        "first": data["page"]["first"],
+                        "last": data["page"]["last"],
                     },
-                    'list': list,
+                    "list": list,
                 }
                 return data
             # Recursive call, get the next page
             else:
-                return self._get_all_record_data(list=list, page=(page+1), filters=filters)
+                return self._get_all_record_data(
+                    list=list, page=(page + 1), filters=filters
+                )
 
     def _get_records(self, filters=None):
         """Helper function that checks to retrieve one record, one page or multiple pages of farmOS records"""
@@ -95,11 +106,17 @@ class BaseAPI(object):
             return self._get_single_record_data(filters)
         elif isinstance(filters, dict):
             # Check if the caller requests a specific page
-            if 'page' in filters:
-                logger.debug('Getting page: %s of record data of entity type: %s', filters['page'], self.entity_type)
+            if "page" in filters:
+                logger.debug(
+                    "Getting page: %s of record data of entity type: %s",
+                    filters["page"],
+                    self.entity_type,
+                )
                 return self._get_record_data(filters=filters)
             else:
-                logger.debug('Getting all record data of entity type: %s', self.entity_type)
+                logger.debug(
+                    "Getting all record data of entity type: %s", self.entity_type
+                )
                 return self._get_all_record_data(filters=filters)
 
     def get(self, filters=None):
@@ -110,43 +127,47 @@ class BaseAPI(object):
         return data
 
     def send(self, payload):
-        options = {'json': payload}
+        options = {"json": payload}
 
         # If an ID is included, update the record
-        id = payload.pop('id', None)
+        id = payload.pop("id", None)
         if id:
-            logger.debug('Updating record id: of entity type: %s', id, self.entity_type)
-            path = self.entity_type + '/' + str(id)
-            response = self.session.http_request(method='PUT', path=path, options=options)
+            logger.debug("Updating record id: of entity type: %s", id, self.entity_type)
+            path = self.entity_type + "/" + str(id)
+            response = self.session.http_request(
+                method="PUT", path=path, options=options
+            )
         # If no ID is included, create a new record
         else:
-            logger.debug('Creating record of entity type: %s', self.entity_type)
+            logger.debug("Creating record of entity type: %s", self.entity_type)
             path = self.entity_type
-            response = self.session.http_request(method='POST', path=path, options=options)
+            response = self.session.http_request(
+                method="POST", path=path, options=options
+            )
 
         # Handle response from POST requests
         if response.status_code == 201:
-            logger.debug('Record created.')
+            logger.debug("Record created.")
             return response.json()
 
         # Handle response from PUT requests
         if response.status_code == 200:
-            logger.debug('Record updated.')
+            logger.debug("Record updated.")
             # farmOS returns no response data for PUT requests
             # response_data = response.json()
 
             # Hard code the entity ID, path, and resource
             entity_data = {
-                'id': id,
-                'uri': path,
-                'resource': self.entity_type,
+                "id": id,
+                "uri": path,
+                "resource": self.entity_type,
             }
             return entity_data
 
     def delete(self, id):
-        logger.debug('Deleted record id: %s of entity type: %s', id, self.entity_type)
-        path = self.entity_type + '/' + str(id)
-        response = self.session.http_request(method='DELETE', path=path)
+        logger.debug("Deleted record id: %s of entity type: %s", id, self.entity_type)
+        path = self.entity_type + "/" + str(id)
+        response = self.session.http_request(method="DELETE", path=path)
 
         return response
 
@@ -156,7 +177,7 @@ class TermAPI(BaseAPI):
 
     def __init__(self, session):
         # Define 'taxonomy_term' as the farmOS API entity endpoint
-        super().__init__(session=session, entity_type='taxonomy_term')
+        super().__init__(session=session, entity_type="taxonomy_term")
 
     def get(self, filters=None):
         """Get method that supports a bundle name as the 'filter' parameter"""
@@ -164,7 +185,7 @@ class TermAPI(BaseAPI):
         # Check if filters parameter is a str
         if isinstance(filters, str):
             # Add filters to instance requests.session filter dict with keyword 'bundle'
-            self.filters['bundle'] = filters
+            self.filters["bundle"] = filters
             # Reset filters to empty dict
             filters = {}
 
@@ -178,7 +199,7 @@ class LogAPI(BaseAPI):
 
     def __init__(self, session):
         # Define 'log' as the farmOS API entity endpoint
-        super().__init__(session=session, entity_type='log')
+        super().__init__(session=session, entity_type="log")
 
 
 class AssetAPI(BaseAPI):
@@ -186,7 +207,7 @@ class AssetAPI(BaseAPI):
 
     def __init__(self, session):
         # Define 'farm_asset' as the farmOS API entity endpoint
-        super().__init__(session=session, entity_type='farm_asset')
+        super().__init__(session=session, entity_type="farm_asset")
 
 
 class AreaAPI(TermAPI):
@@ -194,7 +215,7 @@ class AreaAPI(TermAPI):
 
     def __init__(self, session):
         super().__init__(session=session)
-        self.filters['bundle'] = 'farm_areas'
+        self.filters["bundle"] = "farm_areas"
 
     def get(self, filters=None):
         """Retrieve raw record data from the farmOS API.
@@ -208,7 +229,7 @@ class AreaAPI(TermAPI):
             tid = str(filters)
             # Add tid to filters object
             filters = {
-                'tid': tid,
+                "tid": tid,
             }
 
         data = self._get_records(filters=filters)
@@ -219,7 +240,7 @@ class AreaAPI(TermAPI):
 def info(session):
     """Retrieve info about the farmOS server."""
 
-    logger.debug('Retrieving farmOS server info.')
+    logger.debug("Retrieving farmOS server info.")
     response = session.http_request("farm.json")
     return response.json()
 
@@ -233,6 +254,6 @@ def _parse_api_page(url):
     """
 
     parsed_url = urlparse(url)
-    page_num = parse_qs(parsed_url.query)['page'][0]
+    page_num = parse_qs(parsed_url.query)["page"][0]
 
     return int(page_num)
