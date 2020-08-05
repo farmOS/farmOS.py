@@ -87,7 +87,8 @@ class OAuthSession(OAuth2Session):
 
         # Save the token.
         logger.debug('Saving token with token_updater utility.')
-        self.token_updater(token)
+        if self.token_updater is not None:
+            self.token_updater(token)
 
         return token
 
