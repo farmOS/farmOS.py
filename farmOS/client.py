@@ -62,21 +62,21 @@ class BaseAPI(object):
         filters['page'] = page
 
         logger.debug('Getting page: %s of record data of entity type: %s', filters['page'], self.entity_type)
-        response = self._get_record_data(filters=filters)
+        data = self._get_record_data(filters=filters)
 
         # Append record data to list of all requested data
-        if 'list' in response:
-            list = list + response['list']
+        if 'list' in data:
+            list = list + data['list']
 
         # Check to see if there are more pages
-        if 'page' in response:
-            last_page = response['page']['last']
+        if 'page' in data:
+            last_page = data['page']['last']
             # Last page, return the list
             if last_page == page:
                 data = {
                     'page': {
-                        'first': response['page']['first'],
-                        'last': response['page']['last'],
+                        'first': data['page']['first'],
+                        'last': data['page']['last'],
                     },
                     'list': list,
                 }
