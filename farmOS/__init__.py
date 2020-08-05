@@ -4,6 +4,7 @@ from urllib.parse import urlparse, urlunparse
 from functools import partial
 
 from requests import HTTPError
+from oauthlib.oauth2 import InvalidGrantError, InvalidClientError, InvalidScopeError
 
 from .session import OAuthSession
 from .client import LogAPI, AssetAPI, TermAPI, AreaAPI, info
