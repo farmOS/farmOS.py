@@ -13,18 +13,7 @@ logger.addHandler(logging.NullHandler())
 
 
 class farmOS:
-
-    """Create a new farmOS instance.
-
-    Keyword Arguments:
-    hostname - the farmOS hostname (without protocol)
-    username - the farmOS username
-    password - the farmOS user's password
-
-    Attributes:
-    session - an APISession object that handles HTTP requests
-
-    """
+    """A client that connects to the farmOS server."""
 
     def __init__(self,
                  hostname,
@@ -33,6 +22,17 @@ class farmOS:
                  scope='user_access',
                  token=None,
                  token_updater=None):
+        """
+        Initialize instance of the farmOS client that connects to a single farmOS server.
+
+        :param hostname: Valid hostname without a path or query params. The HTTPS scheme
+            will be added if none is specified.
+        :param client_id: OAuth Client ID. Defaults to "farm"
+        :param client_secret: OAuth Client Secret. Defaults to None.
+        :param scope: OAuth Scope. Defaults to "user_access".
+        :param token: An existing OAuth token to use.
+        :param token_updater: A function used to save OAuth tokens outside of the client.
+        """
 
         logger.debug('Creating farmOS client.')
 
@@ -121,14 +121,15 @@ class farmOS:
         self.info = partial(info, self.session)
 
     def authorize(self, username=None, password=None, scope='user_access'):
-        """Authorize with the farmOS server. """
+        """Authorize with the farmOS server.
+
+        The client must be authorized with the farmOS server before making requests.
+        This method utilizes the OAuth Password Credentials flow to authorize users.
+
+        :param username: farmOS Username. Prompted if not included.
+        :param password: farmOS Password. Prompted if not included.
+        :param scope: Scope to authorize as with the farmOS server. Defaults to "user_access".
+        :return: OAuth Token.
+        """
+
         return self.session.authorize(username, password, scope)
-
-    def info(self, path='farm.json'):
-        """Retrieve info about the farmOS instance"""
-        logger.debug('Retrieving farmOS server info.')
-        response = self.session.http_request(path)
-        if response.status_code == 200:
-            return response.json()
-
-        return []

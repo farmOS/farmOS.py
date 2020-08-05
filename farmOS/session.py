@@ -8,18 +8,7 @@ logger.addHandler(logging.NullHandler())
 
 
 class OAuthSession(OAuth2Session):
-    """OAuthSession uses OAuth2 to authenticate with farmOS
-
-    This class stores access tokens and refresh tokens used to
-    authenticate with the farmOS server for all requests.
-
-    Keyword Arguments:
-        hostname - the farmOS hostname (without protocol)
-        client_id - the farmOS API Client ID
-        client_secret - the farmOS API Client Secret
-        username - the farmOS username (for OAuth2 Password Grant)
-        password - the farmOS user's password (for OAuth2 Password Grant)
-    """
+    """OAuthSession uses OAuth2 to authenticate with farmOS"""
 
     def __init__(self, hostname,
                  client_id,
@@ -56,11 +45,8 @@ class OAuthSession(OAuth2Session):
         self.hostname = hostname
 
     def authorize(self, username, password, scope):
-        """Authenticates with the farmOS site.
+        """Authorize with the farmOS OAuth server."""
 
-        Returns True or False indicating whether or not
-        the authentication was successful
-        """
         token = self.token
 
         logger.debug('Retrieving new OAuth Token.')
