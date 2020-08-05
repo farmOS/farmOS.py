@@ -1,29 +1,25 @@
 import pytest
+import os
 
 import farmOS
+from oauthlib.oauth2 import InvalidGrantError
 
 from tests.conftest import farmOS_testing_server
-from farmOS.exceptions import NotAuthenticatedError
+
 
 # Test authentication
-
 @farmOS_testing_server
 def test_invalid_login():
-    farm = farmOS.farmOS('test.farmos.net', 'username', 'password')
-    success = farm.authenticate()
-
-    assert success is False
+    with pytest.raises(InvalidGrantError):
+        farm = farmOS.farmOS('test.farmos.net')
+        farm.authorize('username', 'password')
 
 
 @farmOS_testing_server
 def test_valid_login(test_farm):
-    success = test_farm.authenticate()
+    FARMOS_OAUTH_USERNAME = os.getenv("FARMOS_OAUTH_USERNAME")
+    FARMOS_OAUTH_PASSWORD = os.getenv("FARMOS_OAUTH_PASSWORD")
+    token = test_farm.authorize(username=FARMOS_OAUTH_USERNAME, password=FARMOS_OAUTH_PASSWORD)
 
-    assert success is True
-
-
-@farmOS_testing_server
-def test_not_authenticated_exception_raised():
-    with pytest.raises(NotAuthenticatedError):
-        farm = farmOS.farmOS('test.farmos.net', 'username', 'password')
-        farm.info()
+    assert 'access_token' in token
+    assert 'refresh_token' in token
