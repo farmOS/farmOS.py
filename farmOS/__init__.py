@@ -1,11 +1,12 @@
 import logging
 from datetime import datetime
 from urllib.parse import urlparse, urlunparse
+from functools import partial
 
 from requests import HTTPError
 
 from .session import OAuthSession
-from .client import LogAPI, AssetAPI, TermAPI, AreaAPI
+from .client import LogAPI, AssetAPI, TermAPI, AreaAPI, info
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -117,6 +118,7 @@ class farmOS:
         self.asset = AssetAPI(self.session)
         self.area = AreaAPI(self.session)
         self.term = TermAPI(self.session)
+        self.info = partial(info, self.session)
 
     def authorize(self, username=None, password=None, scope='user_access'):
         """Authorize with the farmOS server. """

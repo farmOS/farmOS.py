@@ -216,6 +216,14 @@ class AreaAPI(TermAPI):
         return data
 
 
+def info(session):
+    """Retrieve info about the farmOS server."""
+
+    logger.debug('Retrieving farmOS server info.')
+    response = session.http_request("farm.json")
+    return response.json()
+
+
 def _parse_api_page(url):
     """Helper function that returns page numbers from the API response.
 
