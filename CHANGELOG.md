@@ -6,6 +6,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] -- 2020-08-05
+### Removed
+- Removed support for the Drupal Session Auth has been removed from the client.
+- Removed `farm.authenticate()` method (use `farm.authorize()` instead).
+- Removed dependency on ConfigParser used to save default OAuth config and profiles.
+- Removed support for OAuth Authorization flow. This can be completed externally of the farmOS.py library.
+
+### Added
+- Add `farm.authorize()` method for consistency with OAuth and farmOS.js API.
+- Re-export `HTTPError` and OAuth exceptions for convenience.
+- Additional OAuth tests.
+- [Black](https://black.readthedocs.io/en/stable/) code formatting.
+
+### Fixed
+- Don't make requests to `/farm.json` and `/restws/session/token` [#37](https://github.com/farmOS/farmOS.py/issues/37)
+- Write tests for OAuth Integration [#33](https://github.com/farmOS/farmOS.py/issues/33)
+
+## [0.1.6] -- 2020-04-24
+
+### Added
+- Support for OAuth Clients on the farmOS Server!
+- Default to `user_access` OAuth Scope
+- Set default `oauth_client_id` to `farm`
+- Updated documentation.
+
+### Fixed
+- Unset the 'expires_at' key to avoid Requests Exception
+
+## [0.1.6b3] -- 2020-02-10
+### Added
+- Add an optional `token` parameter to the client API for supplying OAuth tokens.
+
+## [0.1.6b2] -- 2020-02-04
+### Fixed
+- Fix spelling of default `oauth_scope` config key
+- Use mapping protocol access instead of the Legacy get/set API for ConfigParser. Fixes bug for loading tokens from config.
+
+## [0.1.6b1] -- 2020-02-03
+### Added
+- Support for custom OAuth Clients [#32](https://github.com/farmOS/farmOS.py/pull/32)
+
+### Fixed
+- Complex passwords are not correctly read from config file. [#29](https://github.com/farmOS/farmOS.py/issues/29)
+
 ## [0.1.5] -- 2019-12-19
 ### Added
 - Add logging with the Python standard logging module. [#21](https://github.com/farmOS/farmOS.py/issues/21)
