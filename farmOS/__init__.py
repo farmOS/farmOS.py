@@ -7,7 +7,7 @@ from requests import HTTPError
 from oauthlib.oauth2 import InvalidGrantError, InvalidClientError, InvalidScopeError
 
 from .session import OAuthSession
-from .client import LogAPI, AssetAPI, TermAPI, AreaAPI, info
+from .client import LogAPI, AssetAPI, TermAPI, AreaAPI, FileAPI, info
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -125,6 +125,7 @@ class farmOS:
         self.asset = AssetAPI(self.session)
         self.area = AreaAPI(self.session)
         self.term = TermAPI(self.session)
+        self.file = FileAPI(self.session)
         self.info = partial(info, self.session)
 
     def authorize(self, username=None, password=None, scope="user_access"):

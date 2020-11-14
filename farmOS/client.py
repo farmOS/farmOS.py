@@ -237,6 +237,14 @@ class AreaAPI(TermAPI):
         return data
 
 
+class FileAPI(BaseAPI):
+    """API for interacting with farm files"""
+
+    def __init__(self, session):
+        # Define 'file' as the farmOS API entity endpoint
+        super().__init__(session=session, entity_type="file")
+
+
 def info(session):
     """Retrieve info about the farmOS server."""
 
