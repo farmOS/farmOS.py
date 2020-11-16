@@ -83,7 +83,10 @@ class farmOS:
             raise Exception("No hostname provided and could not be loaded from config.")
 
         logger.debug("Creating an OAuth Session.")
-        token_url = hostname + "/oauth2/token"
+        # TODO: Document that this token path requires farmOS v1.6
+        # OR implement a method to check both token paths.
+        # maybe version can default to none, and check the server?
+        token_url = hostname + "/oauth/token"
 
         # Check the token expiration time.
         if token is not None and "expires_at" in token:
