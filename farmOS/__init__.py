@@ -131,6 +131,7 @@ class farmOS:
             self.term = client_2.TermAPI(self.session)
             self.resource = client_2.ResourceBase(self.session)
             self.info = partial(client_2.info, self.session)
+            self.filter = client_2.filter
         else:
             self.log = client.LogAPI(self.session)
             self.asset = client.AssetAPI(self.session)
