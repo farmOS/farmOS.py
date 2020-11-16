@@ -106,6 +106,11 @@ class OAuthSession(OAuth2Session):
 
         # Assemble the URL.
         url = "{}/{}".format(self.hostname, path)
+        return self._http_request(
+            url=url, method=method, options=options, params=params
+        )
+
+    def _http_request(self, url, method="GET", options=None, params=None):
 
         # Automatically follow redirects, unless this is a POST request.
         # The Python requests library converts POST to GET during a redirect.
