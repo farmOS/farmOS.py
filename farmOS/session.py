@@ -48,7 +48,7 @@ class OAuthSession(OAuth2Session):
         self._client_secret = client_secret
         self.hostname = hostname
 
-    def authorize(self, username, password, scope):
+    def authorize(self, username, password, scope=None):
         """Authorize with the farmOS OAuth server."""
 
         token = self.token
@@ -66,6 +66,10 @@ class OAuthSession(OAuth2Session):
             from getpass import getpass
 
             password = getpass("Enter password: ")
+
+        # Use default scope if none provided.
+        if scope is None:
+            scope = self.scope
 
         token = self.fetch_token(
             token_url=self._token_url,

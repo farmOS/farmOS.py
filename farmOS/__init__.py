@@ -127,7 +127,7 @@ class farmOS:
         self.term = TermAPI(self.session)
         self.info = partial(info, self.session)
 
-    def authorize(self, username=None, password=None, scope="user_access"):
+    def authorize(self, username=None, password=None, scope=None):
         """Authorize with the farmOS server.
 
         The client must be authorized with the farmOS server before making requests.
