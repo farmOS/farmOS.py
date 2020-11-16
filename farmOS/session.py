@@ -121,20 +121,25 @@ class OAuthSession(OAuth2Session):
         if options and "allow_redirects" in options:
             allow_redirects = options["allow_redirects"]
 
+        headers = {}
+
         # If there is data to be sent, include it.
         data = None
         if options and "data" in options:
             data = options["data"]
+            headers["Content-Type"] = "application/vnd.api+json"
 
         # If there is a json data to be sent, include it.
         json = None
         if options and "json" in options:
             json = options["json"]
+            headers["Content-Type"] = "application/vnd.api+json"
 
         # Perform the request.
         response = self.request(
             method,
             url,
+            headers=headers,
             allow_redirects=allow_redirects,
             data=data,
             json=json,
