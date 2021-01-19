@@ -30,9 +30,11 @@ farmOS_testing_server = pytest.mark.skipif(
 def test_farm():
     if valid_oauth_config:
         farm = farmOS.farmOS(
-            FARMOS_HOSTNAME,
+            hostname=FARMOS_HOSTNAME,
+            scope="farm_manager",
             client_id=FARMOS_OAUTH_CLIENT_ID,
             client_secret=FARMOS_OAUTH_CLIENT_SECRET,
+            version=2,
         )
         farm.authorize(username=FARMOS_OAUTH_USERNAME, password=FARMOS_OAUTH_PASSWORD)
         return farm
