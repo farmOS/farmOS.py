@@ -5,8 +5,8 @@ from functools import partial
 
 from .session import OAuthSession
 
-import client
-import client_2
+from . import client
+from . import client_2
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
