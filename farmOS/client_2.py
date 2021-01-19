@@ -139,6 +139,11 @@ class ResourceHelperBase(object):
             entity_type=self.entity_type, bundle=bundle, payload=payload
         )
 
+    def delete(self, bundle, id):
+        return self.resource_api.delete(
+            entity_type=self.entity_type, bundle=bundle, id=id
+        )
+
 
 class AssetAPI(ResourceHelperBase):
     """API for interacting with farm assets"""
