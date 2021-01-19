@@ -51,11 +51,11 @@ class ResourceBase(object):
                 more = False
 
     def send(self, entity_type, bundle, payload):
+
+        # Set the resource type.
+        payload["type"] = self._get_resource_type(entity_type, bundle)
         json_payload = {
-            "data": {
-                "type": self._get_resource_type(entity_type, bundle),
-                "attributes": payload,
-            }
+            "data": {**payload},
         }
         options = {"json": json_payload}
 
