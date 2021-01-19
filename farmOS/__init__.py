@@ -127,7 +127,6 @@ class farmOS:
         if version == 2:
             self.log = client_2.LogAPI(self.session)
             self.asset = client_2.AssetAPI(self.session)
-            self.area = client_2.AreaAPI(self.session)
             self.term = client_2.TermAPI(self.session)
             self.resource = client_2.ResourceBase(self.session)
             self.info = partial(client_2.info, self.session)

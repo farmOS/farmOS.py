@@ -148,15 +148,6 @@ class AssetAPI(ResourceHelperBase):
         super().__init__(session=session, entity_type="asset")
 
 
-class AreaAPI(ResourceHelperBase):
-    """API for interacting with farm areas, a subset of farm terms"""
-
-    def __init__(self, session):
-        super().__init__(session=session, entity_type="asset")
-
-    # TODO: Support 2x area assets.
-
-
 class LogAPI(ResourceHelperBase):
     """API for interacting with farm logs"""
 
