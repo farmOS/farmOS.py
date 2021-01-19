@@ -1,90 +1,59 @@
 from tests.conftest import farmOS_testing_server
 
 test_term = {
-    "name": "API Test Crop",
-    "vocabulary": {"id": None, "resource": "taxonomy_vocabulary"},
+    "type": "plant_type",
+    "payload": {"attributes": {"name": "Corn"}},
 }
 
-#
-# Test farm taxonomy term methods
-#
-@farmOS_testing_server
-def test_create_taxonomy_term(test_farm):
-    # Find the vocab ID for farm_crops
-    content = test_farm.info()
-
-    # Check that farm info includes farm_crops vid
-    assert "resources" in content
-    assert "taxonomy_term" in content["resources"]
-    assert "farm_crops" in content["resources"]["taxonomy_term"]
-    assert "vid" in content["resources"]["taxonomy_term"]["farm_crops"]
-
-    farm_crop_id = content["resources"]["taxonomy_term"]["farm_crops"]["vid"]
-
-    # Update the test_term with the vid
-    test_term["vocabulary"]["id"] = farm_crop_id
-
-    response = test_farm.term.send(test_term)
-    assert "id" in response
-
-    # Once created, add 'id' to test_asset
-    test_term["id"] = response["id"]
-
 
 @farmOS_testing_server
-def test_get_all_taxonomy_terms(test_farm):
-    terms = test_farm.term.get()
+def test_term_crud(test_farm):
+    post_response = test_farm.term.send(test_term["type"], test_term["payload"])
+    assert "id" in post_response["data"]
 
-    assert "list" in terms
-    assert "page" in terms
-    assert len(terms) > 0
+    # Once created, add 'id' to test_term
+    test_term["id"] = post_response["data"]["id"]
 
+    # Get the term by ID.
+    get_response = test_farm.term.get(test_term["type"], test_term["id"])
 
-@farmOS_testing_server
-def test_get_farm_terms_filtered_by_single_vocabulary_name(test_farm):
-    vocabulary_name = "farm_crops"
+    # Assert that both responses have the correct values.
+    for response in [post_response, get_response]:
+        for key, value in test_term["payload"]["attributes"].items():
+            assert response["data"]["attributes"][key] == value
 
-    terms = test_farm.term.get(vocabulary_name)
+    test_term_changes = {
+        "id": test_term["id"],
+        "attributes": {"name": "Updated corn"},
+    }
+    # Update the term.
+    patch_response = test_farm.term.send(test_term["type"], test_term_changes)
+    # Get the term by ID.
+    get_response = test_farm.term.get(test_term["type"], test_term["id"])
 
-    assert len(terms) > 0
-    # Assert all terms retrieved are from the same vocabulary
-    # (cannot check vocabulary name in response)
-    assert terms["list"][0]["vocabulary"]["id"] == terms["list"][1]["vocabulary"]["id"]
+    # Assert that both responses have the updated name.
+    for response in [patch_response, get_response]:
+        assert (
+            response["data"]["attributes"]["name"]
+            == test_term_changes["attributes"]["name"]
+        )
+
+    # Delete the term.
+    deleted_response = test_farm.term.delete(test_term["type"], test_term["id"])
+    assert deleted_response.status_code == 204
 
 
 @farmOS_testing_server
-def test_get_farm_terms_filtered_by_single_vocabulary_tid(test_farm):
-    vocabulary_tid = 7
+def test_term_get(test_farm):
+    response = test_farm.term.get(test_term["type"])
 
-    term = test_farm.term.get(vocabulary_tid)
-
-    assert "vocabulary" in term
-    assert int(term["tid"]) == vocabulary_tid
-
-
-@farmOS_testing_server
-def test_get_farm_term_filtered_by_multiple_vocabulary(test_farm):
-    vocabulary_name = "farm_crops"
-    term_name = "API Test Crop"
-
-    term = test_farm.term.get({"bundle": vocabulary_name, "name": term_name})
-
-    assert "name" in term["list"][0]
-    assert term["list"][0]["name"] == term_name
+    assert "data" in response
+    assert "links" in response
+    assert len(response["data"]) > 0
 
 
 @farmOS_testing_server
-def test_update_taxonomy_term(test_farm):
-    test_term_changes = {"id": test_term["id"], "name": "Crop changed name"}
-    response = test_farm.term.send(test_term_changes)
-    assert "id" in response
-    assert response["id"] == test_term["id"]
+def test_term_iterate(test_farm):
+    all_terms = list(test_farm.term.iterate(test_term["type"]))
 
-    updated_term = test_farm.term.get(int(test_term["id"]))
-    assert updated_term["name"] == test_term_changes["name"]
-
-
-@farmOS_testing_server
-def test_delete_taxonomy_term(test_farm):
-    response = test_farm.term.delete(int(test_term["id"]))
-    assert response.status_code == 200
+    assert len(all_terms) > 0
