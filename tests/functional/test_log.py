@@ -1,87 +1,67 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from tests.conftest import farmOS_testing_server
 
-curr_time = datetime.now()
-timestamp = datetime.timestamp(curr_time)
-timestamp = str(timestamp)[0:-7]
+curr_time = datetime.now(timezone.utc)
+timestamp = curr_time.isoformat(timespec="seconds")
 
 # Create a test log
 test_log = {
-    "name": "Testing from farmOS.py",
-    "type": "farm_observation",
-    "timestamp": timestamp,
+    "type": "observation",
+    "payload": {
+        "attributes": {"name": "Testing from farmOS.py", "timestamp": timestamp,},
+    },
 }
 
-#
-# Test farm log methods
-#
+
 @farmOS_testing_server
-def test_create_log(test_farm):
-    response = test_farm.log.send(test_log)
-    assert "id" in response
+def test_log_crud(test_farm):
+    post_response = test_farm.log.send(test_log["type"], test_log["payload"])
+    assert "id" in post_response["data"]
 
     # Once created, add 'id' to test_log
-    test_log["id"] = response["id"]
+    test_log["id"] = post_response["data"]["id"]
 
-    created_log = test_farm.log.get(response["id"])
-    assert created_log["timestamp"] == test_log["timestamp"]
+    # Get the log by ID.
+    get_response = test_farm.log.get(test_log["type"], test_log["id"])
 
+    # Assert that both responses have the correct values.
+    for response in [post_response, get_response]:
+        for key, value in test_log["payload"]["attributes"].items():
+            assert response["data"]["attributes"][key] == value
 
-@farmOS_testing_server
-def test_get_one_page_of_logs(test_farm):
-    logs = test_farm.log.get({"page": 0})
-
-    assert "list" in logs
-    assert "page" in logs
-    assert len(logs["list"]) > 0
-    assert logs["page"]["self"] == 0
-
-
-@farmOS_testing_server
-def test_get_all_logs(test_farm):
-    one_page_logs = test_farm.log.get({"page": 0})
-    all_logs = test_farm.log.get()
-
-    assert "page" in all_logs
-    assert all_logs["page"]["last"] != all_logs["page"]["first"]
-    assert len(all_logs["list"]) > len(one_page_logs["list"])
-
-
-@farmOS_testing_server
-def test_get_logs_filtered_by_type(test_farm):
-    log_type = test_log["type"]
-
-    logs = test_farm.log.get({"type": log_type})
-
-    assert len(logs) > 0
-    assert logs["list"][0]["type"] == log_type
-
-
-@farmOS_testing_server
-def test_get_log_by_id(test_farm):
-    log_id = test_log["id"]
-    log = test_farm.log.get(log_id)
-
-    assert "id" in log
-    assert log["id"] == log_id
-
-
-@farmOS_testing_server
-def test_update_log(test_farm):
     test_log_changes = {
         "id": test_log["id"],
-        "name": "Updated Log Name",
+        "attributes": {"name": "Updated Log Name",},
     }
-    response = test_farm.log.send(test_log_changes)
-    assert "id" in response
-    assert response["id"] == test_log["id"]
+    # Update the log.
+    patch_response = test_farm.log.send(test_log["type"], test_log_changes)
+    # Get the log by ID.
+    get_response = test_farm.log.get(test_log["type"], test_log["id"])
 
-    updated_log = test_farm.log.get(test_log["id"])
-    assert updated_log["name"] == test_log_changes["name"]
+    # Assert that both responses have the updated name.
+    for response in [patch_response, get_response]:
+        assert (
+            response["data"]["attributes"]["name"]
+            == test_log_changes["attributes"]["name"]
+        )
+
+    # Delete the log.
+    deleted_response = test_farm.log.delete(test_log["type"], test_log["id"])
+    assert deleted_response.status_code == 204
 
 
 @farmOS_testing_server
-def test_delete_log(test_farm):
-    deleted_response = test_farm.log.delete(test_log["id"])
-    assert deleted_response.status_code == 200
+def test_log_get(test_farm):
+    response = test_farm.log.get(test_log["type"])
+
+    assert "data" in response
+    assert "links" in response
+    assert len(response["data"]) > 0
+
+
+@farmOS_testing_server
+def test_log_iterate(test_farm):
+    all_logs = list(test_farm.log.iterate(test_log["type"]))
+
+    assert len(all_logs) > 0
