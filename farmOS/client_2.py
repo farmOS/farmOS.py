@@ -34,7 +34,7 @@ class ResourceBase(object):
             entity_type=entity_type, bundle=bundle, filters=filters
         )
 
-    def iterate(self, entity_type, bundle, filters=None):
+    def iterate(self, entity_type, bundle=None, filters=None):
         response = self._get_records(
             entity_type=entity_type, bundle=bundle, filters=filters
         )
@@ -50,7 +50,11 @@ class ResourceBase(object):
             except KeyError:
                 more = False
 
-    def send(self, entity_type, bundle, payload):
+    def send(self, entity_type, bundle=None, payload=None):
+
+        # Default to empty payload dict.
+        if payload is None:
+            payload = {}
 
         # Set the resource type.
         payload["type"] = self._get_resource_type(entity_type, bundle)
@@ -88,7 +92,7 @@ class ResourceBase(object):
 
         return response.json()
 
-    def delete(self, entity_type, bundle, id):
+    def delete(self, entity_type, bundle=None, id=None):
         logger.debug("Deleted record id: %s of entity type: %s", id, entity_type)
         path = self._get_resource_path(
             entity_type=entity_type, bundle=bundle, record_id=id
