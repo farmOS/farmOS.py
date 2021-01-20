@@ -44,16 +44,13 @@ def test_term_crud(test_farm):
 
 
 @farmOS_testing_server
-def test_term_get(test_farm):
+def test_term_get(test_farm, test_terms):
+    # Get one page of plant_type terms.
     response = test_farm.term.get(test_term["type"])
-
     assert "data" in response
     assert "links" in response
-    assert len(response["data"]) > 0
+    assert len(response["data"]) == 50
 
-
-@farmOS_testing_server
-def test_term_iterate(test_farm):
+    # Get all plant_type terms.
     all_terms = list(test_farm.term.iterate(test_term["type"]))
-
-    assert len(all_terms) > 0
+    assert len(all_terms) > len(response["data"])

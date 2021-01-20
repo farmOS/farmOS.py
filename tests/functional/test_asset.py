@@ -51,16 +51,13 @@ def test_asset_crud(test_farm):
 
 
 @farmOS_testing_server
-def test_asset_get(test_farm):
+def test_asset_get(test_farm, test_assets):
+    # Get one page of assets.
     response = test_farm.asset.get(test_asset["type"])
-
     assert "data" in response
     assert "links" in response
-    assert len(response["data"]) > 0
+    assert len(response["data"]) == 50
 
-
-@farmOS_testing_server
-def test_asset_iterate(test_farm):
+    # Get all assets.
     all_assets = list(test_farm.asset.iterate(test_asset["type"]))
-
-    assert len(all_assets) > 0
+    assert len(all_assets) > len(response["data"])

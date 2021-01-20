@@ -38,3 +38,48 @@ def test_farm():
         )
         farm.authorize(username=FARMOS_OAUTH_USERNAME, password=FARMOS_OAUTH_PASSWORD)
         return farm
+
+
+@pytest.fixture(scope="module")
+def test_logs(test_farm):
+    log_ids = []
+    # Create logs.
+    for x in range(1, 60):
+        test_log = {
+            "type": "observation",
+            "payload": {"attributes": {"name": "Log #" + str(x)}},
+        }
+        response = test_farm.log.send(test_log["type"], test_log["payload"])
+        log_ids.append(response["data"]["id"])
+
+    return log_ids
+
+
+@pytest.fixture(scope="module")
+def test_assets(test_farm):
+    asset_ids = []
+    # Create assets.
+    for x in range(1, 60):
+        test_asset = {
+            "type": "equipment",
+            "payload": {"attributes": {"name": "Asset #" + str(x)}},
+        }
+        response = test_farm.asset.send(test_asset["type"], test_asset["payload"])
+        asset_ids.append(response["data"]["id"])
+
+    return asset_ids
+
+
+@pytest.fixture(scope="module")
+def test_terms(test_farm):
+    term_ids = []
+    # Create terms.
+    for x in range(1, 60):
+        test_term = {
+            "type": "plant_type",
+            "payload": {"attributes": {"name": "Plant type #" + str(x)}},
+        }
+        response = test_farm.term.send(test_term["type"], test_term["payload"])
+        term_ids.append(response["data"]["id"])
+
+    return term_ids

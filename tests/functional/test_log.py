@@ -52,16 +52,13 @@ def test_log_crud(test_farm):
 
 
 @farmOS_testing_server
-def test_log_get(test_farm):
+def test_log_get(test_farm, test_logs):
+    # Get one page of logs.
     response = test_farm.log.get(test_log["type"])
-
     assert "data" in response
     assert "links" in response
-    assert len(response["data"]) > 0
+    assert len(response["data"]) == 50
 
-
-@farmOS_testing_server
-def test_log_iterate(test_farm):
+    # Get all logs.
     all_logs = list(test_farm.log.iterate(test_log["type"]))
-
-    assert len(all_logs) > 0
+    assert len(all_logs) > len(response["data"])
