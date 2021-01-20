@@ -15,7 +15,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="farmOS",
-    version="0.2.0",
+    version="1.0.0-alpha.1",
     author="farmOS team",
     author_email="mike@mstenta.net",
     description="A Python library for interacting with farmOS over API. ",
