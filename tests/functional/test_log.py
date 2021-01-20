@@ -9,7 +9,10 @@ timestamp = curr_time.isoformat(timespec="seconds")
 test_log = {
     "type": "observation",
     "payload": {
-        "attributes": {"name": "Testing from farmOS.py", "timestamp": timestamp,},
+        "attributes": {
+            "name": "Testing from farmOS.py",
+            "timestamp": timestamp,
+        },
     },
 }
 
@@ -32,7 +35,9 @@ def test_log_crud(test_farm):
 
     test_log_changes = {
         "id": test_log["id"],
-        "attributes": {"name": "Updated Log Name",},
+        "attributes": {
+            "name": "Updated Log Name",
+        },
     }
     # Update the log.
     patch_response = test_farm.log.send(test_log["type"], test_log_changes)

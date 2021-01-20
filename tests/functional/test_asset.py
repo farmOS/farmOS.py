@@ -32,7 +32,10 @@ def test_asset_crud(test_farm):
 
     test_asset_changes = {
         "id": test_asset["id"],
-        "attributes": {"name": "Old tractor", "status": "archived",},
+        "attributes": {
+            "name": "Old tractor",
+            "status": "archived",
+        },
     }
 
     # Update the asset.
