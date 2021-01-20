@@ -1,0 +1,46 @@
+name: Run 2.x tests
+on:
+  push:
+    branches:
+      - '2.x'
+      - '2.x-**'
+
+jobs:
+  build:
+    name: Run tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ 3.6, 3.7, 3.8 ]
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+      - name: Create docker-compose.yml
+        run: curl https://raw.githubusercontent.com/farmOS/farmOS/2.x/docker/docker-compose.development.yml -o docker-compose.yml
+      - name: Start containers
+        run: docker-compose up -d && sleep 5
+      - name: Install farmOS
+        run: docker-compose exec -u www-data -T www drush site-install -y --db-url=pgsql://farm:farm@db/farm --account-pass=admin
+      - name: Create test user
+        run: |
+          docker-compose exec -u www-data -T www drush user-create tester --password test
+          docker-compose exec -u www-data -T www drush user-add-role farm_manager tester
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          python setup.py install
+      - name: Run farmOS.py tests.
+        run: pytest tests
+        env:
+          FARMOS_HOSTNAME: 'http://localhost'
+          FARMOS_OAUTH_USERNAME: 'tester'
+          FARMOS_OAUTH_PASSWORD: 'test'
+      - name: Black linting
+        uses: psf/black@stable
+        with:
+          black_args: ". --check"
