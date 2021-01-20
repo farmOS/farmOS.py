@@ -163,7 +163,7 @@ info = farm_client.info()
 
 ### Client methods
 
-farmOS.py can connect to farmOS servers running version 1.x or 2.x. The version should be specified when instantiating
+farmOS.py can connect to farmOS servers running version ^1.6 or 2.x. The version should be specified when instantiating
 the farmOS client, see [Authentication](#authentication).
 
 Because of [API changes](https://2x.farmos.org/development/api/changes/) in farmOS 2.x, the client provides different
