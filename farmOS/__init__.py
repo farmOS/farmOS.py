@@ -7,6 +7,7 @@ from .session import OAuthSession
 
 from . import client
 from . import client_2
+from . import subrequests
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -129,6 +130,7 @@ class farmOS:
             self.term = client_2.TermAPI(self.session)
             self.resource = client_2.ResourceBase(self.session)
             self.info = partial(client_2.info, self.session)
+            self.subrequests = subrequests.SubrequestsBase(self.session)
             self.filter = client_2.filter
         else:
             self.log = client.LogAPI(self.session)
