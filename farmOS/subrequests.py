@@ -4,6 +4,8 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
+from .session import OAuthSession
+
 # Subrequests model derived from provided JSON Schema
 # https://git.drupalcode.org/project/subrequests/-/blob/3.x/schema.json
 
@@ -39,7 +41,7 @@ class Subrequest(BaseModel):
         title="Body",
     )
     headers: Optional[Dict[str, Any]] = Field(
-        None, description="HTTP headers to be sent with the request.", title="Headers"
+        {}, description="HTTP headers to be sent with the request.", title="Headers"
     )
     waitFor: Optional[List[str]] = Field(
         None,
@@ -66,7 +68,7 @@ class SubrequestsBase(object):
 
     subrequest_path = "subrequests"
 
-    def __init__(self, session):
+    def __init__(self, session: OAuthSession):
         self.session = session
 
     def send(
@@ -78,17 +80,26 @@ class SubrequestsBase(object):
         if isinstance(blueprint, List):
             blueprint = SubrequestsBlueprint.parse_obj(blueprint)
 
-        headers = {
-            "Content-Type": "application/json"
-        }
+        # Auto populate headers for each sub-request.
+        for sub in blueprint.__root__:
+            if "Accept" not in sub.headers:
+                sub.headers["Accept"] = "application/vnd.api+json"
+            if sub.body is not None and "Content-Type" not in sub.headers:
+                sub.headers["Content-Type"] = "application/vnd.api+json"
+
+        headers = {"Content-Type": "application/json"}
 
         params = {}
         if format == Format.json.value:
             params = {"_format": "json"}
 
-        options = {"data": blueprint.json(exclude_unset=True)}
+        options = {"data": blueprint.json(exclude_none=True)}
 
         response = self.session.http_request(
-            method="POST", path=self.subrequest_path, options=options, params=params, headers=headers
+            method="POST",
+            path=self.subrequest_path,
+            options=options,
+            params=params,
+            headers=headers,
         )
         return response
