@@ -1,6 +1,7 @@
 from __future__ import annotations
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+import json
 
 from pydantic import BaseModel, Field, validator
 
@@ -40,7 +41,7 @@ class Subrequest(BaseModel):
         description="ID other requests can use to reference this request.",
         title="Request ID",
     )
-    body: Optional[str] = Field(
+    body: Optional[Union[str, dict]] = Field(
         None,
         description="The JSON encoded body payload for HTTP requests send a body.",
         title="Body",
@@ -60,6 +61,12 @@ class Subrequest(BaseModel):
         if uri is None and endpoint is None:
             raise ValueError("Either uri or endpoint is required.")
         return uri
+
+    @validator("body", pre=True)
+    def serialize_body(cls, body):
+        if not isinstance(body, str):
+            return json.dumps(body)
+        return body
 
 
 class SubrequestsBlueprint(BaseModel):
