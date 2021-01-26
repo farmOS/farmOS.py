@@ -89,7 +89,7 @@ class OAuthSession(OAuth2Session):
 
         return token
 
-    def http_request(self, path, method="GET", options=None, params=None):
+    def http_request(self, path, method="GET", options=None, params=None, headers=None):
         """Raw HTTP request helper function.
 
         Keyword arguments:
@@ -107,10 +107,10 @@ class OAuthSession(OAuth2Session):
         # Assemble the URL.
         url = "{}/{}".format(self.hostname, path)
         return self._http_request(
-            url=url, method=method, options=options, params=params
+            url=url, method=method, options=options, params=params, headers=headers
         )
 
-    def _http_request(self, url, method="GET", options=None, params=None):
+    def _http_request(self, url, method="GET", options=None, params=None, headers=None):
 
         # Automatically follow redirects, unless this is a POST request.
         # The Python requests library converts POST to GET during a redirect.
@@ -121,7 +121,8 @@ class OAuthSession(OAuth2Session):
         if options and "allow_redirects" in options:
             allow_redirects = options["allow_redirects"]
 
-        headers = {}
+        if headers is None:
+            headers = {}
 
         # If there is data to be sent, include it.
         data = None
@@ -133,7 +134,8 @@ class OAuthSession(OAuth2Session):
         json = None
         if options and "json" in options:
             json = options["json"]
-            headers["Content-Type"] = "application/vnd.api+json"
+            if "Content-Type" not in headers:
+                headers["Content-Type"] = "application/vnd.api+json"
 
         # Perform the request.
         response = self.request(
