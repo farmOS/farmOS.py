@@ -2,7 +2,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from .session import OAuthSession
 
@@ -27,8 +27,13 @@ class Subrequest(BaseModel):
         description="The action intended for the request. Each action can resolve into a different HTTP method.",
         title="Action",
     )
-    uri: str = Field(
-        ..., description="The URI where to make the subrequest.", title="URI"
+    endpoint: Optional[str] = Field(
+        None,
+        description="The API endpoint to request. The base URL will be added automatically.",
+        title="Endpoint",
+    )
+    uri: Optional[str] = Field(
+        None, description="The URI where to make the subrequest.", title="URI"
     )
     requestId: Optional[str] = Field(
         None,
@@ -48,6 +53,13 @@ class Subrequest(BaseModel):
         description="ID of other requests that this request depends on.",
         title="Parent ID",
     )
+
+    @validator("uri", pre=True, always=True)
+    def check_uri_or_endpoint(cls, uri, values):
+        endpoint = values.get("endpoint", None)
+        if uri is None and endpoint is None:
+            raise ValueError("Either uri or endpoint is required.")
+        return uri
 
 
 class SubrequestsBlueprint(BaseModel):
@@ -80,8 +92,13 @@ class SubrequestsBase(object):
         if isinstance(blueprint, List):
             blueprint = SubrequestsBlueprint.parse_obj(blueprint)
 
-        # Auto populate headers for each sub-request.
+        # Modify each sub-request as needed.
         for sub in blueprint.__root__:
+            # Build the URI if an endpoint is provided.
+            if sub.uri is None and sub.endpoint is not None:
+                sub.uri = "{}/{}".format(self.session.hostname, sub.endpoint)
+
+            # Auto populate headers for each sub-request.
             if "Accept" not in sub.headers:
                 sub.headers["Accept"] = "application/vnd.api+json"
             if sub.body is not None and "Content-Type" not in sub.headers:
@@ -93,7 +110,10 @@ class SubrequestsBase(object):
         if format == Format.json.value:
             params = {"_format": "json"}
 
-        options = {"data": blueprint.json(exclude_none=True)}
+        # Generate the json to send. It is important to use the .json() method
+        # of the model for correct serialization.
+        json = blueprint.json(exclude={"subrequest": {"endpoint"}}, exclude_none=True)
+        options = {"data": json}
 
         response = self.session.http_request(
             method="POST",
