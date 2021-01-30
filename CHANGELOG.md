@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-alpha.2] -- 2021-01-29
+### Changed
+- Create a resource.get_id method instead of supplying an ID as the filters param. [#42](https://github.com/farmOS/farmOS.py/issues/42)
+- Rename the `filters` parameter to `params`. [#42](https://github.com/farmOS/farmOS.py/issues/42)
+
+### Added
+- Support for subrequests. [#43](https://github.com/farmOS/farmOS.py/issues/43)
+
 ## [1.0.0-alpha.1] -- 2021-01-20
 ### Added
 - Use the common OAuth Token path `/oauth/token` available in farmOS ^1.6
