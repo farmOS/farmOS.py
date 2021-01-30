@@ -1,9 +1,10 @@
 # Client methods for farmOS 2.x
 
 - [Resources](#resources)
-- [Logs](#logs)
-- [Assets](#assets)
-- [Taxonomy Terms](#taxonomy-terms)
+  - [Logs](#logs)
+  - [Assets](#assets)
+  - [Taxonomy Terms](#taxonomy-terms)
+- [Subrequests](#subrequests)
 
 ## Resources
 
@@ -248,4 +249,80 @@ response = farm_client.term.send('plant_type', {"attributes": {"name": "Corn"}})
 
 ```python
 farm_client.term.delete('plant_type', "a260441b-2553-4715-83ee-3ac08a6b85f0")
+```
+
+## Subrequests
+
+farmOS.py supports the [Subrequests](https://www.drupal.org/project/subrequests) module which can optionally be 
+installed on the farmOS server.
+
+Subrequests allows multiple requests to be defined in a "blueprint" and sent to the server in a single POST request. 
+The blueprint can define sequential requests so that the response of one request can be embedded into the body of a 
+later request. See the subrequests [blueprint specification](https://git.drupalcode.org/project/subrequests/blob/8.x-2.x/SPECIFICATION.md)
+for more documentation.
+
+farmOS.py provides some additional features to help use subrequests:
+- The default response format is set to `json` by appending a `?_format=json` query parameter automatically. JSON is 
+  much easier to parse than subrequest's default `html` format, but HTML can be requested by specifying `format='html'`.
+- Unless otherwise provided, the `Accept` and `Content-Type` headers for each sub-request will be set to
+  `application/vnd.api+json` for standard JSONAPI requests.
+- An `endpoint` can be provided instead of the full `uri` for each sub-request. farmOS.py will build the full `uri` 
+  from the `hostname` already configured with the client.
+- The sub-request `body` can be provided as an object that farmOS.py will serialize into a JSON object string.
+- Blueprints are validated using Pydantic models. These models can also be used to build individual requests to include
+  in a blueprint.
+  
+An example that creates a new asset followed by a new log that references the asset:
+  
+```python
+from farmOS import farmOS
+from farmOS.subrequests import Action, Subrequest, SubrequestsBlueprint, Format
+
+client = farmOS("http://localhost", scope="farm_manager", version=2)
+client.authorize(username, password)
+
+plant = {
+    "data": {
+        "type": "asset--plant",
+        "attributes": {
+            "name": "My new plant",
+            "description": "Created in the first request.",
+        },
+    }
+}
+new_asset = Subrequest(action=Action.create, requestId="create-asset", endpoint="api/asset/plant", body=plant)
+
+log = {
+    "data": {
+        "type": "log--seeding",
+        "attributes": {
+            "name": "Seeding my new plant",
+            "notes": "Created in the second request.",
+        },
+        "relationships": {
+            "asset": {
+                "data": [
+                    {
+                        "type": "asset--plant",
+                        "id": "{{create-asset.body@$.data.id}}"
+                    }
+                ]
+            }
+        }
+    }
+}
+new_log = Subrequest(action=Action.create, requestId="create-log", waitFor=["create-asset"], endpoint="api/log/seeding", body=log)
+
+# Create a blueprint object
+blueprint = SubrequestsBlueprint.parse_obj([new_asset, new_log])
+
+# OR provide a list of Subrequest objects.
+blueprint = [new_asset, new_log]
+
+# Send the blueprint.
+response = client.subrequests.send(blueprint, format=Format.json)
+
+# New resource ids.
+print(response['create-asset']['data']['id'])
+print(response['create-log']['data']['id'])
 ```
