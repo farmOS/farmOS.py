@@ -70,7 +70,7 @@ logs = list(farm_client.log.iterate('observation'))
 
 # Filter to 'done' logs.
 filters = farm_client.filter('status', 'done')
-done_observations = list(farm_client.log.iterate('observation', filters=filters))
+done_observations = list(farm_client.log.iterate('observation', params=filters))
 ```
 
 #### `.get()`
@@ -81,7 +81,7 @@ response = farm_client.log.get('observation')
 
 # Filter to 'done' logs.
 filters = farm_client.filter('status', 'done')
-response = farm_client.log.get('observation', filters=filters)
+response = farm_client.log.get('observation', params=filters)
 
 # Get observation log by ID.
 id = 'b9e8c253-a3c1-4af4-b2c8-7f201dc2b046'
@@ -137,7 +137,7 @@ logs = list(farm_client.asset.iterate('animal'))
 
 # Filter to female animals.
 filters = farm_client.filter('sex', 'f')
-females = list(farm_client.asset.iterate('animal', filters=filters))
+females = list(farm_client.asset.iterate('animal', params=filters))
 ```
 
 #### `.get()`
@@ -149,7 +149,7 @@ response = farm_client.asset.get('animal')
 
 # Filter to female animals.
 filters = farm_client.filter('sex', 'f')
-response = farm_client.asset.get('animal', filters=filters)
+response = farm_client.asset.get('animal', params=filters)
 
 # Get asset by ID.
 response = farm_client.asset.get('animal', 'b9e8c253-a3c1-4af4-b2c8-7f201dc2b046')

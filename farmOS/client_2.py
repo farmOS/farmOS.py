@@ -9,36 +9,34 @@ class ResourceBase(object):
 
     def __init__(self, session):
         self.session = session
-        self.filters = {}
+        self.params = {}
 
-    def _get_records(self, entity_type, bundle=None, resource_id=None, filters=None):
+    def _get_records(self, entity_type, bundle=None, resource_id=None, params=None):
         """Helper function that checks to retrieve one record, one page or multiple pages of farmOS records"""
-        if filters is None:
-            filters = {}
+        if params is None:
+            params = {}
 
-        filters = {**self.filters, **filters}
+        params = {**self.params, **params}
 
         path = self._get_resource_path(entity_type, bundle, resource_id)
 
-        response = self.session.http_request(path=path, params=filters)
+        response = self.session.http_request(path=path, params=params)
         return response.json()
 
-    def get(self, entity_type, bundle=None, filters=None):
-        return self._get_records(
-            entity_type=entity_type, bundle=bundle, filters=filters
-        )
+    def get(self, entity_type, bundle=None, params=None):
+        return self._get_records(entity_type=entity_type, bundle=bundle, params=params)
 
-    def get_id(self, entity_type, bundle=None, resource_id=None, filters=None):
+    def get_id(self, entity_type, bundle=None, resource_id=None, params=None):
         return self._get_records(
             entity_type=entity_type,
             bundle=bundle,
-            filters=filters,
+            params=params,
             resource_id=resource_id,
         )
 
-    def iterate(self, entity_type, bundle=None, filters=None):
+    def iterate(self, entity_type, bundle=None, params=None):
         response = self._get_records(
-            entity_type=entity_type, bundle=bundle, filters=filters
+            entity_type=entity_type, bundle=bundle, params=params
         )
         more = True
         while more:
@@ -130,22 +128,22 @@ class ResourceHelperBase(object):
         self.entity_type = entity_type
         self.resource_api = ResourceBase(session=session)
 
-    def get(self, bundle, filters=None):
+    def get(self, bundle, params=None):
         return self.resource_api.get(
-            entity_type=self.entity_type, bundle=bundle, filters=filters
+            entity_type=self.entity_type, bundle=bundle, params=params
         )
 
-    def get_id(self, bundle, resource_id, filters=None):
+    def get_id(self, bundle, resource_id, params=None):
         return self.resource_api.get_id(
             entity_type=self.entity_type,
             bundle=bundle,
             resource_id=resource_id,
-            filters=filters,
+            params=params,
         )
 
-    def iterate(self, bundle, filters=None):
+    def iterate(self, bundle, params=None):
         return self.resource_api.iterate(
-            entity_type=self.entity_type, bundle=bundle, filters=filters
+            entity_type=self.entity_type, bundle=bundle, params=params
         )
 
     def send(self, bundle, payload=None):
