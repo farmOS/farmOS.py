@@ -128,4 +128,9 @@ class SubrequestsBase(object):
             params=params,
             headers=headers,
         )
+
+        # Return a json response if requested.
+        if format == Format.json.value:
+            return response.json()
+
         return response
