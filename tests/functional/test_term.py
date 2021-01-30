@@ -15,7 +15,7 @@ def test_term_crud(test_farm):
     test_term["id"] = post_response["data"]["id"]
 
     # Get the term by ID.
-    get_response = test_farm.term.get(test_term["type"], test_term["id"])
+    get_response = test_farm.term.get_id(test_term["type"], test_term["id"])
 
     # Assert that both responses have the correct values.
     for response in [post_response, get_response]:
@@ -29,7 +29,7 @@ def test_term_crud(test_farm):
     # Update the term.
     patch_response = test_farm.term.send(test_term["type"], test_term_changes)
     # Get the term by ID.
-    get_response = test_farm.term.get(test_term["type"], test_term["id"])
+    get_response = test_farm.term.get_id(test_term["type"], test_term["id"])
 
     # Assert that both responses have the updated name.
     for response in [patch_response, get_response]:

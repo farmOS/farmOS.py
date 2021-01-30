@@ -23,7 +23,7 @@ def test_asset_crud(test_farm):
     test_asset["id"] = post_response["data"]["id"]
 
     # Get the asset by ID.
-    get_response = test_farm.asset.get(test_asset["type"], test_asset["id"])
+    get_response = test_farm.asset.get_id(test_asset["type"], test_asset["id"])
 
     # Assert that both responses have the correct values.
     for response in [post_response, get_response]:
@@ -41,7 +41,7 @@ def test_asset_crud(test_farm):
     # Update the asset.
     patch_response = test_farm.asset.send(test_asset["type"], test_asset_changes)
     # Get the asset by ID.
-    get_response = test_farm.asset.get(test_asset["type"], test_asset["id"])
+    get_response = test_farm.asset.get_id(test_asset["type"], test_asset["id"])
 
     # Assert that both responses have the correct values.
     for response in [patch_response, get_response]:

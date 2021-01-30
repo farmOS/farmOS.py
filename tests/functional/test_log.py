@@ -26,7 +26,7 @@ def test_log_crud(test_farm):
     test_log["id"] = post_response["data"]["id"]
 
     # Get the log by ID.
-    get_response = test_farm.log.get(test_log["type"], test_log["id"])
+    get_response = test_farm.log.get_id(test_log["type"], test_log["id"])
 
     # Assert that both responses have the correct values.
     for response in [post_response, get_response]:
@@ -42,7 +42,7 @@ def test_log_crud(test_farm):
     # Update the log.
     patch_response = test_farm.log.send(test_log["type"], test_log_changes)
     # Get the log by ID.
-    get_response = test_farm.log.get(test_log["type"], test_log["id"])
+    get_response = test_farm.log.get_id(test_log["type"], test_log["id"])
 
     # Assert that both responses have the updated name.
     for response in [patch_response, get_response]:

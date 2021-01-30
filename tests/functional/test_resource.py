@@ -25,7 +25,7 @@ def test_user_update_self(test_farm):
     test_farm.authorize(username=FARMOS_OAUTH_USERNAME, password=FARMOS_OAUTH_PASSWORD)
 
     # Get the user by ID.
-    get_response = test_farm.resource.get("user", filters=user_id)
+    get_response = test_farm.resource.get_id("user", resource_id=user_id)
 
     # Assert that both responses have the updated display_name.
     for response in [patch_response, get_response]:

@@ -11,20 +11,14 @@ class ResourceBase(object):
         self.session = session
         self.filters = {}
 
-    def _get_records(self, entity_type, bundle=None, filters=None):
+    def _get_records(self, entity_type, bundle=None, resource_id=None, filters=None):
         """Helper function that checks to retrieve one record, one page or multiple pages of farmOS records"""
         if filters is None:
             filters = {}
 
-        # Determine if filters is an int (id) or dict (filters object)
-        record_id = None
-        if isinstance(filters, int) or isinstance(filters, str):
-            record_id = filters
-            filters = {}
-
         filters = {**self.filters, **filters}
 
-        path = self._get_resource_path(entity_type, bundle, record_id)
+        path = self._get_resource_path(entity_type, bundle, resource_id)
 
         response = self.session.http_request(path=path, params=filters)
         return response.json()
@@ -32,6 +26,14 @@ class ResourceBase(object):
     def get(self, entity_type, bundle=None, filters=None):
         return self._get_records(
             entity_type=entity_type, bundle=bundle, filters=filters
+        )
+
+    def get_id(self, entity_type, bundle=None, resource_id=None, filters=None):
+        return self._get_records(
+            entity_type=entity_type,
+            bundle=bundle,
+            filters=filters,
+            resource_id=resource_id,
         )
 
     def iterate(self, entity_type, bundle=None, filters=None):
@@ -131,6 +133,14 @@ class ResourceHelperBase(object):
     def get(self, bundle, filters=None):
         return self.resource_api.get(
             entity_type=self.entity_type, bundle=bundle, filters=filters
+        )
+
+    def get_id(self, bundle, resource_id, filters=None):
+        return self.resource_api.get_id(
+            entity_type=self.entity_type,
+            bundle=bundle,
+            resource_id=resource_id,
+            filters=filters,
         )
 
     def iterate(self, bundle, filters=None):
