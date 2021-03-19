@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-beta.1] -- 2021-03-19
+
+- First beta release.
+
 ## [1.0.0-alpha.2] -- 2021-01-29
 ### Changed
 - Create a resource.get_id method instead of supplying an ID as the filters param. [#42](https://github.com/farmOS/farmOS.py/issues/42)
