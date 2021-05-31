@@ -8,7 +8,11 @@ install_requires = [
     "requests-oauthlib",
 ]
 
-tests_require = (["pytest",],)
+tests_require = (
+    [
+        "pytest",
+    ],
+)
 
 with open("README.md", "r") as fh:
     readme = fh.read()
