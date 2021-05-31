@@ -48,7 +48,7 @@ class OAuthSession(OAuth2Session):
         self._client_secret = client_secret
         self.hostname = hostname
 
-    def authorize(self, username, password, scope):
+    def authorize(self, username, password, scope=None):
         """Authorize with the farmOS OAuth server."""
 
         token = self.token
@@ -66,6 +66,10 @@ class OAuthSession(OAuth2Session):
             from getpass import getpass
 
             password = getpass("Enter password: ")
+
+        # Use default scope if none provided.
+        if scope is None:
+            scope = self.scope
 
         token = self.fetch_token(
             token_url=self._token_url,
@@ -85,7 +89,7 @@ class OAuthSession(OAuth2Session):
 
         return token
 
-    def http_request(self, path, method="GET", options=None, params=None):
+    def http_request(self, path, method="GET", options=None, params=None, headers=None):
         """Raw HTTP request helper function.
 
         Keyword arguments:
@@ -102,6 +106,11 @@ class OAuthSession(OAuth2Session):
 
         # Assemble the URL.
         url = "{}/{}".format(self.hostname, path)
+        return self._http_request(
+            url=url, method=method, options=options, params=params, headers=headers
+        )
+
+    def _http_request(self, url, method="GET", options=None, params=None, headers=None):
 
         # Automatically follow redirects, unless this is a POST request.
         # The Python requests library converts POST to GET during a redirect.
@@ -112,20 +121,27 @@ class OAuthSession(OAuth2Session):
         if options and "allow_redirects" in options:
             allow_redirects = options["allow_redirects"]
 
+        if headers is None:
+            headers = {}
+
         # If there is data to be sent, include it.
         data = None
         if options and "data" in options:
             data = options["data"]
+            headers["Content-Type"] = "application/vnd.api+json"
 
         # If there is a json data to be sent, include it.
         json = None
         if options and "json" in options:
             json = options["json"]
+            if "Content-Type" not in headers:
+                headers["Content-Type"] = "application/vnd.api+json"
 
         # Perform the request.
         response = self.request(
             method,
             url,
+            headers=headers,
             allow_redirects=allow_redirects,
             data=data,
             json=json,

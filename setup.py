@@ -4,22 +4,16 @@ setup_requires = [
     "pytest-runner",
 ]
 
-install_requires = [
-    "requests-oauthlib",
-]
+install_requires = ["requests-oauthlib", "pydantic>=1.7.3"]
 
-tests_require = (
-    [
-        "pytest",
-    ],
-)
+tests_require = ["pytest", "black>=20"]
 
 with open("README.md", "r") as fh:
     readme = fh.read()
 
 setuptools.setup(
     name="farmOS",
-    version="0.2.0",
+    version="1.0.0-beta.1",
     author="farmOS team",
     author_email="mike@mstenta.net",
     description="A Python library for interacting with farmOS over API. ",

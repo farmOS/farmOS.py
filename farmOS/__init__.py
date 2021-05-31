@@ -3,11 +3,11 @@ from datetime import datetime
 from urllib.parse import urlparse, urlunparse
 from functools import partial
 
-from requests import HTTPError
-from oauthlib.oauth2 import InvalidGrantError, InvalidClientError, InvalidScopeError
-
 from .session import OAuthSession
-from .client import LogAPI, AssetAPI, TermAPI, AreaAPI, info
+
+from . import client
+from . import client_2
+from . import subrequests
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -24,6 +24,7 @@ class farmOS:
         scope="user_access",
         token=None,
         token_updater=None,
+        version="1",
     ):
         """
         Initialize instance of the farmOS client that connects to a single farmOS server.
@@ -83,7 +84,9 @@ class farmOS:
             raise Exception("No hostname provided and could not be loaded from config.")
 
         logger.debug("Creating an OAuth Session.")
-        token_url = hostname + "/oauth2/token"
+        # OR implement a method to check both token paths.
+        # maybe version can default to none, and check the server?
+        token_url = hostname + "/oauth/token"
 
         # Check the token expiration time.
         if token is not None and "expires_at" in token:
@@ -121,13 +124,22 @@ class farmOS:
                 "initializing a farmOS Client."
             )
 
-        self.log = LogAPI(self.session)
-        self.asset = AssetAPI(self.session)
-        self.area = AreaAPI(self.session)
-        self.term = TermAPI(self.session)
-        self.info = partial(info, self.session)
+        if version == 2:
+            self.log = client_2.LogAPI(self.session)
+            self.asset = client_2.AssetAPI(self.session)
+            self.term = client_2.TermAPI(self.session)
+            self.resource = client_2.ResourceBase(self.session)
+            self.info = partial(client_2.info, self.session)
+            self.subrequests = subrequests.SubrequestsBase(self.session)
+            self.filter = client_2.filter
+        else:
+            self.log = client.LogAPI(self.session)
+            self.asset = client.AssetAPI(self.session)
+            self.area = client.AreaAPI(self.session)
+            self.term = client.TermAPI(self.session)
+            self.info = partial(client.info, self.session)
 
-    def authorize(self, username=None, password=None, scope="user_access"):
+    def authorize(self, username=None, password=None, scope=None):
         """Authorize with the farmOS server.
 
         The client must be authorized with the farmOS server before making requests.
