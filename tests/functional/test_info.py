@@ -1,5 +1,6 @@
 from tests.conftest import farmOS_testing_server
 
+
 #
 # Test farm info method
 #
