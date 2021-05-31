@@ -2,9 +2,8 @@ from datetime import datetime
 
 from tests.conftest import farmOS_testing_server
 
-curr_time = datetime.now()
-timestamp = datetime.timestamp(curr_time)
-timestamp = str(timestamp)[0:-7]
+curr_time = datetime.timestamp(datetime.now())
+timestamp = str(curr_time)[0:-7]
 
 # Create a test log
 test_log = {
