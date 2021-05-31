@@ -68,7 +68,7 @@ password = "password"
 farm_client = farmOS(
     hostname=hostname,
     client_id = "farm", # Optional. The default oauth client_id "farm" is enabled on all farmOS servers.
-    scope="user_access" # Optional. The default scope is "user_access". Only needed if authorizing with a differnt scope.
+    scope="user_access" # Optional. The default scope is "user_access". Only needed if authorizing with a different scope.
 )
 
 # Authorize the client, save the token.
