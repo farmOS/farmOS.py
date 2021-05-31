@@ -10,7 +10,7 @@ jobs:
       - run: bandit --recursive --skip B101,B106 .
       - run: black --check .
       - run: codespell  # --ignore-words-list="" --skip=""
-      - run: flake8 . --count --max-line-length=88 --show-source --statistics
+      - run: flake8 . --count --max-line-length=113 --show-source --statistics
       - run: isort --check-only --profile black . || true
       - run: pip install pydantic requests-oauthlib
       - run: pip install -r requirements.txt || true
