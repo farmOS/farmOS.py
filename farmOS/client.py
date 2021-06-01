@@ -1,11 +1,11 @@
 import logging
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs, urlparse
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class BaseAPI(object):
+class BaseAPI:
     """Base class for API methods
 
     This class includes basic implementations of the

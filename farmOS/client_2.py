@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class ResourceBase(object):
+class ResourceBase:
     """Base class for JSONAPI resource methods."""
 
     def __init__(self, session):
@@ -41,8 +41,7 @@ class ResourceBase(object):
         more = True
         while more:
             # TODO: Should we merge in the "includes" info here?
-            for record in response["data"]:
-                yield record
+            yield from response["data"]
             try:
                 next_url = response["links"]["next"]["href"]
                 response = self.session._http_request(url=next_url)
@@ -123,7 +122,7 @@ class ResourceBase(object):
         return entity_type + "--" + bundle
 
 
-class ResourceHelperBase(object):
+class ResourceHelperBase:
     def __init__(self, session, entity_type):
         self.entity_type = entity_type
         self.resource_api = ResourceBase(session=session)
