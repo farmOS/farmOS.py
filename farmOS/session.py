@@ -1,7 +1,7 @@
 import logging
 
-from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import LegacyApplicationClient
+from requests_oauthlib import OAuth2Session
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -21,7 +21,7 @@ class OAuthSession(OAuth2Session):
         authorization_url=None,
         token_updater=None,
         *args,
-        **kwargs
+        **kwargs,
     ):
 
         # Default to the "user_access" scope.
@@ -32,7 +32,7 @@ class OAuthSession(OAuth2Session):
         # Required to generate a new access token
         auto_refresh_kwargs = {"client_id": client_id, "client_secret": client_secret}
 
-        super(OAuthSession, self).__init__(
+        super().__init__(
             token=token,
             client=LegacyApplicationClient(client_id=client_id),
             auto_refresh_url=token_url,
@@ -105,7 +105,7 @@ class OAuthSession(OAuth2Session):
         path = path.strip()
 
         # Assemble the URL.
-        url = "{}/{}".format(self.hostname, path)
+        url = f"{self.hostname}/{path}"
         return self._http_request(
             url=url, method=method, options=options, params=params, headers=headers
         )

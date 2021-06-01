@@ -1,14 +1,11 @@
-import pytest
 import os
 
-from requests import HTTPError
+import pytest
+from oauthlib.oauth2 import InvalidClientError, InvalidScopeError
 from oauthlib.oauth2.rfc6749.errors import CustomOAuth2Error
-from oauthlib.oauth2 import (
-    InvalidClientError,
-    InvalidScopeError,
-)
-from farmOS import farmOS
+from requests import HTTPError
 
+from farmOS import farmOS
 from tests.conftest import farmOS_testing_server
 
 # Variables for testing.

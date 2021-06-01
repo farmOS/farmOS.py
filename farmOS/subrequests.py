@@ -1,6 +1,6 @@
+import json
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-import json
 
 from pydantic import BaseModel, Field, validator
 
@@ -81,7 +81,7 @@ class Format(str, Enum):
     json = "json"
 
 
-class SubrequestsBase(object):
+class SubrequestsBase:
     """Class for handling subrequests"""
 
     subrequest_path = "subrequests"
@@ -102,7 +102,7 @@ class SubrequestsBase(object):
         for sub in blueprint.__root__:
             # Build the URI if an endpoint is provided.
             if sub.uri is None and sub.endpoint is not None:
-                sub.uri = "{}/{}".format(self.session.hostname, sub.endpoint)
+                sub.uri = f"{self.session.hostname}/{sub.endpoint}"
 
             # Auto populate headers for each sub-request.
             if "Accept" not in sub.headers:

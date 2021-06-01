@@ -1,13 +1,10 @@
 import logging
 from datetime import datetime
-from urllib.parse import urlparse, urlunparse
 from functools import partial
+from urllib.parse import urlparse, urlunparse
 
+from . import client, client_2, subrequests
 from .session import OAuthSession
-
-from . import client
-from . import client_2
-from . import subrequests
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
