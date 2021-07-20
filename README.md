@@ -55,12 +55,13 @@ password = "password"
 farm_client = farmOS(
     hostname=hostname,
     client_id = "farm", # Optional. The default oauth client_id "farm" is enabled on all farmOS servers.
-    scope="user_access", # Optional. The default scope is "user_access". Only needed if authorizing with a different scope.
-    version=1 # Optional. The major version of the farmOS server, 1 or 2. Defaults to 1.
+    scope="farm_manager", # Optional. The default scope is "farm_manager". Only needed if authorizing with a different scope.
+    version=2 # Optional. The major version of the farmOS server, 1 or 2. Defaults to 2.
 )
 
 # Authorize the client, save the token.
-token = farm_client.authorize(username, password, scope="user_access")
+# A scope can be specified, but will default to the default scope set when initializing the client.
+token = farm_client.authorize(username, password, scope="farm_manager")
 ```
 
 Running from a Python Console, the `username` and `password` can also be 
@@ -69,14 +70,13 @@ credentials in plaintext:
 
 ```python
 >>> from farmOS import farmOS
->>> farm_client = farmOS(hostname="myfarm.farmos.net", client_id="farm", scope="user_access")
+>>> farm_client = farmOS(hostname="myfarm.farmos.net")
 >>> farm_client.authorize()
 Warning: Password input may be echoed.
 Enter username: >? username
 Warning: Password input may be echoed.
 Enter password: >? password
 >>> farm_client.info()
-'name': 'server-name', 'url': 'http://localhost', 'api_version': '1.2', 'user': ....
 ```
 
 ##### Authorizing with existing OAuth Token (advanced)
@@ -136,7 +136,7 @@ farm_client = farmOS(
 
 # Authorize the client.
 # Save the initial token that is created.
-current_token = farm_client.authorize(username, password, scope="user_access")
+current_token = farm_client.authorize(username, password, scope="farm_manager")
 ```
 
 ### Server Info
@@ -146,21 +146,42 @@ current_token = farm_client.authorize(username, password, scope="user_access")
 info = farm_client.info()
 
 {
-    'name': 'farmos-test',
-    'url': 'http://localhost',
-    'api_version': '1.2',
-    'user': {
-        'uid': '4',
-        'name': 'paul',
-        'mail': 'paul.weidner+2@gmail.com'
+  "jsonapi": {
+    "version": "1.0",
+    "meta": {
+      "links": {
+        "self": {
+          "href": "http://jsonapi.org/format/1.0/"
+        }
+      }
+    }
+  },
+  "data": [],
+  "meta": {
+    "links": {
+      "me": {
+        "meta": {
+          "id": "163c6e73-46fb-4283-b26b-153b598151ce"
+        },
+        "href": "http://localhost/api/user/user/163c6e73-46fb-4283-b26b-153b598151ce"
+      }
     },
-    'google_maps_api_key': 'AIzaSyCCHTbAGC_gHegwepMxBu_AKd_RmP54mDg',
-    'metrics': {
-        'equipment': {'label': 'Equipment', 'value': '7', 'link': 'farm/assets/equipment/list', 'weight': 0},
-        'areas': {'label': 'Areas', 'value': '20', 'link': 'farm/areas', 'weight': 100},
-        'field': {'label': 'Field area', 'value': '532 hectares', 'link': 'farm/areas', 'weight': 101}
+    "farm": {
+      "name": "Drush Site-Install",
+      "url": "http://localhost",
+      "version": "2.x",
+      "system_of_measurement": "metric"
+    }
+  },
+  "links": {
+    "asset--animal": {
+      "href": "http://localhost/api/asset/animal"
     },
-    'system_of_measurement': 'metric',
+    "asset--equipment": {
+      "href": "http://localhost/api/asset/equipment"
+    },
+    ...
+  }
 }
 ```
 
@@ -197,13 +218,9 @@ More info on logging in Python [here](https://docs.python.org/3/howto/logging.ht
 Functional tests require a live instance of farmOS to communicate with.
 Configure credentials for the farmOS instance to test against by setting the following environment variables: 
 
-For farmOS Drupal Authentication:
-`FARMOS_HOSTNAME`, `FARMOS_RESTWS_USERNAME`, and `FARMOS_RESTWS_PASSWORD`
-
-For farmOS OAuth Authentication (Password Flow):
 `FARMOS_HOSTNAME`, `FARMOS_OAUTH_USERNAME`, `FARMOS_OAUTH_PASSWORD`, `FARMOS_OAUTH_CLIENT_ID`, `FARMOS_OAUTH_CLIENT_SECRET`
 
-Automated tests are run with pytest
+Automated tests are run with pytest:
 
     python setup.py test
 

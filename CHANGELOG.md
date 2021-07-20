@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - The `token_updater` defaults to an empty lambda function to suppress the `requests_oauthlib.TokenUpdated` exception.
+- Set default values in preparation for farmOS 2.x. The `version` defaults to 2 and scope defaults to `farm_manager`.
 
 ## [1.0.0-beta.1] -- 2021-03-19
 

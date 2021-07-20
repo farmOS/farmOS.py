@@ -18,10 +18,10 @@ class farmOS:
         hostname,
         client_id="farm",
         client_secret=None,
-        scope="user_access",
+        scope="farm_manager",
         token=None,
         token_updater=lambda new_token: None,
-        version="1",
+        version=2,
     ):
         """
         Initialize instance of the farmOS client that connects to a single farmOS server.
@@ -30,9 +30,10 @@ class farmOS:
             will be added if none is specified.
         :param client_id: OAuth Client ID. Defaults to "farm"
         :param client_secret: OAuth Client Secret. Defaults to None.
-        :param scope: OAuth Scope. Defaults to "user_access".
+        :param scope: OAuth Scope. Defaults to "farm_manager".
         :param token: An existing OAuth token to use.
         :param token_updater: A function used to save OAuth tokens outside of the client.
+        :param version: The major version of the farmOS server. Defaults to 2.
         """
 
         logger.debug("Creating farmOS client.")
@@ -142,7 +143,7 @@ class farmOS:
 
         :param username: farmOS Username. Prompted if not included.
         :param password: farmOS Password. Prompted if not included.
-        :param scope: Scope to authorize as with the farmOS server. Defaults to "user_access".
+        :param scope: Scope to authorize as with the farmOS server. Defaults to "farm_manager".
         :return: OAuth Token.
         """
 

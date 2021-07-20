@@ -24,9 +24,9 @@ class OAuthSession(OAuth2Session):
         **kwargs,
     ):
 
-        # Default to the "user_access" scope.
+        # Default to the "farm_manager" scope.
         if scope is None:
-            scope = "user_access"
+            scope = "farm_manager"
 
         # Create a dictionary of credentials required to pass along with Refresh Tokens
         # Required to generate a new access token
