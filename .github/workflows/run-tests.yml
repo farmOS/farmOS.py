@@ -40,7 +40,3 @@ jobs:
           FARMOS_HOSTNAME: 'http://localhost'
           FARMOS_OAUTH_USERNAME: 'tester'
           FARMOS_OAUTH_PASSWORD: 'test'
-      - name: Black linting
-        uses: psf/black@stable
-        with:
-          black_args: ". --check"
