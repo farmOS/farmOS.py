@@ -10,9 +10,9 @@ jobs:
       - run: bandit --recursive --skip B101,B106 .
       - run: black --check .
       - run: codespell  # --ignore-words-list="" --skip=""
-      - run: flake8 . --count --max-line-length=113 --show-source --statistics
+      - run: flake8 . --count --max-complexity=10 --max-line-length=113 --show-source --statistics
       - run: isort --check-only --profile black .
       - run: python setup.py install
-      - run: mypy --ignore-missing-imports .  || true
+      - run: mypy --install-types --non-interactive .  || true
       - run: shopt -s globstar && pyupgrade --py36-plus **/*.py
       - run: safety check
