@@ -24,7 +24,7 @@ jobs:
           docker-compose exec -u www-data -T www drush site-install -y --db-url=pgsql://farm:farm@db/farm --account-pass=admin
           docker-compose exec -u www-data -T www drush user-create tester --password test
           docker-compose exec -u www-data -T www drush user-add-role farm_manager tester
-          docker-compose exec -u www-data -T www drush config:set simple_oauth.settings access_token_expiration 10 -y
+          docker-compose exec -u www-data -T www drush config:set simple_oauth.settings access_token_expiration 15 -y
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
