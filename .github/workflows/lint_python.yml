@@ -11,8 +11,8 @@ jobs:
       - run: black --check .
       - run: codespell  # --ignore-words-list="" --skip=""
       - run: flake8 . --count --max-line-length=113 --show-source --statistics
-      - run: isort --check-only --profile black . || true
+      - run: isort --check-only --profile black .
       - run: python setup.py install
       - run: mypy --ignore-missing-imports .  || true
-      - run: shopt -s globstar && pyupgrade --py36-plus **/*.py || true
+      - run: shopt -s globstar && pyupgrade --py36-plus **/*.py
       - run: safety check
