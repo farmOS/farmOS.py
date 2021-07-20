@@ -1,4 +1,5 @@
 import os
+import time
 
 import pytest
 from oauthlib.oauth2 import InvalidClientError, InvalidScopeError
@@ -68,3 +69,15 @@ def test_valid_login(test_farm):
 
     assert "access_token" in token
     assert "refresh_token" in token
+    assert "expires_at" in token
+    assert "expires_in" in token
+
+    # Sleep until the token expires.
+    time.sleep(token["expires_in"] + 1)
+
+    # Make a request that will trigger a refresh.
+    # Ensure the request is still authenticated.
+    info = test_farm.info()
+    assert "meta" in info
+    assert "links" in info["meta"]
+    assert "me" in info["meta"]["links"]
