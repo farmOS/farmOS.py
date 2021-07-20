@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- The `token_updater` defaults to an empty lambda function to suppress the `requests_oauthlib.TokenUpdated` exception.
+
 ## [1.0.0-beta.1] -- 2021-03-19
 
 - First beta release.

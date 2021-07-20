@@ -35,7 +35,6 @@ def test_farm():
             scope="farm_manager",
             client_id=FARMOS_OAUTH_CLIENT_ID,
             client_secret=FARMOS_OAUTH_CLIENT_SECRET,
-            token_updater=lambda new_token: None,
             version=2,
         )
         farm.authorize(username=FARMOS_OAUTH_USERNAME, password=FARMOS_OAUTH_PASSWORD)

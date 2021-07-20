@@ -103,10 +103,14 @@ farm_client = farmOS(
 
 ##### Saving OAuth Tokens
 
-By default, `access_tokens` expire in 1 hour. This means that requests sent 
-1 hour after authorization will trigger a `refresh` flow, providing the 
-client with a new `access_token` to use. A `token_updater` utility must be 
-provided to save tokens when automatic refreshing occurs. 
+By default, access tokens expire in 1 hour. This means that requests sent 1 
+hour after authorization will trigger a `refresh` flow, providing the client
+with a new `access_token` to use. A `token_updater` can be provided to save 
+tokens external of the session when automatic refreshing occurs.
+
+The `token_updater` defaults to an empty lambda function: `lambda new_token: None`.
+Alternatively, set `token_updater = None` to allow the [`requests_oauthlib.TokenUpdated`](https://requests-oauthlib.readthedocs.io/en/latest/api.html#requests_oauthlib.TokenUpdated)
+exception to be raised and caught by code executing requests from farmOS.py.
 
 ```python
 from farmOS import farmOS

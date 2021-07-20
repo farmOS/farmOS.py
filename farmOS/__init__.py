@@ -20,7 +20,7 @@ class farmOS:
         client_secret=None,
         scope="user_access",
         token=None,
-        token_updater=None,
+        token_updater=lambda new_token: None,
         version="1",
     ):
         """
@@ -37,12 +37,10 @@ class farmOS:
 
         logger.debug("Creating farmOS client.")
 
-        # Load the token updater function.
-        self.token_updater = None
-        if token_updater is not None:
-            logger.debug("Using provided token_updater utility.")
-            self.token_updater = token_updater
+        # Save the token_updater function.
+        self.token_updater = token_updater
 
+        # Save the session.
         self.session = None
 
         if hostname is not None:
