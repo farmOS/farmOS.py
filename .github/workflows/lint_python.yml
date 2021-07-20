@@ -10,7 +10,7 @@ jobs:
       - run: bandit --recursive --skip B101,B106 .
       - run: black --check .
       - run: codespell  # --ignore-words-list="" --skip=""
-      - run: flake8 . --count --max-complexity=10 --max-line-length=113 --show-source --statistics
+      - run: flake8 . --count --max-complexity=11 --max-line-length=113 --show-source --statistics
       - run: isort --check-only --profile black .
       - run: python setup.py install
       - run: mypy --install-types --non-interactive .  || true
