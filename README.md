@@ -27,11 +27,13 @@ For more information on farmOS, visit [farmOS.org](https://farmOS.org).
 
 ## Installation
 
-To install using pip:
+To install using `pip`:
 
 ```bash
 $ pip install farmOS~=1.0.0b
 ```
+
+To install using `conda` see [conda-forge/farmos-feedstock](https://github.com/conda-forge/farmos-feedstock#installing-farmos)
 
 ## Usage
 
