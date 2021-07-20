@@ -16,7 +16,8 @@ resources. More info on the farmOS 2.x api
 Any resource on a farmOS 2.x server can be interacted via the
 `farm_client.resource` namespace in the farmOS.py client. The following methods
 are available:
-- `resource.get()`: Perform a GET request.
+- `resource.get()`: Perform a GET request. Returns a single page of resources.
+- `resource.get_id()`: Perform a GET request for a single resource.
 - `resource.iterate()`: Returns a Python iterator that can be used to GET
   multiple pages of resources.
 - `resource.send()`: Perform a POST or PATCH request.
@@ -74,7 +75,7 @@ filters = farm_client.filter('status', 'done')
 done_observations = list(farm_client.log.iterate('observation', params=filters))
 ```
 
-#### `.get()`
+#### `.get()` and `.get_id()`
 
 ```python
 # Get one page of observation logs.
@@ -86,7 +87,7 @@ response = farm_client.log.get('observation', params=filters)
 
 # Get observation log by ID.
 id = 'b9e8c253-a3c1-4af4-b2c8-7f201dc2b046'
-log = farm_client.log.get('observation', id)
+log = farm_client.log.get_id('observation', id)
 ```
 
 #### `.send()`
@@ -141,7 +142,7 @@ filters = farm_client.filter('sex', 'f')
 females = list(farm_client.asset.iterate('animal', params=filters))
 ```
 
-#### `.get()`
+#### `.get()` and `.get_id()`
 
 ```python
 
@@ -153,7 +154,7 @@ filters = farm_client.filter('sex', 'f')
 response = farm_client.asset.get('animal', params=filters)
 
 # Get asset by ID.
-response = farm_client.asset.get('animal', 'b9e8c253-a3c1-4af4-b2c8-7f201dc2b046')
+response = farm_client.asset.get_id('animal', 'b9e8c253-a3c1-4af4-b2c8-7f201dc2b046')
 ```
 
 Some common asset types include:
@@ -225,7 +226,7 @@ crops/varieties, animal species/breeds, input materials, and log categories.
 plant_types = list(farm_client.term.iterate('plant'))
 ```
 
-#### `.get()`
+#### `.get()` and `.get_id()`
 
 ```python
 
@@ -233,7 +234,7 @@ plant_types = list(farm_client.term.iterate('plant'))
 response = farm_client.term.get('plant_type')
 
 # Get a specific term
-response = farm_client.term.get('plant_type', "a260441b-2553-4715-83ee-3ac08a6b85f0")
+response = farm_client.term.get_id('plant_type', "a260441b-2553-4715-83ee-3ac08a6b85f0")
 ```
 
 #### `.send()`
