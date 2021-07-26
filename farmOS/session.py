@@ -19,6 +19,7 @@ class OAuthSession(OAuth2Session):
         token=None,
         token_url=None,
         authorization_url=None,
+        content_type="application/vnd.api+json",
         token_updater=None,
         *args,
         **kwargs,
@@ -44,6 +45,7 @@ class OAuthSession(OAuth2Session):
         # Save values for later use.
         self._token_url = token_url
         self._authorization_base_url = authorization_url
+        self._content_type = content_type
         self._client_id = client_id
         self._client_secret = client_secret
         self.hostname = hostname
@@ -128,14 +130,14 @@ class OAuthSession(OAuth2Session):
         data = None
         if options and "data" in options:
             data = options["data"]
-            headers["Content-Type"] = "application/vnd.api+json"
+            headers["Content-Type"] = self._content_type
 
         # If there is a json data to be sent, include it.
         json = None
         if options and "json" in options:
             json = options["json"]
             if "Content-Type" not in headers:
-                headers["Content-Type"] = "application/vnd.api+json"
+                headers["Content-Type"] = self._content_type
 
         # Perform the request.
         response = self.request(

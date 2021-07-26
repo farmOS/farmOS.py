@@ -100,6 +100,11 @@ class farmOS:
             # Unset the 'expires_at' key.
             token.pop("expires_at")
 
+        # Determine the Content-Type header depending on server version.
+        content_type = (
+            "application/vnd.api+json" if version == 2 else "application/json"
+        )
+
         # Create an OAuth Session
         self.session = OAuthSession(
             hostname=hostname,
@@ -108,6 +113,7 @@ class farmOS:
             scope=scope,
             token=token,
             token_url=token_url,
+            content_type=content_type,
             token_updater=self.token_updater,
         )
 
