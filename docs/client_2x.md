@@ -280,7 +280,18 @@ from farmOS import farmOS
 from farmOS.subrequests import Action, Subrequest, SubrequestsBlueprint, Format
 
 client = farmOS("http://localhost", scope="farm_manager", version=2)
-client.authorize(username, password)
+client.authorize('username', 'password')
+
+plant_type = {
+    "data": {
+        "type": "taxonomy_term--plant_type",
+        "attributes": {
+            "name": "New plant type"
+        }
+    }
+}
+
+new_plant_type = Subrequest(action=Action.create, requestId="create-plant-type", endpoint="api/taxonomy_term/plant_type", body=plant_type)
 
 plant = {
     "data": {
@@ -289,9 +300,19 @@ plant = {
             "name": "My new plant",
             "description": "Created in the first request.",
         },
+        "relationships": {
+            "plant_type": {
+                "data": [
+                    {
+                        "type": "taxonomy_term--plant_type",
+                        "id": "{{create-plant-type.body@$.data.id}}"
+                    }
+                ]
+            }
+        }
     }
 }
-new_asset = Subrequest(action=Action.create, requestId="create-asset", endpoint="api/asset/plant", body=plant)
+new_asset = Subrequest(action=Action.create, requestId="create-asset", waitFor=["create-plant-type"], endpoint="api/asset/plant", body=plant)
 
 log = {
     "data": {
@@ -315,15 +336,11 @@ log = {
 new_log = Subrequest(action=Action.create, requestId="create-log", waitFor=["create-asset"], endpoint="api/log/seeding", body=log)
 
 # Create a blueprint object
-blueprint = SubrequestsBlueprint.parse_obj([new_asset, new_log])
+blueprint = SubrequestsBlueprint.parse_obj([new_plant_type, new_asset, new_log])
 
 # OR provide a list of Subrequest objects.
-blueprint = [new_asset, new_log]
+blueprint = [new_plant_type, new_asset, new_log]
 
 # Send the blueprint.
 response = client.subrequests.send(blueprint, format=Format.json)
-
-# New resource ids.
-print(response['create-asset']['data']['id'])
-print(response['create-log']['data']['id'])
 ```
