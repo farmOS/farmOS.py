@@ -104,6 +104,9 @@ class SubrequestsBase:
             if sub.uri is None and sub.endpoint is not None:
                 sub.uri = f"{self.session.hostname}/{sub.endpoint}"
 
+            # Set the endpoint to None so it is not included in the serialized subrequest.
+            sub.endpoint = None
+
             # Auto populate headers for each sub-request.
             if "Accept" not in sub.headers:
                 sub.headers["Accept"] = "application/vnd.api+json"
@@ -118,7 +121,7 @@ class SubrequestsBase:
 
         # Generate the json to send. It is important to use the .json() method
         # of the model for correct serialization.
-        json = blueprint.json(exclude={"subrequest": {"endpoint"}}, exclude_none=True)
+        json = blueprint.json(exclude_none=True)
         options = {"data": json}
 
         response = self.session.http_request(

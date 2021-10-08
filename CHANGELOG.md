@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Do not include the endpoint property in the serialized subrequest.
+
 ## [1.0.0-beta.3] -- 2021-07-26
 ### Fixed
 - Specify correct Content-Type header for 1.x servers.
