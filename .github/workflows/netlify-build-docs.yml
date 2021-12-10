@@ -12,7 +12,7 @@ jobs:
     env:
       TOKEN: ${{ secrets.NETLIFY_BUILD_HOOK }}
       TRIGGER_TITLE: ${{ format('Triggered+by+{0}+source+repo', github.repository) }}
-      TRIGGER_BRANCH: ${{ github.ref_name }}
+      TRIGGER_BRANCH: main
     steps:
       - name: Trigger Netlify Build Hook
         if: env.TOKEN != ''
