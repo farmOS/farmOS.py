@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Move README sections into /docs with farmOS.org config.yml.
+
 ### Fixed
 - Do not include the endpoint property in the serialized subrequest.
 - Update client_2x Subrequests docs to include a plant_type when creating the plant asset.
