@@ -6,18 +6,9 @@
 [![Twitter](https://img.shields.io/twitter/follow/farmOSorg.svg?label=%40farmOSorg&style=flat)](https://twitter.com/farmOSorg)
 [![Chat](https://img.shields.io/matrix/farmOS:matrix.org.svg)](https://riot.im/app/#/room/#farmOS:matrix.org)
 
-farmOS.py is a Python library for interacting with [farmOS](https://farmOS.org)
-over API.
+farmOS.py is a Python library for interacting with farmOS servers over API.
 
 For more information on farmOS, visit [farmOS.org](https://farmOS.org).
-
-- [Installation](#installation)
-- [Usage](#usage)
-  - [Server Info](#server-info)
-  - [Client methods](#client-methods)  
-    - [farmOS 1.x](docs/client_1x.md)
-    - [farmOS 2.x](docs/client_2x.md)
-
 
 ## Installation
 
@@ -29,65 +20,13 @@ $ pip install farmOS~=1.0.0b
 
 To install using `conda` see [conda-forge/farmos-feedstock](https://github.com/conda-forge/farmos-feedstock#installing-farmos)
 
-## Usage
-
-### Server Info
-
-```python
-
-info = farm_client.info()
-
-{
-  "jsonapi": {
-    "version": "1.0",
-    "meta": {
-      "links": {
-        "self": {
-          "href": "http://jsonapi.org/format/1.0/"
-        }
-      }
-    }
-  },
-  "data": [],
-  "meta": {
-    "links": {
-      "me": {
-        "meta": {
-          "id": "163c6e73-46fb-4283-b26b-153b598151ce"
-        },
-        "href": "http://localhost/api/user/user/163c6e73-46fb-4283-b26b-153b598151ce"
-      }
-    },
-    "farm": {
-      "name": "Drush Site-Install",
-      "url": "http://localhost",
-      "version": "2.x",
-      "system_of_measurement": "metric"
-    }
-  },
-  "links": {
-    "asset--animal": {
-      "href": "http://localhost/api/asset/animal"
-    },
-    "asset--equipment": {
-      "href": "http://localhost/api/asset/equipment"
-    },
-    ...
-  }
-}
-```
-
-
-### Client methods
+## Documentation
 
 farmOS.py can connect to farmOS servers running version ^1.6 or 2.x. The version should be specified when instantiating
-the farmOS client, see [Authentication](#authentication).
+the farmOS client.
 
-Because of [API changes](https://2x.farmos.org/development/api/changes/) in farmOS 2.x, the client provides different
-methods depending on the server version:
-
-- [1.x methods](docs/client_1x.md)
-- [2.x methods](docs/client_2x.md)
+- [1.x documentation](docs/client_1x.md)
+- [2.x documentation](docs/index.md)
 
 ## MAINTAINERS
 
