@@ -1,11 +1,5 @@
 # Client methods for farmOS 2.x
 
-- [Resources](#resources)
-  - [Logs](#logs)
-  - [Assets](#assets)
-  - [Taxonomy Terms](#taxonomy-terms)
-- [Subrequests](#subrequests)
-
 ## Resources
 
 The farmOS 2.x API uses the JSON:API module included with Drupal core, which 

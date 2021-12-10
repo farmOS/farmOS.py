@@ -1,5 +1,7 @@
 # Authorization
 
+## Background
+
 The farmOS.py client authenticates with the farmOS server via OAuth `Bearer`
 tokens. Before authenticating with the server, a farmOS client must be 
 created and an OAuth Authorization flow must be completed (unless an optional 
