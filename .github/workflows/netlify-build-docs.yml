@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: secrets.NETLIFY_BUILD_HOOK != ''
+    if: ${{ secrets.NETLIFY_BUILD_HOOK != '' }}
     env:
       TOKEN: ${{ secrets.NETLIFY_BUILD_HOOK }}
       TRIGGER_TITLE: ${{ format('Triggered by {0} source repo', github.repository) }}
