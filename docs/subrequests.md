@@ -2,8 +2,7 @@
 
 ## Background
 
-farmOS.py supports the [Subrequests](https://www.drupal.org/project/subrequests) module which can optionally be 
-installed on the farmOS server.
+farmOS.py supports the [Subrequests](https://www.drupal.org/project/subrequests) module included with a farmOS server.
 
 Subrequests allows multiple requests to be defined in a "blueprint" and sent to the server in a single POST request. 
 The blueprint can define sequential requests so that the response of one request can be embedded into the body of a 
