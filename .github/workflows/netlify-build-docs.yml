@@ -11,9 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TOKEN: ${{ secrets.NETLIFY_BUILD_HOOK }}
-      TRIGGER_TITLE: ${{ format('Triggered by {0} source repo', github.repository) }}
+      TRIGGER_TITLE: ${{ format('Triggered+by+{0}+source+repo', github.repository) }}
       TRIGGER_BRANCH: ${{ github.ref_name }}
     steps:
       - name: Trigger Netlify Build Hook
         if: env.TOKEN != ''
+        # https://docs.netlify.com/configure-builds/build-hooks/
         run: curl -s -X POST -d {} "https://api.netlify.com/build_hooks/${TOKEN}?trigger_branch=${TRIGGER_BRANCH}&trigger_title=${TRIGGER_TITLE}"
