@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add subrequests tests. [#52](https://github.com/farmOS/farmOS.py/issues/52)
+
 ### Changed
 - Move README sections into /docs with farmOS.org config.yml.
 - Add github workflow to build netlify docs.
