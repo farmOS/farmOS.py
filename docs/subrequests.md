@@ -47,7 +47,7 @@ plant = {
         "type": "asset--plant",
         "attributes": {
             "name": "My new plant",
-            "description": "Created in the first request.",
+            "notes": "Created in the first request.",
         },
         "relationships": {
             "plant_type": {
