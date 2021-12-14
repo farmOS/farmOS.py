@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Move README sections into /docs with farmOS.org config.yml.
 - Add github workflow to build netlify docs.
+- Run tests on pull requests to 1.x.
 
 ### Fixed
 - Do not include the endpoint property in the serialized subrequest.

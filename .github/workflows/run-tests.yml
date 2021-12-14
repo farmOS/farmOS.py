@@ -6,6 +6,9 @@ on:
     branches:
       - '1.x'
       - '1.x-**'
+  pull_request:
+    branches:
+      - '1.x'
 
 jobs:
   build:
