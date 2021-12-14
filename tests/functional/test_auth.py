@@ -2,8 +2,7 @@ import os
 import time
 
 import pytest
-from oauthlib.oauth2 import InvalidClientError, InvalidScopeError
-from oauthlib.oauth2.rfc6749.errors import CustomOAuth2Error
+from oauthlib.oauth2 import InvalidClientError, InvalidGrantError, InvalidScopeError
 from requests import HTTPError
 
 from farmOS import farmOS
@@ -17,9 +16,7 @@ FARMOS_OAUTH_PASSWORD = os.getenv("FARMOS_OAUTH_PASSWORD")
 
 @farmOS_testing_server
 def test_invalid_login():
-    # todo: simple_oauth returns invalid_credentials instead of invalid_grant.
-    # https://www.drupal.org/project/simple_oauth/issues/3193609
-    with pytest.raises(CustomOAuth2Error, match=r"invalid_credentials *."):
+    with pytest.raises(InvalidGrantError):
         farm = farmOS(hostname=FARMOS_HOSTNAME, scope="farm_manager", version=2)
         farm.authorize("username", "password")
 

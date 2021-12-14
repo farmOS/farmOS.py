@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Do not include the endpoint property in the serialized subrequest.
 - Update client_2x Subrequests docs to include a plant_type when creating the plant asset.
+- Correct test_invalid_login to expect InvalidGrantError: https://www.drupal.org/project/simple_oauth/issues/3193609
 
 ## [1.0.0-beta.3] -- 2021-07-26
 ### Fixed
