@@ -1,4 +1,4 @@
-site_name: farmOS.py Docs
+source_name: farmOS.py
 nav:
   - Getting started: index.md
   - Authorization: authorization.md
