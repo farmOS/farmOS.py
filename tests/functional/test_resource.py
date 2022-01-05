@@ -37,6 +37,6 @@ def test_user_update_self(test_farm):
 
 @farmOS_testing_server
 def test_user_iterate(test_farm):
-    all_users = list(test_farm.resource.iterate("user"))
+    all_users = list(test_farm.resource.iterate("user", params={"page[limit]": 1}))
 
-    assert len(all_users) > 0
+    assert len(all_users) > 1
