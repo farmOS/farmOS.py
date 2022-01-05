@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add github workflow to build netlify docs.
 - Run tests on pull requests to 1.x.
 - Test `resource.iterate` method with a page limit.
+- Only use the path from the `next_url` when iterating over resources.
 
 ### Fixed
 - Do not include the endpoint property in the serialized subrequest.

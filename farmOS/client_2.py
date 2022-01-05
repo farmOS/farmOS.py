@@ -1,4 +1,5 @@
 import logging
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -44,7 +45,9 @@ class ResourceBase:
             yield from response["data"]
             try:
                 next_url = response["links"]["next"]["href"]
-                response = self.session._http_request(url=next_url)
+                parsed_url = urlparse(next_url)
+                next_path = parsed_url._replace(scheme="", netloc="").geturl()
+                response = self.session.http_request(path=next_path)
                 response = response.json()
             except KeyError:
                 more = False
