@@ -5,7 +5,7 @@
 The farmOS 2.x API uses the JSON:API module included with Drupal core, which 
 follows the [JSON:API](https://jsonapi.org/) specification for defining API 
 resources. More info on the farmOS 2.x api 
-[here](https://2x.farmos.org/development/api/).
+[here](https://farmos.org/development/api/).
 
 Any resource on a farmOS 2.x server can be interacted via the
 `farm_client.resource` namespace in the farmOS.py client. The following methods
