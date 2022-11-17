@@ -1,5 +1,6 @@
 name: Run 2.x tests
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 8 * * *' # Run at 8AM UTC.
   push:
