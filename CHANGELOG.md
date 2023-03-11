@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] -- 2023-03-10
+
 ### Added
 - Add subrequests tests. [#52](https://github.com/farmOS/farmOS.py/issues/52)
 
