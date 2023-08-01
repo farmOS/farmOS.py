@@ -6,7 +6,7 @@ setup_requires = [
 
 install_requires = ["requests-oauthlib~=1.3.1", "pydantic~=1.7.3"]
 
-tests_require = ["pytest", "black>=20"]
+tests_require = ["pytest", "black~=23.0"]
 
 with open("README.md") as fh:
     readme = fh.read()

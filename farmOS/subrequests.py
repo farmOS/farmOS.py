@@ -94,7 +94,6 @@ class SubrequestsBase:
         blueprint: Union[SubrequestsBlueprint, List],
         format: Optional[Union[Format, str]] = Format.json,
     ):
-
         if isinstance(blueprint, List):
             blueprint = SubrequestsBlueprint.parse_obj(blueprint)
 

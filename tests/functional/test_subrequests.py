@@ -10,7 +10,6 @@ timestamp = curr_time.isoformat(timespec="seconds")
 
 @farmOS_testing_server
 def test_subrequests(test_farm):
-
     plant_type = {
         "data": {
             "type": "taxonomy_term--plant_type",
@@ -114,7 +113,6 @@ def test_subrequests(test_farm):
         },
     }
     for response_key, expected_data in response_keys.items():
-
         # Test that each response succeeded.
         assert response_key in post_response
         assert "headers" in post_response[response_key]

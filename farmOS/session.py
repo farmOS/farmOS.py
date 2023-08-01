@@ -24,7 +24,6 @@ class OAuthSession(OAuth2Session):
         *args,
         **kwargs,
     ):
-
         # Default to the "farm_manager" scope.
         if scope is None:
             scope = "farm_manager"
@@ -113,7 +112,6 @@ class OAuthSession(OAuth2Session):
         )
 
     def _http_request(self, url, method="GET", options=None, params=None, headers=None):
-
         # Automatically follow redirects, unless this is a POST request.
         # The Python requests library converts POST to GET during a redirect.
         # Allow this to be overridden in options.

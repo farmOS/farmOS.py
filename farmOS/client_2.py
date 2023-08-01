@@ -53,7 +53,6 @@ class ResourceBase:
                 more = False
 
     def send(self, entity_type, bundle=None, payload=None):
-
         # Default to empty payload dict.
         if payload is None:
             payload = {}
