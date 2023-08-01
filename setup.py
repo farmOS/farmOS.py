@@ -4,7 +4,7 @@ setup_requires = [
     "pytest-runner",
 ]
 
-install_requires = ["requests-oauthlib", "pydantic~=1.7.3"]
+install_requires = ["requests-oauthlib~=1.3.1", "pydantic~=1.7.3"]
 
 tests_require = ["pytest", "black>=20"]
 
