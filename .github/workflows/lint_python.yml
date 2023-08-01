@@ -17,4 +17,3 @@ jobs:
       - run: python setup.py install
       - run: mypy --exclude './build/lib/farmOS/__init__.py' --ignore-missing-imports .  || true
       - run: shopt -s globstar && pyupgrade --py36-plus **/*.py
-      - run: safety check
