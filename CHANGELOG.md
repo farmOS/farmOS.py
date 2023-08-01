@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.0.1 -- 2023-08-01
+
+### Fixed
+
+- Correct version specifier for pydantic. [#57](https://github.com/farmOS/farmOS.py/issues/57)
+
 ## [1.0.0] -- 2023-03-10
 
 ### Added
