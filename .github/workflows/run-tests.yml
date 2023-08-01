@@ -24,7 +24,7 @@ jobs:
           - 3.11
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Create docker-compose.yml
         run: curl https://raw.githubusercontent.com/farmOS/farmOS/2.x/docker/docker-compose.development.yml -o docker-compose.yml
       - name: Start containers
@@ -36,7 +36,7 @@ jobs:
           docker-compose exec -u www-data -T www drush user-add-role farm_manager tester
           docker-compose exec -u www-data -T www drush config:set simple_oauth.settings access_token_expiration 15 -y
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
