@@ -3,7 +3,7 @@ from datetime import datetime
 from functools import partial
 from urllib.parse import urlparse, urlunparse
 
-from . import client, subrequests
+from . import resource, subrequests
 from .session import OAuthSession
 
 logger = logging.getLogger(__name__)
@@ -119,13 +119,13 @@ class farmOS:
                 "initializing a farmOS Client."
             )
 
-        self.log = client.LogAPI(self.session)
-        self.asset = client.AssetAPI(self.session)
-        self.term = client.TermAPI(self.session)
-        self.resource = client.ResourceBase(self.session)
-        self.info = partial(client.info, self.session)
+        self.log = resource.LogAPI(self.session)
+        self.asset = resource.AssetAPI(self.session)
+        self.term = resource.TermAPI(self.session)
+        self.resource = resource.ResourceBase(self.session)
+        self.info = partial(resource.info, self.session)
         self.subrequests = subrequests.SubrequestsBase(self.session)
-        self.filter = client.filter
+        self.filter = resource.filter
 
     def authorize(self, username=None, password=None, scope=None):
         """Authorize with the farmOS server.
