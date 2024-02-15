@@ -8,8 +8,8 @@ logger.addHandler(logging.NullHandler())
 class ResourceBase:
     """Base class for JSONAPI resource methods."""
 
-    def __init__(self, session):
-        self.session = session
+    def __init__(self, client):
+        self.client = client
         self.params = {}
 
     def _get_records(self, entity_type, bundle=None, resource_id=None, params=None):
@@ -21,7 +21,7 @@ class ResourceBase:
 
         path = self._get_resource_path(entity_type, bundle, resource_id)
 
-        response = self.session.http_request(path=path, params=params)
+        response = self.client.request(method="GET", url=path, params=params)
         return response.json()
 
     def get(self, entity_type, bundle=None, params=None):
@@ -47,7 +47,7 @@ class ResourceBase:
                 next_url = response["links"]["next"]["href"]
                 parsed_url = urlparse(next_url)
                 next_path = parsed_url._replace(scheme="", netloc="").geturl()
-                response = self.session.http_request(path=next_path)
+                response = self.client.request(method="GET", url=next_path)
                 response = response.json()
             except KeyError:
                 more = False
@@ -72,15 +72,21 @@ class ResourceBase:
             path = self._get_resource_path(
                 entity_type=entity_type, bundle=bundle, record_id=id
             )
-            response = self.session.http_request(
-                method="PATCH", path=path, options=options
+            response = self.client.request(
+                method="PATCH",
+                url=path,
+                json=json_payload,
+                headers={"Content-Type": "application/vnd.api+json"},
             )
         # If no ID is included, create a new record
         else:
             logger.debug("Creating record of entity type: %s", entity_type)
             path = self._get_resource_path(entity_type=entity_type, bundle=bundle)
-            response = self.session.http_request(
-                method="POST", path=path, options=options
+            response = self.client.request(
+                method="POST",
+                url=path,
+                json=json_payload,
+                headers={"Content-Type": "application/vnd.api+json"},
             )
 
         # Handle response from POST requests
@@ -98,7 +104,7 @@ class ResourceBase:
         path = self._get_resource_path(
             entity_type=entity_type, bundle=bundle, record_id=id
         )
-        return self.session.http_request(method="DELETE", path=path)
+        return self.client.request(method="DELETE", url=path)
 
     @staticmethod
     def _get_resource_path(entity_type, bundle=None, record_id=None):
@@ -125,9 +131,9 @@ class ResourceBase:
 
 
 class ResourceHelperBase:
-    def __init__(self, session, entity_type):
+    def __init__(self, client, entity_type):
         self.entity_type = entity_type
-        self.resource_api = ResourceBase(session=session)
+        self.resource_api = ResourceBase(client=client)
 
     def get(self, bundle, params=None):
         return self.resource_api.get(
@@ -161,32 +167,32 @@ class ResourceHelperBase:
 class AssetAPI(ResourceHelperBase):
     """API for interacting with farm assets"""
 
-    def __init__(self, session):
+    def __init__(self, client):
         # Define 'asset' as the JSONAPI resource type.
-        super().__init__(session=session, entity_type="asset")
+        super().__init__(client=client, entity_type="asset")
 
 
 class LogAPI(ResourceHelperBase):
     """API for interacting with farm logs"""
 
-    def __init__(self, session):
+    def __init__(self, client):
         # Define 'log' as the JSONAPI resource type.
-        super().__init__(session=session, entity_type="log")
+        super().__init__(client=client, entity_type="log")
 
 
 class TermAPI(ResourceHelperBase):
     """API for interacting with farm Terms"""
 
-    def __init__(self, session):
+    def __init__(self, client):
         # Define 'taxonomy_term' as the farmOS API entity endpoint
-        super().__init__(session=session, entity_type="taxonomy_term")
+        super().__init__(client=client, entity_type="taxonomy_term")
 
 
-def info(session):
+def info(client):
     """Retrieve info about the farmOS server."""
 
     logger.debug("Retrieving farmOS server info.")
-    response = session.http_request("api")
+    response = client.request(method="GET", url="api")
     return response.json()
 
 
