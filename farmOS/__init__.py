@@ -3,7 +3,7 @@ from datetime import datetime
 from functools import partial
 from urllib.parse import urlparse, urlunparse
 
-from . import client, client_2, subrequests
+from . import client, subrequests
 from .session import OAuthSession
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,6 @@ class farmOS:
         scope="farm_manager",
         token=None,
         token_updater=lambda new_token: None,
-        version=2,
     ):
         """
         Initialize instance of the farmOS client that connects to a single farmOS server.
@@ -33,7 +32,6 @@ class farmOS:
         :param scope: OAuth Scope. Defaults to "farm_manager".
         :param token: An existing OAuth token to use.
         :param token_updater: A function used to save OAuth tokens outside of the client.
-        :param version: The major version of the farmOS server. Defaults to 2.
         """
 
         logger.debug("Creating farmOS client.")
@@ -100,11 +98,6 @@ class farmOS:
             # Unset the 'expires_at' key.
             token.pop("expires_at")
 
-        # Determine the Content-Type header depending on server version.
-        content_type = (
-            "application/vnd.api+json" if version == 2 else "application/json"
-        )
-
         # Create an OAuth Session
         self.session = OAuthSession(
             hostname=hostname,
@@ -113,7 +106,7 @@ class farmOS:
             scope=scope,
             token=token,
             token_url=token_url,
-            content_type=content_type,
+            content_type="application/vnd.api+json",
             token_updater=self.token_updater,
         )
 
@@ -126,20 +119,13 @@ class farmOS:
                 "initializing a farmOS Client."
             )
 
-        if version == 2:
-            self.log = client_2.LogAPI(self.session)
-            self.asset = client_2.AssetAPI(self.session)
-            self.term = client_2.TermAPI(self.session)
-            self.resource = client_2.ResourceBase(self.session)
-            self.info = partial(client_2.info, self.session)
-            self.subrequests = subrequests.SubrequestsBase(self.session)
-            self.filter = client_2.filter
-        else:
-            self.log = client.LogAPI(self.session)
-            self.asset = client.AssetAPI(self.session)
-            self.area = client.AreaAPI(self.session)
-            self.term = client.TermAPI(self.session)
-            self.info = partial(client.info, self.session)
+        self.log = client.LogAPI(self.session)
+        self.asset = client.AssetAPI(self.session)
+        self.term = client.TermAPI(self.session)
+        self.resource = client.ResourceBase(self.session)
+        self.info = partial(client.info, self.session)
+        self.subrequests = subrequests.SubrequestsBase(self.session)
+        self.filter = client.filter
 
     def authorize(self, username=None, password=None, scope=None):
         """Authorize with the farmOS server.
