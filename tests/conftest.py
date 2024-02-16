@@ -1,8 +1,9 @@
 import os
 
+from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 import pytest
 
-import farmOS
+from farmOS import FarmClient
 
 # Allow testing via http.
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -30,13 +31,15 @@ farmOS_testing_server = pytest.mark.skipif(
 @pytest.fixture(scope="module")
 def test_farm():
     if valid_oauth_config:
-        farm = farmOS.farmOS(
-            hostname=FARMOS_HOSTNAME,
+        auth = OAuth2ResourceOwnerPasswordCredentials(
+            token_url=f"{FARMOS_HOSTNAME}/oauth/token",
+            username=FARMOS_OAUTH_USERNAME,
+            password=FARMOS_OAUTH_PASSWORD,
             client_id=FARMOS_OAUTH_CLIENT_ID,
             client_secret=FARMOS_OAUTH_CLIENT_SECRET,
+            scope="farm_manager",
         )
-        farm.authorize(username=FARMOS_OAUTH_USERNAME, password=FARMOS_OAUTH_PASSWORD)
-        return farm
+        return FarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
 
 
 @pytest.fixture(scope="module")

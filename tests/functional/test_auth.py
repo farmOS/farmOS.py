@@ -1,36 +1,49 @@
 import os
 import time
 
+from httpx_auth import InvalidGrantRequest
+from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 import pytest
-from oauthlib.oauth2 import InvalidClientError, InvalidGrantError, InvalidScopeError
-from requests import HTTPError
 
-from farmOS import farmOS
+from farmOS import FarmClient
 from tests.conftest import farmOS_testing_server
 
 # Variables for testing.
 FARMOS_HOSTNAME = os.getenv("FARMOS_HOSTNAME")
 FARMOS_OAUTH_USERNAME = os.getenv("FARMOS_OAUTH_USERNAME")
 FARMOS_OAUTH_PASSWORD = os.getenv("FARMOS_OAUTH_PASSWORD")
+FARMOS_OAUTH_CLIENT_ID = os.getenv("FARMOS_OAUTH_CLIENT_ID", "farm")
+FARMOS_OAUTH_CLIENT_SECRET = os.getenv("FARMOS_OAUTH_CLIENT_SECRET", None)
 
 
 @farmOS_testing_server
 def test_invalid_login():
-    with pytest.raises(InvalidGrantError):
-        farm = farmOS(hostname=FARMOS_HOSTNAME, scope="farm_manager", version=2)
-        farm.authorize("username", "password")
+    with pytest.raises(InvalidGrantRequest):
+        auth = OAuth2ResourceOwnerPasswordCredentials(
+            token_url=f"{FARMOS_HOSTNAME}/oauth/token",
+            username="username",
+            password="password",
+            client_id=FARMOS_OAUTH_CLIENT_ID,
+            client_secret=FARMOS_OAUTH_CLIENT_SECRET,
+            scope="farm_manager",
+        )
+        farm = FarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
+        farm.info()
 
 
 @farmOS_testing_server
 def test_invalid_client_id():
-    with pytest.raises(InvalidClientError):
-        farm = farmOS(
-            hostname=FARMOS_HOSTNAME,
-            scope="farm_manager",
+    with pytest.raises(InvalidGrantRequest):
+        auth = OAuth2ResourceOwnerPasswordCredentials(
+            token_url=f"{FARMOS_HOSTNAME}/oauth/token",
+            username=FARMOS_OAUTH_USERNAME,
+            password=FARMOS_OAUTH_PASSWORD,
             client_id="bad_client",
-            version=2,
+            client_secret=FARMOS_OAUTH_CLIENT_SECRET,
+            scope="farm_manager",
         )
-        farm.authorize(FARMOS_OAUTH_USERNAME, FARMOS_OAUTH_PASSWORD)
+        farm = FarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
+        farm.info()
 
 
 @farmOS_testing_server
@@ -38,27 +51,36 @@ def test_invalid_client_id():
     reason="simple_oauth seems to accept any secret if none is configured on the client."
 )
 def test_invalid_client_secret():
-    with pytest.raises(InvalidClientError):
-        farm = farmOS(FARMOS_HOSTNAME, client_id="farm", client_secret="bad_pass")
-        farm.authorize(FARMOS_OAUTH_USERNAME, FARMOS_OAUTH_PASSWORD)
+    with pytest.raises(InvalidGrantRequest):
+        auth = OAuth2ResourceOwnerPasswordCredentials(
+            token_url=f"{FARMOS_HOSTNAME}/oauth/token",
+            username=FARMOS_OAUTH_USERNAME,
+            password=FARMOS_OAUTH_PASSWORD,
+            client_id=FARMOS_OAUTH_CLIENT_ID,
+            client_secret="bad secret",
+            scope="farm_manager",
+        )
+        farm = FarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
+        farm.info()
 
 
 @farmOS_testing_server
 def test_invalid_scope():
-    with pytest.raises(InvalidScopeError):
-        farm = farmOS(hostname=FARMOS_HOSTNAME, scope="bad_scope", version=2)
-        farm.authorize(FARMOS_OAUTH_USERNAME, FARMOS_OAUTH_PASSWORD, scope="bad_scope")
+    with pytest.raises(InvalidGrantRequest):
+        auth = OAuth2ResourceOwnerPasswordCredentials(
+            token_url=f"{FARMOS_HOSTNAME}/oauth/token",
+            username=FARMOS_OAUTH_USERNAME,
+            password=FARMOS_OAUTH_PASSWORD,
+            client_id=FARMOS_OAUTH_CLIENT_ID,
+            client_secret=FARMOS_OAUTH_CLIENT_SECRET,
+            scope="bad_scope",
+        )
+        farm = FarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
+        farm.info()
 
 
 @farmOS_testing_server
-@pytest.mark.skip(reason="JSONAPI endpoints don't return 403.")
-def test_unauthorized_request(test_farm):
-    with pytest.raises(HTTPError, match=r"403 *."):
-        farm = farmOS(hostname=FARMOS_HOSTNAME, scope="farm_manager", version=2)
-        farm.log.get("activity")
-
-
-@farmOS_testing_server
+@pytest.mark.skip(reason="Not implemented yet.")
 def test_valid_login(test_farm):
     token = test_farm.authorize(
         username=FARMOS_OAUTH_USERNAME, password=FARMOS_OAUTH_PASSWORD

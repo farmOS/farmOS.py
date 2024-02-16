@@ -1,9 +1,6 @@
-import os
+from httpx_auth import OAuth2
 
 from tests.conftest import farmOS_testing_server
-
-FARMOS_OAUTH_USERNAME = os.getenv("FARMOS_OAUTH_USERNAME")
-FARMOS_OAUTH_PASSWORD = os.getenv("FARMOS_OAUTH_PASSWORD")
 
 # todo: Expand these tests to include a CRUD. Currently limited by user permissions.
 
@@ -22,7 +19,8 @@ def test_user_update_self(test_farm):
     patch_response = test_farm.resource.send("user", payload=user_changes)
 
     # Re-authorize the user after changing their profile.
-    test_farm.authorize(username=FARMOS_OAUTH_USERNAME, password=FARMOS_OAUTH_PASSWORD)
+    state, token, expires_in, refresh = test_farm.auth.request_new_token()
+    OAuth2.token_cache._add_access_token(state, token, expires_in)
 
     # Get the user by ID.
     get_response = test_farm.resource.get_id("user", resource_id=user_id)
