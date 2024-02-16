@@ -4,8 +4,6 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, validator
 
-from .session import OAuthSession
-
 # Subrequests model derived from provided JSON Schema
 # https://git.drupalcode.org/project/subrequests/-/blob/3.x/schema.json
 
@@ -86,8 +84,8 @@ class SubrequestsBase:
 
     subrequest_path = "subrequests"
 
-    def __init__(self, session: OAuthSession):
-        self.session = session
+    def __init__(self, client):
+        self.client = client
 
     def send(
         self,
@@ -101,7 +99,7 @@ class SubrequestsBase:
         for sub in blueprint.__root__:
             # Build the URI if an endpoint is provided.
             if sub.uri is None and sub.endpoint is not None:
-                sub.uri = f"{self.session.hostname}/{sub.endpoint}"
+                sub.uri = sub.endpoint
 
             # Set the endpoint to None so it is not included in the serialized subrequest.
             sub.endpoint = None
@@ -112,8 +110,6 @@ class SubrequestsBase:
             if sub.body is not None and "Content-Type" not in sub.headers:
                 sub.headers["Content-Type"] = "application/vnd.api+json"
 
-        headers = {"Content-Type": "application/json"}
-
         params = {}
         if format == Format.json.value:
             params = {"_format": "json"}
@@ -121,14 +117,13 @@ class SubrequestsBase:
         # Generate the json to send. It is important to use the .json() method
         # of the model for correct serialization.
         json = blueprint.json(exclude_none=True)
-        options = {"data": json}
 
-        response = self.session.http_request(
+        response = self.client.request(
             method="POST",
-            path=self.subrequest_path,
-            options=options,
+            url=self.subrequest_path,
             params=params,
-            headers=headers,
+            headers={"Content-Type": "application/json"},
+            content=json,
         )
 
         # Return a json response if requested.

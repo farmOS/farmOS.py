@@ -2,7 +2,7 @@ from functools import partial
 
 from httpx import Client
 
-from farmOS import resource
+from farmOS import resource, subrequests
 
 
 class FarmClient(Client):
@@ -10,6 +10,7 @@ class FarmClient(Client):
         super().__init__(base_url=hostname, **kwargs)
         self.info = partial(resource.info, self)
         self.filter = resource.filter
+        self.subrequests = subrequests.SubrequestsBase(self)
         self.resource = resource.ResourceBase(self)
         self.log = resource.LogAPI(self)
         self.asset = resource.AssetAPI(self)

@@ -116,7 +116,7 @@ def test_subrequests(test_farm):
         # Test that each response succeeded.
         assert response_key in post_response
         assert "headers" in post_response[response_key]
-        assert 201 == post_response[response_key]["headers"]["status"][0]
+        assert 201 == int(post_response[response_key]["headers"]["status"][0])
 
         # Test that each resource was created.
         assert "body" in post_response[response_key]
