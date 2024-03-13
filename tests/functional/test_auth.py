@@ -80,23 +80,25 @@ def test_invalid_scope():
 
 
 @farmOS_testing_server
-@pytest.mark.skip(reason="Not implemented yet.")
-def test_valid_login(test_farm):
-    token = test_farm.authorize(
-        username=FARMOS_OAUTH_USERNAME, password=FARMOS_OAUTH_PASSWORD
+def test_valid_login():
+    auth = OAuth2ResourceOwnerPasswordCredentials(
+        token_url=f"{FARMOS_HOSTNAME}/oauth/token",
+        username=FARMOS_OAUTH_USERNAME,
+        password=FARMOS_OAUTH_PASSWORD,
+        client_id=FARMOS_OAUTH_CLIENT_ID,
+        client_secret=FARMOS_OAUTH_CLIENT_SECRET,
+        scope="farm_manager",
     )
+    farm = FarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
 
-    assert "access_token" in token
-    assert "refresh_token" in token
-    assert "expires_at" in token
-    assert "expires_in" in token
+    # Re-authorize the user after changing their profile.
+    state, token, expires_in, refresh = farm.auth.request_new_token()
+    assert ".ey" in token
+    assert 3600 == expires_in
+    assert refresh is not None
 
-    # Sleep until the token expires.
-    time.sleep(token["expires_in"] + 1)
-
-    # Make a request that will trigger a refresh.
-    # Ensure the request is still authenticated.
-    info = test_farm.info()
+    # Check that the user info is provided at farm.info.
+    info = farm.info()
     assert "meta" in info
     assert "links" in info["meta"]
     assert "me" in info["meta"]["links"]
