@@ -62,7 +62,6 @@ class ResourceBase:
         json_payload = {
             "data": {**payload},
         }
-        options = {"json": json_payload}
 
         # If an ID is included, update the record
         id = payload.pop("id", None)

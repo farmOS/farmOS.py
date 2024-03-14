@@ -1,5 +1,4 @@
 import os
-import time
 
 from httpx_auth import InvalidGrantRequest
 from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
