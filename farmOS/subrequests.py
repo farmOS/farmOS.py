@@ -1,8 +1,8 @@
 import json
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional, Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, RootModel, Field, field_validator, model_validator
 
 # Subrequests model derived from provided JSON Schema
 # https://git.drupalcode.org/project/subrequests/-/blob/3.x/schema.json
@@ -52,26 +52,28 @@ class Subrequest(BaseModel):
         title="Parent ID",
     )
 
-    @validator("uri", pre=True, always=True)
-    def check_uri_or_endpoint(cls, uri, values):
-        endpoint = values.get("endpoint", None)
-        if uri is None and endpoint is None:
+    @model_validator(mode="after")
+    def check_uri_or_endpoint(self):
+        # endpoint = values.get("endpoint", None)
+        if self.uri is None and self.endpoint is None:
             raise ValueError("Either uri or endpoint is required.")
-        return uri
+        return self.uri
 
-    @validator("body", pre=True)
+    @field_validator("body")
     def serialize_body(cls, body):
         if not isinstance(body, str):
             return json.dumps(body)
         return body
 
 
-class SubrequestsBlueprint(BaseModel):
-    __root__: List[Subrequest] = Field(
-        ...,
-        description="Describes the subrequests payload format.",
-        title="Subrequests format",
-    )
+class SubrequestsBlueprint(RootModel):
+    root: List
+
+    def __iter__(self) -> Iterator[Subrequest]:
+        return iter(self.root)
+
+    def __getitem__(self, item) -> Subrequest:
+        return self.root[item]
 
 
 class Format(str, Enum):
@@ -93,10 +95,10 @@ class SubrequestsBase:
         format: Optional[Union[Format, str]] = Format.json,
     ):
         if isinstance(blueprint, List):
-            blueprint = SubrequestsBlueprint.parse_obj(blueprint)
+            blueprint = SubrequestsBlueprint(blueprint)
 
         # Modify each sub-request as needed.
-        for sub in blueprint.__root__:
+        for sub in blueprint:
             # Build the URI if an endpoint is provided.
             if sub.uri is None and sub.endpoint is not None:
                 sub.uri = sub.endpoint
@@ -114,16 +116,16 @@ class SubrequestsBase:
         if format == Format.json.value:
             params = {"_format": "json"}
 
-        # Generate the json to send. It is important to use the .json() method
+        # Generate the json to send. It is important to use the .model_dump_json() method
         # of the model for correct serialization.
-        json = blueprint.json(exclude_none=True)
+        blueprint_json = blueprint.model_dump_json(exclude_none=True)
 
         response = self.client.request(
             method="POST",
             url=self.subrequest_path,
             params=params,
             headers={"Content-Type": "application/json"},
-            content=json,
+            content=blueprint_json,
         )
 
         # Return a json response if requested.

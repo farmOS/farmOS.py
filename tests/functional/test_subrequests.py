@@ -77,7 +77,7 @@ def test_subrequests(test_farm):
     )
 
     # Create a blueprint object
-    blueprint = SubrequestsBlueprint.parse_obj([new_plant_type, new_asset, new_log])
+    blueprint = SubrequestsBlueprint([new_plant_type, new_asset, new_log])
 
     # Send the blueprint.
     post_response = test_farm.subrequests.send(blueprint, format=Format.json)
