@@ -1,7 +1,7 @@
 import os
 
-from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 import pytest
+from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 
 from farmOS import FarmClient
 

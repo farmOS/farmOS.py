@@ -1,8 +1,7 @@
 import os
 
-from httpx_auth import InvalidGrantRequest
-from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 import pytest
+from httpx_auth import InvalidGrantRequest, OAuth2ResourceOwnerPasswordCredentials
 
 from farmOS import FarmClient
 from tests.conftest import farmOS_testing_server
