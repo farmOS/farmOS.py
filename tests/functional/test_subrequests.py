@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timezone
 
+from farmOS import FarmClient
 from farmOS.subrequests import Action, Format, Subrequest, SubrequestsBlueprint
 from tests.conftest import farmOS_testing_server
 
@@ -9,7 +10,7 @@ timestamp = curr_time.isoformat(timespec="seconds")
 
 
 @farmOS_testing_server
-def test_subrequests(test_farm):
+def test_subrequests(farm_auth):
     plant_type = {
         "data": {
             "type": "taxonomy_term--plant_type",
@@ -80,61 +81,68 @@ def test_subrequests(test_farm):
     blueprint = SubrequestsBlueprint([new_plant_type, new_asset, new_log])
 
     # Send the blueprint.
-    post_response = test_farm.subrequests.send(blueprint, format=Format.json)
+    hostname, auth = farm_auth
+    with FarmClient(hostname, auth=auth) as farm:
+        post_response = farm.subrequests.send(blueprint, format=Format.json)
 
-    # Expected results.
-    response_keys = {
-        "create-plant-type": {
-            "attributes": {"name": "New plant type"},
-            "relationships": {},
-        },
-        "create-asset#body{0}": {
-            "attributes": {
-                "name": "My new plant",
+        # Expected results.
+        response_keys = {
+            "create-plant-type": {
+                "attributes": {"name": "New plant type"},
+                "relationships": {},
             },
-            "relationships": {
-                "plant_type": [
-                    {
-                        "type": "taxonomy_term--plant_type",
-                        "id": "{{create-plant-type.body@$.data.id}}",
-                    }
+            "create-asset#body{0}": {
+                "attributes": {
+                    "name": "My new plant",
+                },
+                "relationships": {
+                    "plant_type": [
+                        {
+                            "type": "taxonomy_term--plant_type",
+                            "id": "{{create-plant-type.body@$.data.id}}",
+                        }
+                    ]
+                },
+            },
+            "create-log#body{0}": {
+                "attributes": {
+                    "name": "Seeding my new plant",
+                },
+                "relationships": {
+                    "asset": [
+                        {
+                            "type": "asset--plant",
+                            "id": "{{create-asset.body@$.data.id}}",
+                        }
+                    ]
+                },
+            },
+        }
+        for response_key, expected_data in response_keys.items():
+            # Test that each response succeeded.
+            assert response_key in post_response
+            assert "headers" in post_response[response_key]
+            assert 201 == int(post_response[response_key]["headers"]["status"][0])
+
+            # Test that each resource was created.
+            assert "body" in post_response[response_key]
+            body = json.loads(post_response[response_key]["body"])
+            resource_id = body["data"]["id"]
+            entity_type, bundle = body["data"]["type"].split("--")
+            created_resource = farm.resource.get_id(entity_type, bundle, resource_id)
+
+            assert created_resource is not None
+            assert created_resource["data"]["id"] == resource_id
+
+            # Test for correct attributes.
+            for key, value in expected_data["attributes"].items():
+                assert created_resource["data"]["attributes"][key] == value
+
+            # Test for correct relationships.
+            for field_name, relationships in expected_data["relationships"].items():
+                relationship_field = created_resource["data"]["relationships"][
+                    field_name
                 ]
-            },
-        },
-        "create-log#body{0}": {
-            "attributes": {
-                "name": "Seeding my new plant",
-            },
-            "relationships": {
-                "asset": [
-                    {"type": "asset--plant", "id": "{{create-asset.body@$.data.id}}"}
-                ]
-            },
-        },
-    }
-    for response_key, expected_data in response_keys.items():
-        # Test that each response succeeded.
-        assert response_key in post_response
-        assert "headers" in post_response[response_key]
-        assert 201 == int(post_response[response_key]["headers"]["status"][0])
-
-        # Test that each resource was created.
-        assert "body" in post_response[response_key]
-        body = json.loads(post_response[response_key]["body"])
-        resource_id = body["data"]["id"]
-        entity_type, bundle = body["data"]["type"].split("--")
-        created_resource = test_farm.resource.get_id(entity_type, bundle, resource_id)
-
-        assert created_resource is not None
-        assert created_resource["data"]["id"] == resource_id
-
-        # Test for correct attributes.
-        for key, value in expected_data["attributes"].items():
-            assert created_resource["data"]["attributes"][key] == value
-
-        # Test for correct relationships.
-        for field_name, relationships in expected_data["relationships"].items():
-            relationship_field = created_resource["data"]["relationships"][field_name]
-            assert len(relationship_field["data"]) == len(relationships)
-            for resource in relationships:
-                assert relationship_field["data"][0]["type"] == resource["type"]
+                assert len(relationship_field["data"]) == len(relationships)
+                for resource in relationships:
+                    assert relationship_field["data"][0]["type"] == resource["type"]
