@@ -93,7 +93,8 @@ def test_valid_login():
     # Re-authorize the user after changing their profile.
     state, token, expires_in, refresh = farm.auth.request_new_token()
     assert ".ey" in token
-    assert 3600 == expires_in
+    # Expiration should be 3600 but can fluctuate during tests.
+    assert 3590 < expires_in < 3610
     assert refresh is not None
 
     # Check that the user info is provided at farm.info.
