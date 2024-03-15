@@ -1,4 +1,6 @@
-from farmOS import FarmClient
+import pytest
+
+from farmOS import AsyncFarmClient
 from tests.conftest import farmOS_testing_server
 
 # Create a test asset
@@ -15,18 +17,19 @@ test_asset = {
 }
 
 
+@pytest.mark.anyio
 @farmOS_testing_server
-def test_asset_crud(farm_auth):
+async def test_asset_crud(farm_auth):
     hostname, auth = farm_auth
-    with FarmClient(hostname, auth=auth) as farm:
-        post_response = farm.asset.send(test_asset["type"], test_asset["payload"])
+    async with AsyncFarmClient(hostname, auth=auth) as farm:
+        post_response = await farm.asset.send(test_asset["type"], test_asset["payload"])
         assert "id" in post_response["data"]
 
         # Once created, add 'id' to test_asset
         test_asset["id"] = post_response["data"]["id"]
 
         # Get the asset by ID.
-        get_response = farm.asset.get_id(test_asset["type"], test_asset["id"])
+        get_response = await farm.asset.get_id(test_asset["type"], test_asset["id"])
 
         # Assert that both responses have the correct values.
         for response in [post_response, get_response]:
@@ -42,9 +45,9 @@ def test_asset_crud(farm_auth):
         }
 
         # Update the asset.
-        patch_response = farm.asset.send(test_asset["type"], test_asset_changes)
+        patch_response = await farm.asset.send(test_asset["type"], test_asset_changes)
         # Get the asset by ID.
-        get_response = farm.asset.get_id(test_asset["type"], test_asset["id"])
+        get_response = await farm.asset.get_id(test_asset["type"], test_asset["id"])
 
         # Assert that both responses have the correct values.
         for response in [patch_response, get_response]:
@@ -52,20 +55,21 @@ def test_asset_crud(farm_auth):
                 assert response["data"]["attributes"][key] == value
 
         # Delete the asset.
-        deleted_response = farm.asset.delete(test_asset["type"], test_asset["id"])
+        deleted_response = await farm.asset.delete(test_asset["type"], test_asset["id"])
         assert deleted_response.status_code == 204
 
 
+@pytest.mark.anyio
 @farmOS_testing_server
-def test_asset_get(farm_auth, test_assets):
+async def test_asset_get(farm_auth, test_assets):
     hostname, auth = farm_auth
-    with FarmClient(hostname, auth=auth) as farm:
+    async with AsyncFarmClient(hostname, auth=auth) as farm:
         # Get one page of assets.
-        response = farm.asset.get(test_asset["type"])
+        response = await farm.asset.get(test_asset["type"])
         assert "data" in response
         assert "links" in response
         assert len(response["data"]) == 50
 
         # Get all assets.
-        all_assets = [asset for asset in farm.asset.iterate(test_asset["type"])]
+        all_assets = [asset async for asset in farm.asset.iterate(test_asset["type"])]
         assert len(all_assets) > len(response["data"])

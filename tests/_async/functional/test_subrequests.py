@@ -1,16 +1,19 @@
 import json
 from datetime import datetime, timezone
 
-from farmOS import FarmClient
-from farmOS.subrequests import Action, Format, Subrequest, SubrequestsBlueprint
+import pytest
+
+from farmOS import AsyncFarmClient
+from farmOS.subrequests_model import Action, Format, Subrequest, SubrequestsBlueprint
 from tests.conftest import farmOS_testing_server
 
 curr_time = datetime.now(timezone.utc)
 timestamp = curr_time.isoformat(timespec="seconds")
 
 
+@pytest.mark.anyio
 @farmOS_testing_server
-def test_subrequests(farm_auth):
+async def test_subrequests(farm_auth):
     plant_type = {
         "data": {
             "type": "taxonomy_term--plant_type",
@@ -82,8 +85,8 @@ def test_subrequests(farm_auth):
 
     # Send the blueprint.
     hostname, auth = farm_auth
-    with FarmClient(hostname, auth=auth) as farm:
-        post_response = farm.subrequests.send(blueprint, format=Format.json)
+    async with AsyncFarmClient(hostname, auth=auth) as farm:
+        post_response = await farm.subrequests.send(blueprint, format=Format.json)
 
         # Expected results.
         response_keys = {
@@ -129,7 +132,7 @@ def test_subrequests(farm_auth):
             body = json.loads(post_response[response_key]["body"])
             resource_id = body["data"]["id"]
             entity_type, bundle = body["data"]["type"].split("--")
-            created_resource = farm.resource.get_id(entity_type, bundle, resource_id)
+            created_resource = await farm.resource.get_id(entity_type, bundle, resource_id)
 
             assert created_resource is not None
             assert created_resource["data"]["id"] == resource_id

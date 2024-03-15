@@ -1,10 +1,10 @@
+import pytest
+
 from farmOS import FarmClient
 from tests.conftest import farmOS_testing_server
 
 
-#
-# Test farm info method
-#
+
 @farmOS_testing_server
 def test_get_farm_info(farm_auth):
     hostname, auth = farm_auth

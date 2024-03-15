@@ -3,7 +3,7 @@ import os
 import pytest
 from httpx_auth import InvalidGrantRequest, OAuth2ResourceOwnerPasswordCredentials
 
-from farmOS import FarmClient
+from farmOS import AsyncFarmClient
 from tests.conftest import farmOS_testing_server
 
 # Variables for testing.
@@ -14,8 +14,9 @@ FARMOS_OAUTH_CLIENT_ID = os.getenv("FARMOS_OAUTH_CLIENT_ID", "farm")
 FARMOS_OAUTH_CLIENT_SECRET = os.getenv("FARMOS_OAUTH_CLIENT_SECRET", None)
 
 
+@pytest.mark.anyio
 @farmOS_testing_server
-def test_invalid_login():
+async def test_invalid_login():
     with pytest.raises(InvalidGrantRequest):
         auth = OAuth2ResourceOwnerPasswordCredentials(
             token_url=f"{FARMOS_HOSTNAME}/oauth/token",
@@ -25,12 +26,13 @@ def test_invalid_login():
             client_secret=FARMOS_OAUTH_CLIENT_SECRET,
             scope="farm_manager",
         )
-        farm = FarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
-        farm.info()
+        farm = AsyncFarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
+        await farm.info()
 
 
+@pytest.mark.anyio
 @farmOS_testing_server
-def test_invalid_client_id():
+async def test_invalid_client_id():
     with pytest.raises(InvalidGrantRequest):
         auth = OAuth2ResourceOwnerPasswordCredentials(
             token_url=f"{FARMOS_HOSTNAME}/oauth/token",
@@ -40,15 +42,16 @@ def test_invalid_client_id():
             client_secret=FARMOS_OAUTH_CLIENT_SECRET,
             scope="farm_manager",
         )
-        farm = FarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
-        farm.info()
+        farm = AsyncFarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
+        await farm.info()
 
 
-@farmOS_testing_server
+@pytest.mark.anyio
 @pytest.mark.skip(
     reason="simple_oauth seems to accept any secret if none is configured on the client."
 )
-def test_invalid_client_secret():
+@farmOS_testing_server
+async def test_invalid_client_secret():
     with pytest.raises(InvalidGrantRequest):
         auth = OAuth2ResourceOwnerPasswordCredentials(
             token_url=f"{FARMOS_HOSTNAME}/oauth/token",
@@ -58,12 +61,13 @@ def test_invalid_client_secret():
             client_secret="bad secret",
             scope="farm_manager",
         )
-        farm = FarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
-        farm.info()
+        farm = AsyncFarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
+        await farm.info()
 
 
+@pytest.mark.anyio
 @farmOS_testing_server
-def test_invalid_scope():
+async def test_invalid_scope():
     with pytest.raises(InvalidGrantRequest):
         auth = OAuth2ResourceOwnerPasswordCredentials(
             token_url=f"{FARMOS_HOSTNAME}/oauth/token",
@@ -73,12 +77,13 @@ def test_invalid_scope():
             client_secret=FARMOS_OAUTH_CLIENT_SECRET,
             scope="bad_scope",
         )
-        farm = FarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
-        farm.info()
+        farm = AsyncFarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
+        await farm.info()
 
 
+@pytest.mark.anyio
 @farmOS_testing_server
-def test_valid_login():
+async def test_valid_login():
     auth = OAuth2ResourceOwnerPasswordCredentials(
         token_url=f"{FARMOS_HOSTNAME}/oauth/token",
         username=FARMOS_OAUTH_USERNAME,
@@ -87,7 +92,7 @@ def test_valid_login():
         client_secret=FARMOS_OAUTH_CLIENT_SECRET,
         scope="farm_manager",
     )
-    farm = FarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
+    farm = AsyncFarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
 
     # Re-authorize the user after changing their profile.
     state, token, expires_in, refresh = farm.auth.request_new_token()
@@ -97,7 +102,7 @@ def test_valid_login():
     assert refresh is not None
 
     # Check that the user info is provided at farm.info.
-    info = farm.info()
+    info = await farm.info()
     assert "meta" in info
     assert "links" in info["meta"]
     assert "me" in info["meta"]["links"]

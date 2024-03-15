@@ -12,7 +12,9 @@ class ResourceBase:
         self.client = client
         self.params = {}
 
-    def _get_records(self, entity_type, bundle=None, resource_id=None, params=None):
+    async def _get_records(
+        self, entity_type, bundle=None, resource_id=None, params=None
+    ):
         """Helper function that checks to retrieve one record, one page or multiple pages of farmOS records"""
         if params is None:
             params = {}
@@ -21,38 +23,41 @@ class ResourceBase:
 
         path = self._get_resource_path(entity_type, bundle, resource_id)
 
-        response = self.client.request(method="GET", url=path, params=params)
+        response = await self.client.request(method="GET", url=path, params=params)
         return response.json()
 
-    def get(self, entity_type, bundle=None, params=None):
-        return self._get_records(entity_type=entity_type, bundle=bundle, params=params)
+    async def get(self, entity_type, bundle=None, params=None):
+        return await self._get_records(
+            entity_type=entity_type, bundle=bundle, params=params
+        )
 
-    def get_id(self, entity_type, bundle=None, resource_id=None, params=None):
-        return self._get_records(
+    async def get_id(self, entity_type, bundle=None, resource_id=None, params=None):
+        return await self._get_records(
             entity_type=entity_type,
             bundle=bundle,
             params=params,
             resource_id=resource_id,
         )
 
-    def iterate(self, entity_type, bundle=None, params=None):
-        response = self._get_records(
+    async def iterate(self, entity_type, bundle=None, params=None):
+        response = await self._get_records(
             entity_type=entity_type, bundle=bundle, params=params
         )
         more = True
         while more:
             # TODO: Should we merge in the "includes" info here?
-            yield from response["data"]
+            for resource in response["data"]:
+                yield resource
             try:
                 next_url = response["links"]["next"]["href"]
                 parsed_url = urlparse(next_url)
                 next_path = parsed_url._replace(scheme="", netloc="").geturl()
-                response = self.client.request(method="GET", url=next_path)
+                response = await self.client.request(method="GET", url=next_path)
                 response = response.json()
             except KeyError:
                 more = False
 
-    def send(self, entity_type, bundle=None, payload=None):
+    async def send(self, entity_type, bundle=None, payload=None):
         # Default to empty payload dict.
         if payload is None:
             payload = {}
@@ -71,7 +76,7 @@ class ResourceBase:
             path = self._get_resource_path(
                 entity_type=entity_type, bundle=bundle, record_id=id
             )
-            response = self.client.request(
+            response = await self.client.request(
                 method="PATCH",
                 url=path,
                 json=json_payload,
@@ -81,7 +86,7 @@ class ResourceBase:
         else:
             logger.debug("Creating record of entity type: %s", entity_type)
             path = self._get_resource_path(entity_type=entity_type, bundle=bundle)
-            response = self.client.request(
+            response = await self.client.request(
                 method="POST",
                 url=path,
                 json=json_payload,
@@ -98,12 +103,12 @@ class ResourceBase:
 
         return response.json()
 
-    def delete(self, entity_type, bundle=None, id=None):
+    async def delete(self, entity_type, bundle=None, id=None):
         logger.debug("Deleted record id: %s of entity type: %s", id, entity_type)
         path = self._get_resource_path(
             entity_type=entity_type, bundle=bundle, record_id=id
         )
-        return self.client.request(method="DELETE", url=path)
+        return await self.client.request(method="DELETE", url=path)
 
     @staticmethod
     def _get_resource_path(entity_type, bundle=None, record_id=None):
@@ -134,31 +139,32 @@ class ResourceHelperBase:
         self.entity_type = entity_type
         self.resource_api = ResourceBase(client=client)
 
-    def get(self, bundle, params=None):
-        return self.resource_api.get(
+    async def get(self, bundle, params=None):
+        return await self.resource_api.get(
             entity_type=self.entity_type, bundle=bundle, params=params
         )
 
-    def get_id(self, bundle, resource_id, params=None):
-        return self.resource_api.get_id(
+    async def get_id(self, bundle, resource_id, params=None):
+        return await self.resource_api.get_id(
             entity_type=self.entity_type,
             bundle=bundle,
             resource_id=resource_id,
             params=params,
         )
 
-    def iterate(self, bundle, params=None):
-        return self.resource_api.iterate(
+    async def iterate(self, bundle, params=None):
+        async for item in self.resource_api.iterate(
             entity_type=self.entity_type, bundle=bundle, params=params
-        )
+        ):
+            yield item
 
-    def send(self, bundle, payload=None):
-        return self.resource_api.send(
+    async def send(self, bundle, payload=None):
+        return await self.resource_api.send(
             entity_type=self.entity_type, bundle=bundle, payload=payload
         )
 
-    def delete(self, bundle, id):
-        return self.resource_api.delete(
+    async def delete(self, bundle, id):
+        return await self.resource_api.delete(
             entity_type=self.entity_type, bundle=bundle, id=id
         )
 
@@ -187,45 +193,9 @@ class TermAPI(ResourceHelperBase):
         super().__init__(client=client, entity_type="taxonomy_term")
 
 
-def info(client):
+async def info(client):
     """Retrieve info about the farmOS server."""
 
     logger.debug("Retrieving farmOS server info.")
-    response = client.request(method="GET", url="api")
+    response = await client.request(method="GET", url="api")
     return response.json()
-
-
-def filter(path, value, operation="="):
-    """Helper method to build JSONAPI filter query params."""
-
-    # TODO: Validate path, value, operation?
-    # TODO: Support filter groups.
-    # TODO: Support revision filters, are these edge cases?
-    # TODO: Support "pagination" query params? Separate method?
-    # TODO: Support "sort" query params? Separate method?
-    # TODO: Support "includes" query params? Separate method?
-
-    filters = {}
-
-    # If the operation is '=', only one query param is required.
-    if operation == "=":
-        param = f"filter[{path}]"
-        filters[param] = value
-    # Else we need a query param for the path, operation, and value.
-    else:
-        # TODO: Use a unique identifier instead of using "condition"
-        # otherwise the same path cannot be filtered multiple times.
-        base_param = f"filter[{path}_{operation.lower()}][condition]"
-
-        path_param = base_param + "[path]"
-        filters[path_param] = path
-
-        op_param = base_param + "[operator]"
-        filters[op_param] = operation
-
-        value_param = base_param + "[value]"
-        if operation in ["IN", "NOT IN", ">", "<", "<>", "BETWEEN"]:
-            value_param += "[]"
-        filters[value_param] = value
-
-    return filters

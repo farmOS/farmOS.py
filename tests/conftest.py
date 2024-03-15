@@ -28,6 +28,11 @@ farmOS_testing_server = pytest.mark.skipif(
 )
 
 
+@pytest.fixture
+def anyio_backend():
+    return "asyncio"
+
+
 @pytest.fixture(scope="module")
 def farm_auth():
     if valid_oauth_config:

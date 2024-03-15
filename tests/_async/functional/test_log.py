@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 
-from farmOS import FarmClient
+import pytest
+
+from farmOS import AsyncFarmClient
 from tests.conftest import farmOS_testing_server
 
 curr_time = datetime.now(timezone.utc)
@@ -18,18 +20,19 @@ test_log = {
 }
 
 
+@pytest.mark.anyio
 @farmOS_testing_server
-def test_log_crud(farm_auth):
+async def test_log_crud(farm_auth):
     hostname, auth = farm_auth
-    with FarmClient(hostname, auth=auth) as farm:
-        post_response = farm.log.send(test_log["type"], test_log["payload"])
+    async with AsyncFarmClient(hostname, auth=auth) as farm:
+        post_response = await farm.log.send(test_log["type"], test_log["payload"])
         assert "id" in post_response["data"]
 
         # Once created, add 'id' to test_log
         test_log["id"] = post_response["data"]["id"]
 
         # Get the log by ID.
-        get_response = farm.log.get_id(test_log["type"], test_log["id"])
+        get_response = await farm.log.get_id(test_log["type"], test_log["id"])
 
         # Assert that both responses have the correct values.
         for response in [post_response, get_response]:
@@ -43,9 +46,9 @@ def test_log_crud(farm_auth):
             },
         }
         # Update the log.
-        patch_response = farm.log.send(test_log["type"], test_log_changes)
+        patch_response = await farm.log.send(test_log["type"], test_log_changes)
         # Get the log by ID.
-        get_response = farm.log.get_id(test_log["type"], test_log["id"])
+        get_response = await farm.log.get_id(test_log["type"], test_log["id"])
 
         # Assert that both responses have the updated name.
         for response in [patch_response, get_response]:
@@ -55,20 +58,21 @@ def test_log_crud(farm_auth):
             )
 
         # Delete the log.
-        deleted_response = farm.log.delete(test_log["type"], test_log["id"])
+        deleted_response = await farm.log.delete(test_log["type"], test_log["id"])
         assert deleted_response.status_code == 204
 
 
+@pytest.mark.anyio
 @farmOS_testing_server
-def test_log_get(farm_auth, test_logs):
+async def test_log_get(farm_auth, test_logs):
     hostname, auth = farm_auth
-    with FarmClient(hostname, auth=auth) as farm:
+    async with AsyncFarmClient(hostname, auth=auth) as farm:
         # Get one page of logs.
-        response = farm.log.get(test_log["type"])
+        response = await farm.log.get(test_log["type"])
         assert "data" in response
         assert "links" in response
         assert len(response["data"]) == 50
 
         # Get all logs.
-        all_logs = [log for log in farm.log.iterate(test_log["type"])]
+        all_logs = [log async for log in farm.log.iterate(test_log["type"])]
         assert len(all_logs) > len(response["data"])

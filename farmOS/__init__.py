@@ -1,3 +1,4 @@
-from .client import FarmClient
+from ._async.client import AsyncFarmClient
+from ._sync.client import FarmClient
 
-__all__ = ["FarmClient"]
+__all__ = ["AsyncFarmClient", "FarmClient"]

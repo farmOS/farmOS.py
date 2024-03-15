@@ -1,3 +1,5 @@
+import pytest
+
 from farmOS import FarmClient
 from tests.conftest import farmOS_testing_server
 
@@ -5,6 +7,7 @@ test_term = {
     "type": "plant_type",
     "payload": {"attributes": {"name": "Corn"}},
 }
+
 
 
 @farmOS_testing_server
@@ -44,6 +47,7 @@ def test_term_crud(farm_auth):
         # Delete the term.
         deleted_response = farm.term.delete(test_term["type"], test_term["id"])
         assert deleted_response.status_code == 204
+
 
 
 @farmOS_testing_server
