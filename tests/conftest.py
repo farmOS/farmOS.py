@@ -1,8 +1,9 @@
 import os
 
 import pytest
+from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 
-import farmOS
+from farmOS import FarmClient
 
 # Allow testing via http.
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -27,58 +28,71 @@ farmOS_testing_server = pytest.mark.skipif(
 )
 
 
+@pytest.fixture
+def anyio_backend():
+    return "asyncio"
+
+
 @pytest.fixture(scope="module")
-def test_farm():
+def farm_auth():
     if valid_oauth_config:
-        farm = farmOS.farmOS(
-            hostname=FARMOS_HOSTNAME,
+        auth = OAuth2ResourceOwnerPasswordCredentials(
+            token_url=f"{FARMOS_HOSTNAME}/oauth/token",
+            username=FARMOS_OAUTH_USERNAME,
+            password=FARMOS_OAUTH_PASSWORD,
             client_id=FARMOS_OAUTH_CLIENT_ID,
             client_secret=FARMOS_OAUTH_CLIENT_SECRET,
+            scope="farm_manager",
         )
-        farm.authorize(username=FARMOS_OAUTH_USERNAME, password=FARMOS_OAUTH_PASSWORD)
-        return farm
+        return FARMOS_HOSTNAME, auth
 
 
 @pytest.fixture(scope="module")
-def test_logs(test_farm):
-    log_ids = []
-    # Create logs.
-    for x in range(1, 60):
-        test_log = {
-            "type": "observation",
-            "payload": {"attributes": {"name": "Log #" + str(x)}},
-        }
-        response = test_farm.log.send(test_log["type"], test_log["payload"])
-        log_ids.append(response["data"]["id"])
+def test_logs(farm_auth):
+    hostname, auth = farm_auth
+    with FarmClient(hostname, auth=auth) as farm:
+        log_ids = []
+        # Create logs.
+        for x in range(1, 60):
+            test_log = {
+                "type": "observation",
+                "payload": {"attributes": {"name": "Log #" + str(x)}},
+            }
+            response = farm.log.send(test_log["type"], test_log["payload"])
+            log_ids.append(response["data"]["id"])
 
-    return log_ids
-
-
-@pytest.fixture(scope="module")
-def test_assets(test_farm):
-    asset_ids = []
-    # Create assets.
-    for x in range(1, 60):
-        test_asset = {
-            "type": "equipment",
-            "payload": {"attributes": {"name": "Asset #" + str(x)}},
-        }
-        response = test_farm.asset.send(test_asset["type"], test_asset["payload"])
-        asset_ids.append(response["data"]["id"])
-
-    return asset_ids
+        return log_ids
 
 
 @pytest.fixture(scope="module")
-def test_terms(test_farm):
-    term_ids = []
-    # Create terms.
-    for x in range(1, 60):
-        test_term = {
-            "type": "plant_type",
-            "payload": {"attributes": {"name": "Plant type #" + str(x)}},
-        }
-        response = test_farm.term.send(test_term["type"], test_term["payload"])
-        term_ids.append(response["data"]["id"])
+def test_assets(farm_auth):
+    hostname, auth = farm_auth
+    with FarmClient(hostname, auth=auth) as farm:
+        asset_ids = []
+        # Create assets.
+        for x in range(1, 60):
+            test_asset = {
+                "type": "equipment",
+                "payload": {"attributes": {"name": "Asset #" + str(x)}},
+            }
+            response = farm.asset.send(test_asset["type"], test_asset["payload"])
+            asset_ids.append(response["data"]["id"])
 
-    return term_ids
+        return asset_ids
+
+
+@pytest.fixture(scope="module")
+def test_terms(farm_auth):
+    hostname, auth = farm_auth
+    with FarmClient(hostname, auth=auth) as farm:
+        term_ids = []
+        # Create terms.
+        for x in range(1, 60):
+            test_term = {
+                "type": "plant_type",
+                "payload": {"attributes": {"name": "Plant type #" + str(x)}},
+            }
+            response = farm.term.send(test_term["type"], test_term["payload"])
+            term_ids.append(response["data"]["id"])
+
+        return term_ids

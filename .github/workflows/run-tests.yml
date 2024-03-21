@@ -18,23 +18,23 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - 3.8
           - 3.9
           - '3.10'
           - 3.11
+          - 3.12
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
       - name: Create docker-compose.yml
-        run: curl https://raw.githubusercontent.com/farmOS/farmOS/2.x/docker/docker-compose.development.yml -o docker-compose.yml
+        run: curl https://raw.githubusercontent.com/farmOS/farmOS/3.x/docker/docker-compose.development.yml -o docker-compose.yml
       - name: Start containers
         run: docker-compose up -d && sleep 5
       - name: Install farmOS
         run: |
           docker-compose exec -u www-data -T www drush site-install -y --db-url=pgsql://farm:farm@db/farm --account-pass=admin
+          docker-compose exec -u www-data -T www drush en farm_api_default_consumer -y 
           docker-compose exec -u www-data -T www drush user-create tester --password test
           docker-compose exec -u www-data -T www drush user-add-role farm_manager tester
-          docker-compose exec -u www-data -T www drush config:set simple_oauth.settings access_token_expiration 15 -y
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
@@ -43,6 +43,8 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pytest -e .[test]
+      - name: Check unasync
+        run: python farmOS/utils/unasync.py --check
       - name: Run farmOS.py tests.
         run: pytest tests
         env:
