@@ -86,4 +86,5 @@ Now that you know the basics, dive deeper into following topics:
 
 - [Authorizing with farmOS server](authorization.md)
 - [Working with farmOS resources](client.md)
+- [Async Support](async.md)
 - [Using Subrequests](subrequests.md)
