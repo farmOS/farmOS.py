@@ -85,5 +85,5 @@ farm_client.log.delete('observation', log_id)
 Now that you know the basics, dive deeper into following topics:
 
 - [Authorizing with farmOS server](authorization.md)
-- [Working with farmOS resources](client_2x.md)
+- [Working with farmOS resources](client.md)
 - [Using Subrequests](subrequests.md)

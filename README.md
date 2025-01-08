@@ -21,11 +21,7 @@ To install using `conda` see [conda-forge/farmos-feedstock](https://github.com/c
 
 ## Documentation
 
-farmOS.py can connect to farmOS servers running version ^1.6 or greater. The version should be specified when instantiating
-the farmOS client.
-
-- [1.x documentation](docs/client_1x.md)
-- [2.x documentation](docs/index.md)
+See [docs/index.md](docs/index.md) or the hosted [farmOS.py documentation](https://farmos.org/development/farmos-py/).
 
 ## MAINTAINERS
 
