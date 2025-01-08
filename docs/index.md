@@ -27,32 +27,31 @@ $ pip install farmOS~=1.0.0b
 
 To install using `conda` see [conda-forge/farmos-feedstock](https://github.com/conda-forge/farmos-feedstock#installing-farmos)
 
-### 2. Create a farm client instance
+### 2. Create a FarmClient instance
 
 ```python
-from farmOS import farmOS
+from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
+from farmOS import FarmClient
 
-farm_client = farmOS(
-    hostname= "https://farm.example.com",
-    client_id = "farm",
-    scope = "farm_manager",
+FARMOS_HOSTNAME="https://myfarm.farmos.net"
+
+auth = OAuth2ResourceOwnerPasswordCredentials(
+    token_url=f"{FARMOS_HOSTNAME}/oauth/token",
+    username=USERNAME,
+    password=PASSWORD,
+    client_id="farm",
+    scope="farm_manager",
 )
+farm_client = FarmClient(hostname=FARMOS_HOSTNAME, auth=auth)
 ```
 
-### 3. Authorize with farmOS server
-
-```python
-token = farm_client.authorize()
-# Complete username and password prompts.
-```
-
-### 4. Get farmOS server info
+### 3. Get farmOS server info
 
 ```python
 info = farm_client.info()
 ```
 
-### 5. CRUD Operations with a farmOS log
+### 4. CRUD Operations with a farmOS log
 
 ```python
 
