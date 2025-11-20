@@ -13,9 +13,13 @@ tools that exist in the Python ecosystem.
 The [farmOS Aggregator](https://github.com/farmOS/farmOS-aggregator)
 also uses farmOS.py to communicate with farmOS servers.
 
+
+
 ## Quick start
 
 Learn farmOS.py by example.
+
+Tested on Python 3.10.x 
 
 ### 1. Install 
 
