@@ -11,6 +11,8 @@ For more information on farmOS, visit [farmOS.org](https://farmOS.org).
 
 ## Installation
 
+**NOTE: Python 3.14 is not yet supported.**
+
 To install using `pip`:
 
 ```bash
