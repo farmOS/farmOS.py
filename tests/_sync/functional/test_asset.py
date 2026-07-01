@@ -40,7 +40,7 @@ def test_asset_crud(farm_auth):
             "id": test_asset["id"],
             "attributes": {
                 "name": "Old tractor",
-                "status": "archived",
+                "archived": True,
             },
         }
 
