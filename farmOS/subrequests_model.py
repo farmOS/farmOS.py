@@ -67,7 +67,7 @@ class Subrequest(BaseModel):
 
 
 class SubrequestsBlueprint(RootModel):
-    root: List
+    root: List[Subrequest]
 
     def __iter__(self) -> Iterator[Subrequest]:
         return iter(self.root)
