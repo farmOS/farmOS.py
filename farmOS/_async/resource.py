@@ -24,6 +24,7 @@ class ResourceBase:
         path = self._get_resource_path(entity_type, bundle, resource_id)
 
         response = await self.client.request(method="GET", url=path, params=params)
+        response.raise_for_status()
         return response.json()
 
     async def get(self, entity_type, bundle=None, params=None):
@@ -53,6 +54,7 @@ class ResourceBase:
                 parsed_url = urlparse(next_url)
                 next_path = parsed_url._replace(scheme="", netloc="").geturl()
                 response = await self.client.request(method="GET", url=next_path)
+                response.raise_for_status()
                 response = response.json()
             except KeyError:
                 more = False
@@ -82,6 +84,7 @@ class ResourceBase:
                 json=json_payload,
                 headers={"Content-Type": "application/vnd.api+json"},
             )
+            response.raise_for_status()
         # If no ID is included, create a new record
         else:
             logger.debug("Creating record of entity type: %s", entity_type)
@@ -92,6 +95,7 @@ class ResourceBase:
                 json=json_payload,
                 headers={"Content-Type": "application/vnd.api+json"},
             )
+            response.raise_for_status()
 
         # Handle response from POST requests
         if response.status_code == 201:
@@ -108,7 +112,9 @@ class ResourceBase:
         path = self._get_resource_path(
             entity_type=entity_type, bundle=bundle, record_id=id
         )
-        return await self.client.request(method="DELETE", url=path)
+        response = await self.client.request(method="DELETE", url=path)
+        response.raise_for_status()
+        return response
 
     @staticmethod
     def _get_resource_path(entity_type, bundle=None, record_id=None):
@@ -198,4 +204,5 @@ async def info(client):
 
     logger.debug("Retrieving farmOS server info.")
     response = await client.request(method="GET", url="api")
+    response.raise_for_status()
     return response.json()
