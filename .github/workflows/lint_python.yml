@@ -8,10 +8,10 @@ jobs:
       - uses: actions/setup-python@v3
       - run: pip install bandit black codespell flake8 isort mypy pyupgrade safety
       - run: bandit --recursive --skip B101,B106 .
-      - run: black --check .
+      - run: black --check --exclude '(/farmOS/_sync/|/tests/_sync/)' .
       - run: codespell  # --ignore-words-list="" --skip=""
-      - run: flake8 . --count --max-complexity=11 --max-line-length=113 --show-source --statistics
-      - run: isort --check-only --profile black .
+      - run: flake8 . --count --max-complexity=11 --max-line-length=113 --show-source --statistics --exclude=farmOS/_sync,tests/_sync
+      - run: isort --check-only --profile black --skip farmOS/_sync --skip tests/_sync .
       - run: python setup.py install
       - run: mypy --exclude './build/lib/farmOS/__init__.py' --ignore-missing-imports .  || true
       - run: shopt -s globstar && pyupgrade --py36-plus **/*.py
