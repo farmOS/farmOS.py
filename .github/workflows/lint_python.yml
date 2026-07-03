@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
-      - run: pip install bandit black codespell flake8 isort mypy pyupgrade safety setuptools
+      - run: pip install bandit black codespell flake8 isort mypy safety setuptools
       - run: bandit --recursive --skip B101,B106 .
       - run: black --check --exclude '(/farmOS/_sync/|/tests/_sync/)' .
       - run: codespell  # --ignore-words-list="" --skip=""
@@ -14,4 +14,3 @@ jobs:
       - run: isort --check-only --profile black --skip farmOS/_sync --skip tests/_sync .
       - run: python setup.py install
       - run: mypy --exclude './build/lib/farmOS/__init__.py' --ignore-missing-imports .  || true
-      - run: shopt -s globstar && pyupgrade --py36-plus **/*.py
