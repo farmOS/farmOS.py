@@ -14,3 +14,4 @@ jobs:
       - run: isort --check-only --profile black --skip farmOS/_sync --skip tests/_sync .
       - run: python setup.py install
       - run: mypy --exclude './build/lib/farmOS/__init__.py' --ignore-missing-imports .  || true
+      - run: python farmOS/utils/unasync.py --check
