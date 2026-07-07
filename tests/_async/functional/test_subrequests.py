@@ -132,7 +132,9 @@ async def test_subrequests(farm_auth):
             body = json.loads(post_response[response_key]["body"])
             resource_id = body["data"]["id"]
             entity_type, bundle = body["data"]["type"].split("--")
-            created_resource = await farm.resource.get_id(entity_type, bundle, resource_id)
+            created_resource = await farm.resource.get_id(
+                entity_type, bundle, resource_id
+            )
 
             assert created_resource is not None
             assert created_resource["data"]["id"] == resource_id
