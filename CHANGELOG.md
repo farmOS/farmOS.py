@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Async support: all client and resource methods are now available as async functions. [#64](https://github.com/farmOS/farmOS.py/issues/64)
+- Allow custom authentication mechanisms via the HTTPX `auth` parameter on `FarmClient`. [#63](https://github.com/farmOS/farmOS.py/issues/63)
+- Auto-generate the sync client (and sync tests) from the async code using an unasync approach. [#67](https://github.com/farmOS/farmOS.py/pull/67)
+- Document the new `FarmClient` usage and async support in /docs.
+
+### Changed
+
+- **Breaking:** Replace the `farmOS` client class with `FarmClient` (and `AsyncFarmClient`), which extend the HTTPX client with farmOS resource methods. [#67](https://github.com/farmOS/farmOS.py/pull/67)
+- **Breaking:** Use [HTTPX](https://www.python-httpx.org/) instead of requests, and [httpx_auth](https://github.com/Colin-b/httpx_auth) instead of requests_oauthlib for OAuth2.
+- **Breaking:** Update to pydantic v2. [#59](https://github.com/farmOS/farmOS.py/issues/59)
+- Restructure the library so a custom `FarmClient` can be built on a different transport while reusing the `Resource` helper methods.
+
+### Removed
+- **Breaking:** Remove support for farmOS v1 servers (and the 1.x client docs). [#67](https://github.com/farmOS/farmOS.py/pull/67)
+
 ## 1.0.1 -- 2023-08-01
 
 ### Fixed
