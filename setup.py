@@ -15,7 +15,7 @@ with open("README.md") as fh:
 
 setuptools.setup(
     name="farmOS",
-    version="1.0.1",
+    version="2.0.0",
     author="farmOS team",
     author_email="mike@mstenta.net",
     description="A Python library for interacting with farmOS over API. ",
@@ -28,7 +28,7 @@ setuptools.setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     setup_requires=setup_requires,
     install_requires=install_requires,
     extras_require=extras_require,
