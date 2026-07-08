@@ -5,11 +5,10 @@ on:
     - cron: '0 8 * * *' # Run at 8AM UTC.
   push:
     branches:
-      - '1.x'
-      - '1.x-**'
+      - 'main'
   pull_request:
     branches:
-      - '1.x'
+      - 'main'
 
 jobs:
   build:
