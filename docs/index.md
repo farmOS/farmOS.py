@@ -10,9 +10,6 @@ to build custom importers and exporters that interface with CSV, IoT and
 other APIs. farmOS.py also helps integrate with existing scientific and GIS
 tools that exist in the Python ecosystem.
 
-The [farmOS Aggregator](https://github.com/farmOS/farmOS-aggregator)
-also uses farmOS.py to communicate with farmOS servers.
-
 ## Quick start
 
 Learn farmOS.py by example.
