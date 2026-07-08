@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow custom authentication mechanisms via the HTTPX `auth` parameter on `FarmClient`. [#63](https://github.com/farmOS/farmOS.py/issues/63)
 - Auto-generate the sync client (and sync tests) from the async code using an unasync approach. [#67](https://github.com/farmOS/farmOS.py/pull/67)
 - Document the new `FarmClient` usage and async support in /docs.
+- Add Async documentation tab.
 
 ### Changed
 

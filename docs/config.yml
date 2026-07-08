@@ -3,4 +3,5 @@ nav:
   - Getting started: index.md
   - Authorization: authorization.md
   - Resources: client.md
+  - Async: async.md
   - Subrequests: subrequests.md
