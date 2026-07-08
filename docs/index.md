@@ -22,7 +22,7 @@ Learn farmOS.py by example.
 To install using `pip`:
 
 ```bash
-$ pip install farmOS~=1.0.0b
+$ pip install farmOS
 ```
 
 To install using `conda` see [conda-forge/farmos-feedstock](https://github.com/conda-forge/farmos-feedstock#installing-farmos)
