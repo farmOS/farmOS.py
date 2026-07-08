@@ -2,5 +2,5 @@ source_name: farmOS.py
 nav:
   - Getting started: index.md
   - Authorization: authorization.md
-  - Resources: client_2x.md
+  - Resources: client.md
   - Subrequests: subrequests.md
