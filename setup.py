@@ -22,6 +22,7 @@ setuptools.setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/farmOS/farmOS.py",
+    license_files=("LICENSE"),
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
