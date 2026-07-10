@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Raise an exception on HTTP error responses (4xx/5xx) from all resource methods, instead of returning the error payload (or failing with a `JSONDecodeError`) as if the request had succeeded.
+- Type `SubrequestsBlueprint.root` as `List[Subrequest]` so blueprint members are validated as subrequests.
+- Return `self` from the `Subrequest` model validator, as required by Pydantic v2 `@model_validator(mode="after")`.
+
 ## 2.0.0 -- 2026-07-08
 
 ### Added

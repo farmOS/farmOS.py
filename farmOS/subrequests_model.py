@@ -54,10 +54,9 @@ class Subrequest(BaseModel):
 
     @model_validator(mode="after")
     def check_uri_or_endpoint(self):
-        # endpoint = values.get("endpoint", None)
         if self.uri is None and self.endpoint is None:
             raise ValueError("Either uri or endpoint is required.")
-        return self.uri
+        return self
 
     @field_validator("body")
     def serialize_body(cls, body):
@@ -67,7 +66,7 @@ class Subrequest(BaseModel):
 
 
 class SubrequestsBlueprint(RootModel):
-    root: List
+    root: List[Subrequest]
 
     def __iter__(self) -> Iterator[Subrequest]:
         return iter(self.root)
