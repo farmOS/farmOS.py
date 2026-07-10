@@ -24,7 +24,9 @@ async def test_get_raises_on_http_error():
 async def test_send_raises_on_http_error():
     async with AsyncFarmClient(HOST, transport=_error_transport(422)) as farm:
         with pytest.raises(httpx.HTTPStatusError):
-            await farm.resource.send("log", "observation", {"attributes": {"name": "x"}})
+            await farm.resource.send(
+                "log", "observation", {"attributes": {"name": "x"}}
+            )
 
 
 @pytest.mark.anyio
